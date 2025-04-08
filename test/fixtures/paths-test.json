@@ -1,0 +1,61 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Path Testing API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/project/tasks/{taskId}": {
+      "get": {
+        "summary": "Get task details",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task details"
+          }
+        }
+      }
+    },
+    "/article/{articleId}/comment/{commentId}": {
+      "get": {
+        "summary": "Get comment on article",
+        "parameters": [
+          {
+            "name": "articleId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Comment details"
+          }
+        }
+      }
+    },
+    "/sub/sub/sub/sub/folded/entrypoint": {
+      "post": {
+        "summary": "Deeply nested endpoint",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    }
+  }
+}

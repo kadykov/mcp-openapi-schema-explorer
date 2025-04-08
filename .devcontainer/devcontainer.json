@@ -1,0 +1,24 @@
+{
+  "name": "MCP OpenAPI Schema Explorer",
+  "dockerFile": "../Dockerfile",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "username": "vscode"
+    },
+    "ghcr.io/guiyomh/features/just:0": {}
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "just install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-docker",
+        "GitHub.vscode-github-actions",
+        "saoudrizwan.claude-dev",
+        "dbaeumer.vscode-eslint",
+        "rvest.vs-code-prettier-eslint",
+        "ms-vscode.vscode-typescript-next"
+      ]
+    }
+  }
+}

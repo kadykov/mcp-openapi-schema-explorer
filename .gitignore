@@ -134,3 +134,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Personal files
+kadykov-*
+
+# Local documentation and examples
+local-docs/

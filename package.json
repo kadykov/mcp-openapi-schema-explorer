@@ -1,0 +1,61 @@
+{
+  "name": "mcp-openapi-schema-explorer",
+  "version": "0.1.0",
+  "description": "MCP OpenAPI schema explorer",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kadykov/mcp-openapi-schema-explorer.git"
+  },
+  "keywords": [
+    "mcp",
+    "openapi"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kadykov/mcp-openapi-schema-explorer/issues"
+  },
+  "homepage": "https://github.com/kadykov/mcp-openapi-schema-explorer#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.14.0",
+    "@types/node-fetch": "^2.6.12",
+    "@typescript-eslint/parser": "^8.29.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "axios": "^1.8.4",
+    "eslint": "^9.24.0",
+    "eslint-plugin-security": "^3.0.1",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "jest-silent-reporter": "^0.6.0",
+    "license-checker": "^25.0.1",
+    "msw": "^2.7.3",
+    "openapi-typescript": "^7.6.1",
+    "prettier": "^3.5.3",
+    "swagger2openapi": "^7.0.8",
+    "ts-jest": "^29.3.1",
+    "typescript": "^5.8.3"
+  }
+}
