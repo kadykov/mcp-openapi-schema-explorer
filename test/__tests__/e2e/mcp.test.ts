@@ -1,5 +1,24 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { startMcpServer } from '../../utils/mcp-test-helpers';
+import { startMcpServer } from '../../utils/mcp-test-helpers.js';
+import { OpenAPIV3 } from 'openapi-types';
+
+interface EndpointResponse {
+  method: string;
+  path: string;
+  parameters?: OpenAPIV3.ParameterObject[];
+  requestBody?: OpenAPIV3.RequestBodyObject;
+  responses: { [key: string]: OpenAPIV3.ResponseObject };
+}
+
+interface ResourceContent {
+  uri: string;
+  mimeType: string;
+  text: string;
+}
+
+interface ResourceResponse {
+  contents: ResourceContent[];
+}
 
 describe('OpenAPI Explorer MCP Server E2E', () => {
   let client: Client;
@@ -20,75 +39,155 @@ describe('OpenAPI Explorer MCP Server E2E', () => {
   describe('Endpoint Resource', () => {
     it('should return GET endpoint details with parameters', async () => {
       const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      const response = await client.readResource({
-        uri: `openapi://endpoint/get/${path}`
-      });
+      const response = (await client.readResource({
+        uri: `openapi://endpoint/get/${path}`,
+      })) as ResourceResponse;
 
       expect(response.contents).toHaveLength(1);
-      const content = response.contents[0].text as string;
-      
+      const content = JSON.parse(response.contents[0].text) as EndpointResponse;
+
       // Basic info
-      expect(content).toContain('# GET /api/v1/organizations/{orgId}/projects/{projectId}/tasks');
+      expect(content.method).toBe('GET');
+      expect(content.path).toBe('/api/v1/organizations/{orgId}/projects/{projectId}/tasks');
 
-      // Path parameters
-      expect(content).toContain('## Path Parameters');
-      expect(content).toContain('- `orgId` (string) (required)');
-      expect(content).toContain('- `projectId` (string) (required)');
-
-      // Query parameters
-      expect(content).toContain('## Query Parameters');
-      expect(content).toContain('- `status` (string)');
-      expect(content).toContain('- `sort` (string)');
+      // Parameters
+      expect(content.parameters).toEqual(
+        expect.arrayContaining([
+          {
+            name: 'orgId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+          {
+            name: 'projectId',
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          },
+          {
+            name: 'status',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['active', 'completed'],
+            },
+          },
+          {
+            name: 'sort',
+            in: 'query',
+            schema: {
+              type: 'string',
+              enum: ['created', 'updated', 'priority'],
+            },
+          },
+        ])
+      );
     });
 
     it('should return POST endpoint details with request body', async () => {
       const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      const response = await client.readResource({
-        uri: `openapi://endpoint/post/${path}`
-      });
+      const response = (await client.readResource({
+        uri: `openapi://endpoint/post/${path}`,
+      })) as ResourceResponse;
 
       expect(response.contents).toHaveLength(1);
-      const content = response.contents[0].text as string;
-      
+      const content = JSON.parse(response.contents[0].text) as EndpointResponse;
+
       // Basic info
-      expect(content).toContain('# POST /api/v1/organizations/{orgId}/projects/{projectId}/tasks');
+      expect(content.method).toBe('POST');
+      expect(content.path).toBe('/api/v1/organizations/{orgId}/projects/{projectId}/tasks');
 
       // Request Body
-      expect(content).toContain('## Request Body');
-      expect(content).toContain('Schema: `#/components/schemas/CreateTaskRequest`');
+      expect(content.requestBody).toMatchObject({
+        required: true,
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['title'],
+              properties: {
+                title: {
+                  type: 'string',
+                },
+                status: {
+                  type: 'string',
+                  enum: ['active', 'completed'],
+                  default: 'active',
+                },
+                priority: {
+                  type: 'integer',
+                  minimum: 1,
+                  maximum: 5,
+                  default: 3,
+                },
+              },
+            },
+          },
+        },
+      });
 
       // Response
-      expect(content).toContain('### 201');
-      expect(content).toContain('Task created');
-      expect(content).toContain('Schema: `#/components/schemas/Task`');
+      expect(content.responses['201']).toMatchObject({
+        description: 'Task created',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              required: ['id', 'title', 'status'],
+              properties: {
+                id: {
+                  type: 'string',
+                  format: 'uuid',
+                },
+                title: {
+                  type: 'string',
+                },
+                status: {
+                  type: 'string',
+                  enum: ['active', 'completed'],
+                },
+                priority: {
+                  type: 'integer',
+                  minimum: 1,
+                  maximum: 5,
+                },
+              },
+            },
+          },
+        },
+      });
     });
 
     it('should handle non-existent endpoint', async () => {
       const path = encodeURIComponent('does/not/exist');
       await expect(
         client.readResource({
-          uri: `openapi://endpoint/get/${path}`
+          uri: `openapi://endpoint/get/${path}`,
         })
-      ).rejects.toThrow('Endpoint not found: get /does/not/exist');
+      ).rejects.toThrow('Path not found: /does/not/exist');
     });
 
     it('should handle non-existent method', async () => {
       const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
       await expect(
         client.readResource({
-          uri: `openapi://endpoint/put/${path}`
+          uri: `openapi://endpoint/put/${path}`,
         })
-      ).rejects.toThrow('Endpoint not found: put /api/v1/organizations/{orgId}/projects/{projectId}/tasks');
+      ).rejects.toThrow(
+        'Method put not found for path: /api/v1/organizations/{orgId}/projects/{projectId}/tasks'
+      );
     });
 
     describe('Resource Templates', () => {
       it('should list endpoint template', async () => {
         const response = await client.listResourceTemplates();
-        
+
         expect(response.resourceTemplates).toContainEqual({
-          name: 'endpoint',
           uriTemplate: 'openapi://endpoint/{method}/{path}',
-          mimeType: 'text/markdown'
+          name: 'endpoint',
+          description: 'OpenAPI endpoint details',
+          mimeType: 'application/json',
         });
       });
     });

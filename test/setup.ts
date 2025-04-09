@@ -7,11 +7,7 @@ jest.setTimeout(30000);
 // Clean up any previous test artifacts
 beforeAll(async () => {
   // Create required directories if they don't exist
-  const dirs = [
-    'dist',
-    'dist/src',
-    'test/fixtures'
-  ];
+  const dirs = ['dist', 'dist/src', 'test/fixtures'];
 
   for (const dir of dirs) {
     try {

@@ -61,7 +61,6 @@ inspect:
 
 # Run all checks including security
 all:
-    @just generate-types
     @just format
     @just lint
     @just build

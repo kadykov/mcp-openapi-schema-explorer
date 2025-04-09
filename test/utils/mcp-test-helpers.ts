@@ -16,21 +16,17 @@ export async function startMcpServer(specPath: string): Promise<McpTestContext> 
   let client: Client | undefined;
 
   try {
-    // Initialize transport
+    // Initialize transport with spec path as argument
     transport = new StdioClientTransport({
       command: 'node',
-      args: ['dist/src/index.js'],
-      env: {
-        ...process.env,
-        OPENAPI_SPEC_PATH: path.resolve(process.cwd(), specPath)
-      },
+      args: ['dist/src/index.js', path.resolve(process.cwd(), specPath)],
       stderr: 'inherit', // Show server errors in test output
     });
 
     // Initialize client
     client = new Client({
       name: 'test-client',
-      version: '1.0.0'
+      version: '1.0.0',
     });
 
     await client.connect(transport);
@@ -45,7 +41,7 @@ export async function startMcpServer(specPath: string): Promise<McpTestContext> 
     return {
       client,
       transport,
-      cleanup
+      cleanup,
     };
   } catch (error) {
     // Clean up on error
