@@ -69,7 +69,7 @@ export class EndpointHandler {
    * Get resource template for endpoints
    */
   getTemplate(): ResourceTemplate {
-    return new ResourceTemplate('openapi://endpoint/{method}/{path}', {
+    return new ResourceTemplate('openapi://endpoint/{method*}/{path*}', {
       list: undefined,
       complete: {
         // Provide completion for HTTP methods
