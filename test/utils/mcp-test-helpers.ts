@@ -8,10 +8,17 @@ interface McpTestContext {
   cleanup: () => Promise<void>;
 }
 
+interface StartServerOptions {
+  outputFormat?: 'json' | 'yaml';
+}
+
 /**
  * Start MCP server with test configuration
  */
-export async function startMcpServer(specPath: string): Promise<McpTestContext> {
+export async function startMcpServer(
+  specPath: string,
+  options: StartServerOptions = {}
+): Promise<McpTestContext> {
   let transport: StdioClientTransport | undefined;
   let client: Client | undefined;
 
@@ -19,7 +26,11 @@ export async function startMcpServer(specPath: string): Promise<McpTestContext> 
     // Initialize transport with spec path as argument
     transport = new StdioClientTransport({
       command: 'node',
-      args: ['dist/src/index.js', path.resolve(process.cwd(), specPath)],
+      args: [
+        'dist/src/index.js',
+        path.resolve(process.cwd(), specPath),
+        ...(options.outputFormat ? ['--output-format', options.outputFormat] : []),
+      ],
       stderr: 'inherit', // Show server errors in test output
     });
 

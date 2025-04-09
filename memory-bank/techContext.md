@@ -43,11 +43,26 @@
 - Coverage reporting
 
 ## Response Formats
-- JSON-based responses with references
-- URI-based reference links
-- Token-efficient structure
-- OpenAPI v3 type compliance
-- Clear error messages
+1. Base Formats
+   - JSON format (default format)
+   - YAML format support
+   - URI-based reference links
+   - Token-efficient structure
+   - OpenAPI v3 type compliance
+
+2. Format Service
+   - Pluggable formatter architecture
+   - Format-specific MIME types
+   - Type-safe formatter interface
+   - Consistent error formatting
+   - CLI-configurable output format
+
+3. Implementation
+   - Format-specific serialization
+   - Shared type system
+   - Error response handling
+   - Multiple operation support
+   - Reference transformation
 
 ## Deployment
 - Published as npm package

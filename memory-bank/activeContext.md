@@ -61,8 +61,17 @@ Token-efficient reference handling in OpenAPI specifications
 3. Document reference patterns
 4. Add reference validation
 
-## Immediate Tasks
-- [ ] Complete schema resource implementation
-- [ ] Add tests for schema resources
-- [ ] Document reference transformation patterns
-- [ ] Support schema URI resolution
+## Completed Tasks
+1. Output Format Enhancement
+   - [✓] YAML format support added
+   - [✓] Format service with JSON/YAML formatters
+   - [✓] CLI format configuration
+   - [✓] Unit and E2E test coverage
+   - [✓] Type-safe formatter architecture
+
+## Next Steps
+1. Schema Resource Enhancement
+   - [ ] Complete schema resource implementation
+   - [ ] Add tests for schema resources
+   - [ ] Document reference transformation patterns
+   - [ ] Support schema URI resolution

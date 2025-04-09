@@ -1,40 +1,7 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { startMcpServer } from '../../utils/mcp-test-helpers.js';
-import { OpenAPIV3 } from 'openapi-types';
-
-interface EndpointSuccessResponse {
-  method: string;
-  path: string;
-  parameters?: OpenAPIV3.ParameterObject[];
-  requestBody?: OpenAPIV3.RequestBodyObject;
-  responses: { [key: string]: OpenAPIV3.ResponseObject };
-}
-
-interface EndpointErrorResponse {
-  method: string;
-  path: string;
-  error: string;
-}
-
-type EndpointResponse = EndpointSuccessResponse | EndpointErrorResponse;
-
-function isEndpointErrorResponse(obj: unknown): obj is EndpointErrorResponse {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    typeof (obj as EndpointErrorResponse).error === 'string'
-  );
-}
-
-interface ResourceContent {
-  uri: string;
-  mimeType: string;
-  text: string;
-}
-
-interface ResourceResponse {
-  contents: ResourceContent[];
-}
+import { isEndpointErrorResponse } from '../../utils/test-types.js';
+import type { EndpointResponse, ResourceResponse } from '../../utils/test-types.js';
 
 describe('OpenAPI Explorer MCP Server E2E', () => {
   let client: Client;

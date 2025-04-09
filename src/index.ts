@@ -6,14 +6,20 @@ import { EndpointHandler } from './handlers/endpoint.js';
 import { EndpointListHandler } from './handlers/endpoint-list.js';
 import { OpenAPITransformer, ReferenceTransformService } from './services/reference-transform.js';
 import { SpecLoaderService } from './services/spec-loader.js';
+import { createFormatter } from './services/formatters.js';
 
 async function main(): Promise<void> {
   try {
-    // Get spec path from command line argument
-    const specPath = process.argv[2];
+    // Get spec path and options from command line arguments
+    const [, , specPath, ...args] = process.argv;
+    const options = {
+      outputFormat: args.includes('--output-format')
+        ? args[args.indexOf('--output-format') + 1]
+        : undefined,
+    };
 
     // Load configuration
-    const config = loadConfig(specPath);
+    const config = loadConfig(specPath, options);
 
     // Initialize services
     const referenceTransform = new ReferenceTransformService();
@@ -29,7 +35,8 @@ async function main(): Promise<void> {
     });
 
     // Set up handlers
-    const endpointHandler = new EndpointHandler(specLoader);
+    const formatter = createFormatter(config.outputFormat);
+    const endpointHandler = new EndpointHandler(specLoader, formatter);
     const endpointListHandler = new EndpointListHandler(specLoader);
 
     // Add endpoint details resource
@@ -38,7 +45,7 @@ async function main(): Promise<void> {
       'endpoint',
       template,
       {
-        mimeType: 'application/json',
+        mimeType: formatter.getMimeType(),
         description: 'OpenAPI endpoint details',
         name: 'endpoint',
       },

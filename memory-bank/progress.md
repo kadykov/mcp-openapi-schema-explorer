@@ -94,11 +94,21 @@
    - Generic interface support
    - Clear error handling
 
-### Output Format Enhancement (⏳)
-- Schema resource implementation
-- Schema URI resolution
-- Enhanced documentation
-- Reference validation
+### Output Format Enhancement (✓)
+1. Output Formatters
+   - JSON format (default)
+   - YAML format support
+   - CLI format selection
+   - Content type handling
+   - Full test coverage
+   - Type-safe implementation
+
+2. Format Features
+   - Schema resource support
+   - Endpoint resource support
+   - Error response formatting
+   - Multiple operation support
+   - Reference handling
 
 ### Additional Features (⏳)
 - Reference traversal service

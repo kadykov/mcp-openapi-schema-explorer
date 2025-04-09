@@ -2,6 +2,7 @@ import { EndpointHandler } from '../../../../src/handlers/endpoint.js';
 import { OpenAPIV3 } from 'openapi-types';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { SpecLoaderService } from '../../../../src/services/spec-loader.js';
+import { JsonFormatter, YamlFormatter } from '../../../../src/services/formatters.js';
 
 interface ApiResponse {
   method: string;
@@ -63,54 +64,47 @@ function isApiResponse(obj: unknown): obj is ApiResponse {
 }
 
 describe('EndpointHandler', () => {
-  let handler: EndpointHandler;
-  let mockSpecLoader: jest.Mocked<SpecLoaderService>;
-  let abortSignal: AbortSignal;
+  const mockOperation: OpenAPIV3.OperationObject = {
+    summary: 'Test Operation',
+    responses: {
+      '200': {
+        description: 'Success',
+      },
+    },
+  };
 
-  beforeEach(() => {
-    mockSpecLoader = {
-      getSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
-      getTransformedSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
-      loadSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
-    } as unknown as jest.Mocked<SpecLoaderService>;
-    handler = new EndpointHandler(mockSpecLoader);
-    abortSignal = new AbortController().signal;
-  });
+  const mockSpec: OpenAPIV3.Document = {
+    openapi: '3.0.0',
+    info: {
+      title: 'Test API',
+      version: '1.0.0',
+    },
+    paths: {
+      '/test/path': {
+        get: mockOperation,
+      },
+    },
+  };
 
-  describe('getTemplate', () => {
+  describe('with JSON formatter', () => {
+    let handler: EndpointHandler;
+    let mockSpecLoader: jest.Mocked<SpecLoaderService>;
+    let abortSignal: AbortSignal;
+
+    beforeEach(() => {
+      mockSpecLoader = {
+        getSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+        getTransformedSpec: jest.fn().mockResolvedValue(mockSpec),
+        loadSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+      } as unknown as jest.Mocked<SpecLoaderService>;
+      handler = new EndpointHandler(mockSpecLoader, new JsonFormatter());
+      abortSignal = new AbortController().signal;
+    });
+
     it('returns resource template for endpoint URLs', () => {
       const template = handler.getTemplate();
       expect(template).toBeDefined();
-      // Just verify that we get a ResourceTemplate instance
       expect(template.constructor.name).toBe('ResourceTemplate');
-    });
-  });
-
-  describe('handleRequest', () => {
-    const mockOperation: OpenAPIV3.OperationObject = {
-      summary: 'Test Operation',
-      responses: {
-        '200': {
-          description: 'Success',
-        },
-      },
-    };
-
-    const mockSpec: OpenAPIV3.Document = {
-      openapi: '3.0.0',
-      info: {
-        title: 'Test API',
-        version: '1.0.0',
-      },
-      paths: {
-        '/test/path': {
-          get: mockOperation,
-        },
-      },
-    };
-
-    beforeEach(() => {
-      mockSpecLoader.getTransformedSpec.mockResolvedValue(mockSpec);
     });
 
     it('returns formatted operation details for valid endpoint', async () => {
@@ -124,7 +118,7 @@ describe('EndpointHandler', () => {
 
       expect(result.contents).toHaveLength(1);
       const content = result.contents[0];
-      expect(content.mimeType).toBe('application/json');
+      expect(content.mimeType).toBe(new JsonFormatter().getMimeType());
       expect(content.uri).toBe(uri.href);
 
       if (!isResourceTextContent(content)) {
@@ -353,6 +347,68 @@ describe('EndpointHandler', () => {
 
       // Should normalize to a single leading slash
       expect(parsedJson.path).toBe('/test/path');
+    });
+  });
+
+  describe('with YAML formatter', () => {
+    let handler: EndpointHandler;
+    let mockSpecLoader: jest.Mocked<SpecLoaderService>;
+    let abortSignal: AbortSignal;
+
+    beforeEach(() => {
+      mockSpecLoader = {
+        getSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+        getTransformedSpec: jest.fn().mockResolvedValue(mockSpec),
+        loadSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+      } as unknown as jest.Mocked<SpecLoaderService>;
+      handler = new EndpointHandler(mockSpecLoader, new YamlFormatter());
+      abortSignal = new AbortController().signal;
+    });
+
+    it('returns YAML formatted operation details', async () => {
+      mockSpecLoader.getTransformedSpec.mockResolvedValue({
+        openapi: '3.0.0',
+        info: {
+          title: 'Test API',
+          version: '1.0.0',
+        },
+        paths: {
+          '/test/path': {
+            get: {
+              summary: 'Test Operation',
+              responses: {
+                '200': {
+                  description: 'Success',
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const uri = new URL('openapi://endpoint/get/test%2Fpath');
+      const variables: Variables = {
+        method: 'get',
+        path: 'test%2Fpath',
+      };
+
+      const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
+
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe(new YamlFormatter().getMimeType());
+      expect(content.uri).toBe(uri.href);
+
+      if (!isResourceTextContent(content)) {
+        throw new Error('Expected text content in response');
+      }
+
+      // YAML content ends with a newline
+      expect(content.text).toMatch(/\n$/);
+      // Should contain typical YAML markers
+      expect(content.text).toContain('method: GET');
+      expect(content.text).toContain('path: /test/path');
+      expect(content.text).toContain('summary: Test Operation');
     });
   });
 });

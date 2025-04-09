@@ -5,6 +5,7 @@ import {
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { OpenAPI, OpenAPIV3 } from 'openapi-types';
 import { HttpMethod, SpecLoaderService } from '../types.js';
+import { IFormatter } from '../services/formatters.js';
 
 function isValidHttpMethod(method: string): method is HttpMethod {
   return ['get', 'put', 'post', 'delete', 'patch'].includes(method.toLowerCase());
@@ -63,7 +64,10 @@ function getPathOperation(
 }
 
 export class EndpointHandler {
-  constructor(private specLoader: SpecLoaderService) {}
+  constructor(
+    private specLoader: SpecLoaderService,
+    private formatter: IFormatter
+  ) {}
 
   /**
    * Get resource template for endpoints
@@ -125,23 +129,20 @@ export class EndpointHandler {
               const operation = this.getOperationDetails(spec, method, path);
               return {
                 uri: `openapi://endpoint/${method.toLowerCase()}/${path}`,
-                mimeType: 'application/json',
-                text: JSON.stringify(operation, null, 2),
+                mimeType: this.formatter.getMimeType(),
+                text: this.formatter.format(operation),
               };
             } catch (error) {
               const decodedPath = '/' + decodeURIComponent(path || '').replace(/^\/+/, '');
+              const errorResponse = {
+                method: method.toUpperCase(),
+                path: decodedPath,
+                error: error instanceof Error ? error.message : String(error),
+              };
               return {
                 uri: `openapi://endpoint/${method.toLowerCase()}/${path}`,
-                mimeType: 'application/json',
-                text: JSON.stringify(
-                  {
-                    method: method.toUpperCase(),
-                    path: decodedPath,
-                    error: error instanceof Error ? error.message : String(error),
-                  },
-                  null,
-                  2
-                ),
+                mimeType: this.formatter.getMimeType(),
+                text: this.formatter.format(errorResponse),
               };
             }
           })
