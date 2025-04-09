@@ -1,5 +1,7 @@
 import { EndpointListHandler } from '../../../../src/handlers/endpoint-list.js';
 import { OpenAPIV3 } from 'openapi-types';
+import { SpecLoaderService } from '../../../../src/services/spec-loader.js';
+import { ReferenceTransformService } from '../../../../src/services/reference-transform.js';
 
 type ResourceTextContent = {
   uri: string;
@@ -18,12 +20,15 @@ function isResourceTextContent(content: unknown): content is ResourceTextContent
 
 describe('EndpointListHandler', () => {
   let handler: EndpointListHandler;
-  let mockSpecLoader: { getSpec: jest.Mock };
+  let mockSpecLoader: jest.Mocked<SpecLoaderService>;
 
   beforeEach(() => {
-    mockSpecLoader = {
-      getSpec: jest.fn(),
-    };
+    const transform = new ReferenceTransformService();
+    const loader = new SpecLoaderService('/test.json', transform);
+    mockSpecLoader = jest.mocked(loader, { shallow: true });
+    mockSpecLoader.getSpec = jest.fn().mockResolvedValue({} as OpenAPIV3.Document);
+    mockSpecLoader.getTransformedSpec = jest.fn().mockResolvedValue({} as OpenAPIV3.Document);
+    mockSpecLoader.loadSpec = jest.fn().mockResolvedValue({} as OpenAPIV3.Document);
     handler = new EndpointListHandler(mockSpecLoader);
   });
 
@@ -52,7 +57,7 @@ describe('EndpointListHandler', () => {
     };
 
     beforeEach(() => {
-      mockSpecLoader.getSpec.mockReturnValue(mockSpec);
+      mockSpecLoader.getSpec.mockResolvedValue(mockSpec);
     });
 
     it('returns formatted endpoint list in text/plain format', async () => {
@@ -73,7 +78,7 @@ describe('EndpointListHandler', () => {
     });
 
     it('returns error for non-OpenAPI v3 spec', async () => {
-      mockSpecLoader.getSpec.mockReturnValue({
+      mockSpecLoader.getSpec.mockResolvedValue({
         swagger: '2.0', // OpenAPI 2.0
         info: {
           title: 'Test API',
@@ -93,7 +98,7 @@ describe('EndpointListHandler', () => {
     });
 
     it('returns empty result for spec with no paths', async () => {
-      mockSpecLoader.getSpec.mockReturnValue({
+      mockSpecLoader.getSpec.mockResolvedValue({
         openapi: '3.0.0',
         info: {
           title: 'Test API',
@@ -112,7 +117,7 @@ describe('EndpointListHandler', () => {
     });
 
     it('handles paths without valid methods', async () => {
-      mockSpecLoader.getSpec.mockReturnValue({
+      mockSpecLoader.getSpec.mockResolvedValue({
         openapi: '3.0.0',
         info: {
           title: 'Test API',

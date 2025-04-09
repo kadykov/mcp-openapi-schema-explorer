@@ -109,8 +109,13 @@ export class EndpointHandler {
       const methods = Array.isArray(variables.method) ? variables.method : [variables.method];
       const paths = Array.isArray(variables.path) ? variables.path : [variables.path];
 
-      // Get the OpenAPI spec
-      const spec = await Promise.resolve(this.specLoader.getSpec());
+      // Get transformed OpenAPI spec
+      const spec = await this.specLoader.getTransformedSpec({
+        resourceType: 'endpoint',
+        format: 'openapi',
+        method: methods[0],
+        path: paths[0],
+      });
 
       // Generate all combinations of methods and paths
       return {

@@ -8,15 +8,17 @@
 
 ## Key Dependencies
 - @modelcontextprotocol/sdk - Core MCP functionality
-- @apidevtools/swagger-parser - OpenAPI parsing and validation
+- @apidevtools/swagger-parser - OpenAPI spec parsing
 - TypeScript compiler and types
-- OpenAPI types from openapi-types package
+- openapi-types for OpenAPI type definitions
+- Type definitions for transformers
 
 ## Technical Requirements
 1. Must follow MCP protocol specifications
 2. Must handle large OpenAPI specs efficiently
-3. Must provide type-safe implementation
-4. Must be easily testable and maintainable
+3. Must provide type-safe reference handling
+4. Must support multiple specification formats
+5. Must be easily testable and maintainable
 
 ## Development Environment
 - TypeScript setup with strict type checking
@@ -26,21 +28,24 @@
 - Test fixtures and helpers
 
 ## Code Organization
-- Modular architecture with separate concerns
-- Clear directory structure
-- Strong typing throughout
+- Services layer for spec loading and transformation
+- Handlers layer for resource endpoints
+- Generic interfaces for extensibility
+- Strong typing with generics
 - Comprehensive test coverage
 
 ## Testing Infrastructure
-- Unit tests for all components
-- End-to-end tests for server
-- Mock implementations
-- Test helpers and utilities
+- Unit tests for components and transformers
+- Integration tests for service cooperation
+- End-to-end tests for full functionality
+- Type-safe test utilities
+- Reference transformation tests
 - Coverage reporting
 
 ## Response Formats
-- JSON-based responses
-- Consistent structure
+- JSON-based responses with references
+- URI-based reference links
+- Token-efficient structure
 - OpenAPI v3 type compliance
 - Clear error messages
 
@@ -63,7 +68,8 @@
 - Proper error propagation
 
 ## Future Extensions
-- Additional resource handlers
-- Schema dereferencing
-- Path and operation listing
-- Enhanced documentation support
+- AsyncAPI format support
+- GraphQL schema support
+- External reference resolution
+- Enhanced schema resources
+- Reference validation

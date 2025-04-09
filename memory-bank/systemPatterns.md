@@ -6,8 +6,19 @@
 graph TD
     Config[Configuration] --> Server[MCP Server]
     Spec[OpenAPI Spec File] --> SpecLoader[Spec Loader]
+    Transform[Reference Transform] --> SpecLoader
     SpecLoader --> Handlers[Resource Handlers]
     Server --> Handlers
+
+    subgraph Services
+        SpecLoader
+        Transform
+        subgraph Transformers[Transformers]
+            OpenAPITransform[OpenAPI Transformer]
+            AsyncAPITransform[AsyncAPI Transformer]
+            GraphQLTransform[GraphQL Transformer]
+        end
+    end
 
     subgraph Handlers
         EndpointHandler[Endpoint Handler]
@@ -20,10 +31,17 @@ graph TD
 ## Component Structure
 
 ### Services Layer
-- SpecLoader: Loads and parses OpenAPI specifications
-  - Uses swagger-parser for validation
+- SpecLoader: Loads and transforms OpenAPI specifications
+  - Parses spec without resolving references
+  - Integrates with reference transformation
   - Provides typed access to spec data
   - Handles file loading and caching
+
+- ReferenceTransform: Manages reference transformations
+  - Format-agnostic transformer interface
+  - OpenAPI reference transformation
+  - Type-safe implementation
+  - Extensible for other formats
 
 ### Handler Layer
 - EndpointHandler: Dynamic endpoint details
@@ -45,10 +63,15 @@ graph TD
 ## Resource Design Patterns
 
 ### URI Structure
-- Dynamic Resources:
+- Resource URIs:
   - `openapi://endpoint/{method}/{path}` - Get endpoint details
   - `openapi://endpoints/list` - Get all endpoints
   - `openapi://schema/{name}` - Get schema details
+
+- Reference URIs:
+  - `openapi://schema/{name}` - Schema reference
+  - `openapi://parameter/{name}` - Parameter reference
+  - `openapi://response/{name}` - Response reference
 
 ### Response Format Patterns
 1. Token-Efficient Formats:
@@ -65,31 +88,47 @@ graph TD
    - Error type validation
 
 ## Extension Points
-1. Response formats (JSON/YAML)
-2. Resource handlers
-3. URI resolution for $refs
-4. Parameter validation
+1. Reference Transformers:
+   - AsyncAPI transformer
+   - GraphQL transformer
+   - Custom format transformers
+
+2. Resource Handlers:
+   - Schema resource handler
+   - Additional reference handlers
+   - Custom format handlers
+
+3. URI Resolution:
+   - Reference resolution
+   - Cross-resource linking
+   - External references
+
+4. Validation:
+   - Parameter validation
+   - Reference validation
+   - Format-specific validation
 
 ## Testing Strategy
 1. Unit Tests
    - Handler tests with type safety
-   - Error handling scenarios
-   - Multiple values support
-   - Path normalization
+   - Reference transformation tests
+   - Format-specific tests
+   - Edge case handling
 
 2. Integration Tests
-   - Resource handler cooperation
+   - Service cooperation
+   - Reference resolution
+   - Cross-format handling
    - Error propagation
-   - Type validation
 
 3. E2E Tests
    - Full resource functionality
-   - Complex paths and methods
+   - Reference resolution
+   - Complex references
    - Error scenarios
-   - Response format validation
 
 4. Test Support
    - Type-safe fixtures
-   - Mock OpenAPI specs
-   - Helper utilities
-   - Response validation
+   - Reference test helpers
+   - Format-specific mocks
+   - Validation utilities

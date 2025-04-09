@@ -15,7 +15,7 @@ export class EndpointListHandler {
    */
   handleRequest: ReadResourceCallback = async (uri: URL, _extra: { signal: AbortSignal }) => {
     try {
-      const spec = await Promise.resolve(this.specLoader.getSpec());
+      const spec = await this.specLoader.getSpec(); // Already returns a Promise, no need for Promise.resolve
       if (!isOpenAPIV3(spec)) {
         return {
           contents: [

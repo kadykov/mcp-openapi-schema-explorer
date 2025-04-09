@@ -74,33 +74,53 @@
 
 ## Planned Features
 
+### Reference Transformation (✓)
+1. Reference Service
+   - Format-agnostic transformer service
+   - Generic transformer interface
+   - Type-safe implementation
+   - Service registration system
+
+2. OpenAPI Transformer
+   - Schema reference transformation
+   - Token-efficient URI links
+   - Nested reference support
+   - Array references handling
+   - Full test coverage
+
+3. Integration
+   - SpecLoader integration
+   - Type-safe transformations
+   - Generic interface support
+   - Clear error handling
+
 ### Output Format Enhancement (⏳)
-- YAML output for endpoints
-- $ref URI resolution
-- Response format optimization
-- Parameter validation
+- Schema resource implementation
+- Schema URI resolution
+- Enhanced documentation
+- Reference validation
 
 ### Additional Features (⏳)
-- Schema examples
-- Enhanced documentation
+- Reference traversal service
+- Enhanced schema support
 - Parameter validation
 - More token optimizations
 
 ## Technical Improvements
 1. Code Quality
-   - Modular design
-   - Type safety
+   - Generic type system
+   - Format-agnostic design
    - Clean code structure
    - Error handling
 
 2. Testing
-   - Full unit test coverage
-   - E2E test coverage
-   - Test fixtures
+   - Comprehensive reference tests
+   - Edge case coverage
+   - Type-safe tests
    - Mock implementations
 
 3. API Design
-   - Consistent formats
-   - Clear error messages
+   - Consistent URI patterns
+   - Clear reference formats
    - Token efficiency
-   - Proper validation
+   - Type-safe interfaces

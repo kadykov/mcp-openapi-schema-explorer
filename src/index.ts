@@ -2,9 +2,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { loadConfig } from './config.js';
-import { createSpecLoader } from './services/spec-loader.js';
 import { EndpointHandler } from './handlers/endpoint.js';
 import { EndpointListHandler } from './handlers/endpoint-list.js';
+import { OpenAPITransformer, ReferenceTransformService } from './services/reference-transform.js';
+import { SpecLoaderService } from './services/spec-loader.js';
 
 async function main(): Promise<void> {
   try {
@@ -14,8 +15,12 @@ async function main(): Promise<void> {
     // Load configuration
     const config = loadConfig(specPath);
 
-    // Initialize spec loader
-    const specLoader = await createSpecLoader(config.specPath);
+    // Initialize services
+    const referenceTransform = new ReferenceTransformService();
+    referenceTransform.registerTransformer('openapi', new OpenAPITransformer());
+
+    const specLoader = new SpecLoaderService(config.specPath, referenceTransform);
+    await specLoader.loadSpec();
 
     // Create MCP server
     const server = new McpServer({

@@ -118,61 +118,25 @@ describe('OpenAPI Explorer MCP Server E2E', () => {
           expect(content.method).toBe('POST');
           expect(content.path).toBe('/api/v1/organizations/{orgId}/projects/{projectId}/tasks');
 
-          // Request Body
+          // Request Body - now using reference
           expect(content.requestBody).toMatchObject({
             required: true,
             content: {
               'application/json': {
                 schema: {
-                  type: 'object',
-                  required: ['title'],
-                  properties: {
-                    title: {
-                      type: 'string',
-                    },
-                    status: {
-                      type: 'string',
-                      enum: ['active', 'completed'],
-                      default: 'active',
-                    },
-                    priority: {
-                      type: 'integer',
-                      minimum: 1,
-                      maximum: 5,
-                      default: 3,
-                    },
-                  },
+                  $ref: 'openapi://schema/CreateTaskRequest',
                 },
               },
             },
           });
 
-          // Response
+          // Response - now using reference
           expect(content.responses['201']).toMatchObject({
             description: 'Task created',
             content: {
               'application/json': {
                 schema: {
-                  type: 'object',
-                  required: ['id', 'title', 'status'],
-                  properties: {
-                    id: {
-                      type: 'string',
-                      format: 'uuid',
-                    },
-                    title: {
-                      type: 'string',
-                    },
-                    status: {
-                      type: 'string',
-                      enum: ['active', 'completed'],
-                    },
-                    priority: {
-                      type: 'integer',
-                      minimum: 1,
-                      maximum: 5,
-                    },
-                  },
+                  $ref: 'openapi://schema/Task',
                 },
               },
             },

@@ -1,6 +1,7 @@
 import { EndpointHandler } from '../../../../src/handlers/endpoint.js';
 import { OpenAPIV3 } from 'openapi-types';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
+import { SpecLoaderService } from '../../../../src/services/spec-loader.js';
 
 interface ApiResponse {
   method: string;
@@ -63,13 +64,15 @@ function isApiResponse(obj: unknown): obj is ApiResponse {
 
 describe('EndpointHandler', () => {
   let handler: EndpointHandler;
-  let mockSpecLoader: { getSpec: jest.Mock };
+  let mockSpecLoader: jest.Mocked<SpecLoaderService>;
   let abortSignal: AbortSignal;
 
   beforeEach(() => {
     mockSpecLoader = {
-      getSpec: jest.fn(),
-    };
+      getSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+      getTransformedSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+      loadSpec: jest.fn().mockResolvedValue({} as OpenAPIV3.Document),
+    } as unknown as jest.Mocked<SpecLoaderService>;
     handler = new EndpointHandler(mockSpecLoader);
     abortSignal = new AbortController().signal;
   });
@@ -107,7 +110,7 @@ describe('EndpointHandler', () => {
     };
 
     beforeEach(() => {
-      mockSpecLoader.getSpec.mockReturnValue(mockSpec);
+      mockSpecLoader.getTransformedSpec.mockResolvedValue(mockSpec);
     });
 
     it('returns formatted operation details for valid endpoint', async () => {
@@ -146,7 +149,7 @@ describe('EndpointHandler', () => {
     });
 
     it('returns multiple operations when method is an array', async () => {
-      mockSpecLoader.getSpec.mockReturnValue({
+      mockSpecLoader.getTransformedSpec.mockResolvedValue({
         ...mockSpec,
         paths: {
           '/test/path': {
@@ -207,7 +210,7 @@ describe('EndpointHandler', () => {
     });
 
     it('handles multiple paths with multiple methods', async () => {
-      mockSpecLoader.getSpec.mockReturnValue({
+      mockSpecLoader.getTransformedSpec.mockResolvedValue({
         ...mockSpec,
         paths: {
           '/test/path1': {

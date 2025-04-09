@@ -1,70 +1,68 @@
 # Active Context
 
 ## Current Focus
-Improving endpoint resource features and token efficiency
+Token-efficient reference handling in OpenAPI specifications
 
 ## Recent Progress
-1. Enhanced endpoint handler:
-   - Proper error handling with isError flag
-   - Support for multiple methods and paths
-   - HTTP method completion support
-   - Path normalization
-   - Type-safe implementation
+1. Added Reference Transformation System:
+   - ReferenceTransformService for managing transformers
+   - OpenAPITransformer for OpenAPI v3 specifications
+   - Generic, format-agnostic transformer interface
+   - Type-safe implementation with TypeScript generics
 
-2. Added endpoint list handler:
-   - `src/handlers/endpoint-list.ts`
-   - Token-efficient text/plain format
-   - Sorted and grouped by path
-   - Full test coverage
+2. Enhanced SpecLoaderService:
+   - Integration with reference transformation
+   - Skips full $ref resolution for token efficiency
+   - Type-safe spec loading and transformation
+   - Clear separation of loading and transformation
 
-3. Code Improvements:
-   - Type-safe error handling
-   - Normalized path handling
-   - Completion support
-   - Enhanced E2E tests with proper error responses
+3. Improved Type Safety:
+   - Generic transformer types
+   - Type guards for OpenAPI structures
+   - Safe reference type handling
+   - Comprehensive type coverage
 
 4. Test Coverage:
-   - Unit tests for all handlers
-   - E2E tests with error cases
-   - Improved type safety in tests
-   - Proper error response testing
+   - Unit tests for reference transformation
+   - Schema reference scenarios
+   - Nested reference handling
+   - Edge cases and error handling
 
 ## Implementation Status
-1. Resource Handlers:
+1. Reference Transformation:
    ```typescript
-   // Endpoint details with proper error handling
-   class EndpointHandler {
-     getTemplate(): ResourceTemplate // with completion
-     handleRequest(uri: URL, variables: Variables): Promise<ResourceResponse>
+   // Generic transformer interface
+   interface ReferenceTransform<T> {
+     transformRefs(document: T, context: TransformContext): T;
    }
 
-   // Token-efficient endpoint listing
-   class EndpointListHandler {
-     getTemplate(): ResourceTemplate
-     handleRequest(uri: URL): Promise<ResourceResponse>
+   // OpenAPI implementation
+   class OpenAPITransformer {
+     transformObject(obj: unknown): unknown;
+     transformReference(ref: string): TransformedReference;
    }
    ```
 
-2. Response Format:
-   - Consistent error format with isError flag
-   - Complete operation details
-   - Token-efficient listing format
-   - Proper type definitions
+2. Service Architecture:
+   - Format-agnostic transformer service
+   - OpenAPI-specific implementation
+   - Extensible for other formats
+   - Type-safe design
 
 3. Code Features:
-   - MCP-compliant error handling
-   - Multiple values support
-   - HTTP method completion
-   - Path normalization
+   - Token-efficient references
+   - Format-specific transformations
+   - Type-safe implementations
+   - Clear separation of concerns
 
 ## Next Actions
-1. Implement YAML format for responses
-2. Add $ref URI resolution
-3. Add parameter validation
-4. Consider output format optimization
+1. Implement schema resource handler
+2. Add support for URI resolution
+3. Document reference patterns
+4. Add reference validation
 
 ## Immediate Tasks
-- [ ] Add YAML output for endpoint details
-- [ ] Implement $ref URI links
-- [ ] Consider response format optimization
-- [ ] Add endpoint parameter validation
+- [ ] Complete schema resource implementation
+- [ ] Add tests for schema resources
+- [ ] Document reference transformation patterns
+- [ ] Support schema URI resolution
