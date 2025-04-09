@@ -4,6 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { loadConfig } from './config.js';
 import { EndpointHandler } from './handlers/endpoint.js';
 import { EndpointListHandler } from './handlers/endpoint-list.js';
+import { SchemaHandler } from './handlers/schema.js'; // Import SchemaHandler
 import { OpenAPITransformer, ReferenceTransformService } from './services/reference-transform.js';
 import { SpecLoaderService } from './services/spec-loader.js';
 import { createFormatter } from './services/formatters.js';
@@ -38,12 +39,13 @@ async function main(): Promise<void> {
     const formatter = createFormatter(config.outputFormat);
     const endpointHandler = new EndpointHandler(specLoader, formatter);
     const endpointListHandler = new EndpointListHandler(specLoader);
+    const schemaHandler = new SchemaHandler(specLoader, formatter); // Instantiate SchemaHandler
 
     // Add endpoint details resource
-    const template = endpointHandler.getTemplate();
+    const endpointTemplate = endpointHandler.getTemplate(); // Rename variable
     server.resource(
       'endpoint',
-      template,
+      endpointTemplate, // Use renamed variable
       {
         mimeType: formatter.getMimeType(),
         description: 'OpenAPI endpoint details',
@@ -62,6 +64,19 @@ async function main(): Promise<void> {
         name: 'endpoints-list',
       },
       endpointListHandler.handleRequest
+    );
+
+    // Add schema details resource
+    const schemaTemplate = schemaHandler.getTemplate();
+    server.resource(
+      'schema',
+      schemaTemplate,
+      {
+        mimeType: formatter.getMimeType(), // Use same formatter for consistency
+        description: 'OpenAPI schema details',
+        name: 'schema',
+      },
+      (uri, variables, extra) => schemaHandler.handleRequest(uri, variables, extra)
     );
 
     // Start server

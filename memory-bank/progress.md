@@ -8,12 +8,12 @@
    - Lists all available schemas
    - Full test coverage
 
-2. Schema Details
-   - Resource: `openapi://schema/{name}`
-   - Shows schema structure
-   - Properties and types
+2. Schema Details (✓)
+   - Resource: `openapi://schema/{name*}` (Supports multiple names)
+   - Shows schema structure using configured formatter (JSON/YAML)
+   - Handles non-existent schemas with error structure
    - Required fields
-   - Full test coverage
+   - Full test coverage (Unit & E2E)
 
 ### Endpoint Resources (✓)
 1. Endpoint Details

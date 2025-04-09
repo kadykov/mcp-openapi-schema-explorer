@@ -55,6 +55,13 @@ graph TD
   - Sorted method groups
   - Consistent output
 
+- SchemaHandler: Dynamic schema details
+  - Handles `openapi://schema/{name*}` URIs
+  - Supports multiple schema names via `{name*}`
+  - Retrieves schema definitions from `components.schemas`
+  - Uses configured formatter (JSON/YAML) for output
+  - Returns error structure for non-existent schemas
+
 ### Configuration Layer
 - Environment variables validation
 - Server configuration
