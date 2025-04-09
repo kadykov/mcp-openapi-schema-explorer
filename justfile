@@ -52,12 +52,9 @@ build:
 inspect:
     #!/usr/bin/env sh
     just build
-    # Load .env variables and pass them to the inspector
-    set -a
-    . .env
-    set +a
     npx @modelcontextprotocol/inspector \
-        node dist/src/mcp/server.js
+        node dist/src/index.js \
+        test/fixtures/complex-endpoint.json
 
 # Run all checks including security
 all:

@@ -18,16 +18,42 @@
 ### Endpoint Resources (✓)
 1. Endpoint Details
    - Resource: `openapi://endpoint/{method}/{path}`
-   - Shows full operation details
-   - Parameters documentation
-   - Request/response schemas
-   - Full test coverage
+   - JSON format output
+   - Full operation details
+   - Parameters and schemas
+   - Test coverage
+     - Unit tests
+     - E2E tests
+     - Complex paths
+     - Edge cases
 
-2. URI Design Solution
-   - Encoded path handling
-   - Deep path support
-   - Method-specific lookup
-   - Error handling
+2. Core Components
+   - Endpoint handler
+   - Spec loader service
+   - Configuration management
+   - Type definitions
+   - Test helpers
+
+## Refactored Features
+
+### Codebase Organization (✓)
+1. File Structure
+   - Handlers directory
+   - Services directory
+   - Types file
+   - Config module
+
+2. Testing Structure
+   - Unit tests directory
+   - E2E tests directory
+   - Fixtures directory
+   - Test utils
+
+3. Type System
+   - OpenAPI v3 types
+   - Resource types
+   - Response types
+   - Service interfaces
 
 ## In Progress Features
 
@@ -45,42 +71,33 @@
 
 ## Planned Features
 
-### Reference Resolution (⏳)
-- Resolve $ref in schemas
-- Handle external references
-- Handle recursive references
+### Schema Enhancement (⏳)
+- Swagger-parser integration
+- Reference resolution
+- Schema examples
+- Parameter validation
 
-### Enhanced Documentation (⏳)
-- Add examples
-- Add descriptions
-- Add parameter constraints
+### Additional Features (⏳)
+- Parameter validation
+- Path listing
+- Operation listing
+- Enhanced documentation
 
-## Testing Status
+## Technical Improvements
+1. Code Quality
+   - Modular design
+   - Type safety
+   - Clean code structure
+   - Error handling
 
-### Unit Tests
-- Schema resources ✓
-- Endpoint resources ✓
-- Path listing (pending)
-- Operation listing (pending)
+2. Testing
+   - Full unit test coverage
+   - E2E test coverage
+   - Test fixtures
+   - Mock implementations
 
-### E2E Tests
-- Basic functionality ✓
-- Error handling ✓
-- Complex paths ✓
-- Deep schema nesting (pending)
-
-## Technical Achievements
-1. URL Handling
-   - Proper encoding/decoding
-   - Deep path support
-   - Special character handling
-
-2. Resource Design
-   - Clean URI patterns
-   - Intuitive resource names
-   - Consistent error handling
-
-3. Documentation
-   - Markdown formatting
-   - Structured output
-   - Schema references
+3. API Design
+   - JSON formatted responses
+   - Consistent structure
+   - Clear error messages
+   - Proper validation

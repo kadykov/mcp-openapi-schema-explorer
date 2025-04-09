@@ -8,33 +8,62 @@
 
 ## Key Dependencies
 - @modelcontextprotocol/sdk - Core MCP functionality
+- @apidevtools/swagger-parser - OpenAPI parsing and validation
 - TypeScript compiler and types
-- OpenAPI/Swagger parser library (to be selected)
+- OpenAPI types from openapi-types package
 
-## Technical Constraints
+## Technical Requirements
 1. Must follow MCP protocol specifications
 2. Must handle large OpenAPI specs efficiently
-3. Must be easily testable
-4. Must be extensible for future features
+3. Must provide type-safe implementation
+4. Must be easily testable and maintainable
 
 ## Development Environment
 - TypeScript setup with strict type checking
-- Jest testing framework configured
+- Jest testing framework with coverage
 - ESLint for code quality
 - Prettier for code formatting
+- Test fixtures and helpers
 
-## Building and Testing
-- npm scripts for common operations
-- Jest configuration for testing
-- TypeScript configuration
-- CI pipeline configuration
+## Code Organization
+- Modular architecture with separate concerns
+- Clear directory structure
+- Strong typing throughout
+- Comprehensive test coverage
+
+## Testing Infrastructure
+- Unit tests for all components
+- End-to-end tests for server
+- Mock implementations
+- Test helpers and utilities
+- Coverage reporting
+
+## Response Formats
+- JSON-based responses
+- Consistent structure
+- OpenAPI v3 type compliance
+- Clear error messages
 
 ## Deployment
 - Published as npm package
 - Versioned releases
 - Documentation for installation and usage
+- Example configurations
 
 ## Configuration
-- Specification file path in MCP server config
-- Environment-based configuration support
-- Validation for required settings
+- Environment-based configuration
+- Required settings validation
+- TypeScript type safety
+- Error handling for missing config
+
+## Error Handling
+- Descriptive error messages
+- Type-safe error handling
+- Consistent error format
+- Proper error propagation
+
+## Future Extensions
+- Additional resource handlers
+- Schema dereferencing
+- Path and operation listing
+- Enhanced documentation support

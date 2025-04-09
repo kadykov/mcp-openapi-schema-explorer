@@ -1,60 +1,63 @@
 # Active Context
 
 ## Current Focus
-Implementing endpoint resources with the successful URI design
+Code refactoring and improved testing coverage
 
 ## Recent Progress
-1. Successfully implemented endpoint resource handling:
-   - Working URI structure: `openapi://endpoint/{method}/{path}`
-   - Path encoding/decoding handling
-   - Method-specific operation lookup
-   - Parameter documentation
+1. Successfully refactored the codebase:
+   - Separated concerns into multiple files (handlers, services)
+   - Improved type safety with OpenAPI types
+   - Simplified resource output to JSON format
+   - Unit tests for all components
 
-2. Working Features:
-   - GET endpoint details with parameters
-   - POST endpoint details with request body
-   - Error handling for non-existent endpoints/methods
-   - Query and path parameter documentation
-   - Request/response schema references
+2. Code Organization:
+   - `src/handlers/endpoint.ts`: Endpoint resource handler
+   - `src/services/spec-loader.ts`: OpenAPI spec loading using swagger-parser
+   - `src/config.ts`: Configuration management
+   - `src/types.ts`: Shared type definitions
 
-3. Test Coverage:
-   - Complex endpoint paths
-   - Multiple path parameters
-   - Request body schemas
-   - Response schemas
-   - Error cases
+3. Code Improvements:
+   - Using OpenAPI v3 types from swagger-parser
+   - Better error handling
+   - Proper type checking
+   - Cleaner resource response structure
+
+4. Test Coverage:
+   - Unit tests for all components
+   - End-to-end tests updated for JSON format
+   - Test helpers and fixtures
+   - Config validation tests
 
 ## Implementation Status
-1. URI Design Solution:
+1. Resource Handler Structure:
    ```typescript
-   // Template
-   openapi://endpoint/{method}/{path}
-   
-   // Example
-   openapi://endpoint/get/api%2Fv1%2Forganizations%2F%7BorgId%7D%2Fprojects%2F%7BprojectId%7D%2Ftasks
+   class EndpointHandler {
+     getTemplate(): ResourceTemplate
+     handleRequest(uri: URL, params: { method: string; path: string }): Promise<ResourceResponse>
+   }
    ```
 
-2. Path Handling:
-   - URL encoding for special characters
-   - Preserved path parameters (e.g., `{orgId}`)
-   - Leading slash handling
-   - Unlimited path depth
+2. Response Format:
+   - JSON output for better parsing
+   - Complete operation details
+   - Proper type definitions
+   - Consistent structure
 
-3. Operation Features:
-   - Method-specific lookup
-   - Full parameter documentation
-   - Schema references
-   - Response details
+3. Code Features:
+   - OpenAPI spec validation
+   - Type-safe implementation
+   - Modular design
+   - Easy extensibility
 
 ## Next Actions
 1. Add path listing resource
 2. Implement schema dereferencing
 3. Add operation listing by path
-4. Consider adding query parameter examples
-5. Add schema examples in documentation
+4. Add schema examples in documentation
+5. Consider path parameter validation
 
 ## Immediate Tasks
 - [ ] Implement path listing (`openapi://paths/list`)
-- [ ] Add schema dereferencing
+- [ ] Add swagger-parser schema dereferencing
 - [ ] Add operation list by path
-- [ ] Add more documentation features
+- [ ] Add parameter validation

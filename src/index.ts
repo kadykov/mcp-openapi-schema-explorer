@@ -40,7 +40,6 @@ async function main(): Promise<void> {
     // Start server
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.error('OpenAPI Explorer MCP server running on stdio');
   } catch (error) {
     console.error(
       'Failed to start server:',
