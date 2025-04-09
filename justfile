@@ -54,7 +54,8 @@ inspect:
     just build
     npx @modelcontextprotocol/inspector \
         node dist/src/index.js \
-        test/fixtures/complex-endpoint.json
+        test/fixtures/complex-endpoint.json \
+        --output-format yaml
 
 # Run all checks including security
 all:
