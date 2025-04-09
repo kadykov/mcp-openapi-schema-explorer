@@ -1,63 +1,70 @@
 # Active Context
 
 ## Current Focus
-Code refactoring and improved testing coverage
+Improving endpoint resource features and token efficiency
 
 ## Recent Progress
-1. Successfully refactored the codebase:
-   - Separated concerns into multiple files (handlers, services)
-   - Improved type safety with OpenAPI types
-   - Simplified resource output to JSON format
-   - Unit tests for all components
+1. Enhanced endpoint handler:
+   - Proper error handling with isError flag
+   - Support for multiple methods and paths
+   - HTTP method completion support
+   - Path normalization
+   - Type-safe implementation
 
-2. Code Organization:
-   - `src/handlers/endpoint.ts`: Endpoint resource handler
-   - `src/services/spec-loader.ts`: OpenAPI spec loading using swagger-parser
-   - `src/config.ts`: Configuration management
-   - `src/types.ts`: Shared type definitions
+2. Added endpoint list handler:
+   - `src/handlers/endpoint-list.ts`
+   - Token-efficient text/plain format
+   - Sorted and grouped by path
+   - Full test coverage
 
 3. Code Improvements:
-   - Using OpenAPI v3 types from swagger-parser
-   - Better error handling
-   - Proper type checking
-   - Cleaner resource response structure
+   - Type-safe error handling
+   - Normalized path handling
+   - Completion support
+   - Enhanced E2E tests with proper error responses
 
 4. Test Coverage:
-   - Unit tests for all components
-   - End-to-end tests updated for JSON format
-   - Test helpers and fixtures
-   - Config validation tests
+   - Unit tests for all handlers
+   - E2E tests with error cases
+   - Improved type safety in tests
+   - Proper error response testing
 
 ## Implementation Status
-1. Resource Handler Structure:
+1. Resource Handlers:
    ```typescript
+   // Endpoint details with proper error handling
    class EndpointHandler {
+     getTemplate(): ResourceTemplate // with completion
+     handleRequest(uri: URL, variables: Variables): Promise<ResourceResponse>
+   }
+
+   // Token-efficient endpoint listing
+   class EndpointListHandler {
      getTemplate(): ResourceTemplate
-     handleRequest(uri: URL, params: { method: string; path: string }): Promise<ResourceResponse>
+     handleRequest(uri: URL): Promise<ResourceResponse>
    }
    ```
 
 2. Response Format:
-   - JSON output for better parsing
+   - Consistent error format with isError flag
    - Complete operation details
+   - Token-efficient listing format
    - Proper type definitions
-   - Consistent structure
 
 3. Code Features:
-   - OpenAPI spec validation
-   - Type-safe implementation
-   - Modular design
-   - Easy extensibility
+   - MCP-compliant error handling
+   - Multiple values support
+   - HTTP method completion
+   - Path normalization
 
 ## Next Actions
-1. Add path listing resource
-2. Implement schema dereferencing
-3. Add operation listing by path
-4. Add schema examples in documentation
-5. Consider path parameter validation
+1. Implement YAML format for responses
+2. Add $ref URI resolution
+3. Add parameter validation
+4. Consider output format optimization
 
 ## Immediate Tasks
-- [ ] Implement path listing (`openapi://paths/list`)
-- [ ] Add swagger-parser schema dereferencing
-- [ ] Add operation list by path
-- [ ] Add parameter validation
+- [ ] Add YAML output for endpoint details
+- [ ] Implement $ref URI links
+- [ ] Consider response format optimization
+- [ ] Add endpoint parameter validation

@@ -71,42 +71,82 @@ export class EndpointHandler {
   getTemplate(): ResourceTemplate {
     return new ResourceTemplate('openapi://endpoint/{method}/{path}', {
       list: undefined,
+      complete: {
+        // Provide completion for HTTP methods
+        method: () => ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+      },
     });
+  }
+
+  /**
+   * Get details for a single operation
+   */
+  private getOperationDetails(
+    spec: OpenAPI.Document,
+    method: string,
+    encodedPath: string
+  ): OpenAPIV3.OperationObject & { method: string; path: string } {
+    if (!method || !isValidHttpMethod(method)) {
+      throw new Error(`Invalid HTTP method: ${method}`);
+    }
+
+    const decodedPath = '/' + decodeURIComponent(encodedPath || '').replace(/^\/+/, '');
+    const operation = getPathOperation(spec, decodedPath, method.toLowerCase() as HttpMethod);
+
+    return {
+      method: method.toUpperCase(),
+      path: decodedPath,
+      ...operation,
+    };
   }
 
   /**
    * Handle resource request for endpoint details
    */
   handleRequest: ReadResourceTemplateCallback = async (uri: URL, variables: Variables) => {
-    // Get method and path from variables
-    const methodValue = Array.isArray(variables.method) ? variables.method[0] : variables.method;
-    const encodedPath = Array.isArray(variables.path) ? variables.path[0] : variables.path;
-    const decodedPath = '/' + decodeURIComponent(encodedPath || '');
+    try {
+      // Get method(s) and path(s) from variables
+      const methods = Array.isArray(variables.method) ? variables.method : [variables.method];
+      const paths = Array.isArray(variables.path) ? variables.path : [variables.path];
 
-    if (!methodValue || !isValidHttpMethod(methodValue)) {
-      throw new Error(`Invalid HTTP method: ${methodValue}`);
+      // Get the OpenAPI spec
+      const spec = await Promise.resolve(this.specLoader.getSpec());
+
+      // Generate all combinations of methods and paths
+      const operations = paths.flatMap(path =>
+        methods.map(method => {
+          try {
+            return this.getOperationDetails(spec, method, path);
+          } catch (error) {
+            return {
+              method: method.toUpperCase(),
+              path: '/' + decodeURIComponent(path || '').replace(/^\/+/, ''),
+              error: error instanceof Error ? error.message : String(error),
+            };
+          }
+        })
+      );
+
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: 'application/json',
+            text: JSON.stringify(operations.length === 1 ? operations[0] : operations, null, 2),
+          },
+        ],
+      };
+    } catch (error) {
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            mimeType: 'text/plain',
+            text: error instanceof Error ? error.message : 'Unknown error',
+            isError: true,
+          },
+        ],
+      };
     }
-
-    // Get operation from OpenAPI spec
-    const spec = await Promise.resolve(this.specLoader.getSpec());
-    const operation = getPathOperation(spec, decodedPath, methodValue);
-
-    return {
-      contents: [
-        {
-          uri: uri.href,
-          mimeType: 'application/json',
-          text: JSON.stringify(
-            {
-              method: methodValue.toUpperCase(),
-              path: decodedPath,
-              ...operation,
-            },
-            null,
-            2
-          ),
-        },
-      ],
-    };
   };
 }

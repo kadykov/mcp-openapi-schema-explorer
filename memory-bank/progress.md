@@ -21,22 +21,33 @@
    - JSON format output
    - Full operation details
    - Parameters and schemas
+   - Error handling with isError
+   - Multiple values support
+   - Path normalization
+   - HTTP method completion
    - Test coverage
      - Unit tests
      - E2E tests
+     - Error handling tests
      - Complex paths
-     - Edge cases
 
-2. Core Components
-   - Endpoint handler
+2. Endpoint List (✓)
+   - Resource: `openapi://endpoints/list`
+   - Token-efficient text/plain format
+   - Available methods per path
+   - Sorted output for consistency
+   - Full test coverage
+
+3. Core Components
+   - Endpoint handlers
    - Spec loader service
    - Configuration management
    - Type definitions
    - Test helpers
 
-## Refactored Features
+## Technical Features (✓)
 
-### Codebase Organization (✓)
+### Codebase Organization
 1. File Structure
    - Handlers directory
    - Services directory
@@ -55,33 +66,25 @@
    - Response types
    - Service interfaces
 
-## In Progress Features
-
-### Path Listing (🔄)
-- Resource: `openapi://paths/list`
-- Group by base path
-- Show available methods
-- Status: Planning
-
-### Operation Listing (🔄)
-- Resource: `openapi://path/{path}/operations`
-- List all operations for path
-- Show method summaries
-- Status: Planning
+4. Error Handling
+   - MCP-compliant errors with isError
+   - Type-safe error handling
+   - Consistent error format
+   - Proper error testing
 
 ## Planned Features
 
-### Schema Enhancement (⏳)
-- Swagger-parser integration
-- Reference resolution
-- Schema examples
+### Output Format Enhancement (⏳)
+- YAML output for endpoints
+- $ref URI resolution
+- Response format optimization
 - Parameter validation
 
 ### Additional Features (⏳)
-- Parameter validation
-- Path listing
-- Operation listing
+- Schema examples
 - Enhanced documentation
+- Parameter validation
+- More token optimizations
 
 ## Technical Improvements
 1. Code Quality
@@ -97,7 +100,7 @@
    - Mock implementations
 
 3. API Design
-   - JSON formatted responses
-   - Consistent structure
+   - Consistent formats
    - Clear error messages
+   - Token efficiency
    - Proper validation

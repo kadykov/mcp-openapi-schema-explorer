@@ -9,6 +9,24 @@ interface ApiResponse {
   responses: OpenAPIV3.ResponsesObject;
 }
 
+interface ApiErrorResponse {
+  method: string;
+  path: string;
+  error: string;
+}
+
+type OperationResponse = ApiResponse | ApiErrorResponse;
+
+function isApiErrorResponse(obj: unknown): obj is ApiErrorResponse {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof (obj as ApiErrorResponse).method === 'string' &&
+    typeof (obj as ApiErrorResponse).path === 'string' &&
+    typeof (obj as ApiErrorResponse).error === 'string'
+  );
+}
+
 type ResourceTextContent = {
   uri: string;
   mimeType: string;
@@ -127,28 +145,176 @@ describe('EndpointHandler', () => {
       });
     });
 
-    it('throws error for non-existent path', async () => {
+    it('returns multiple operations when method is an array', async () => {
+      mockSpecLoader.getSpec.mockReturnValue({
+        ...mockSpec,
+        paths: {
+          '/test/path': {
+            get: mockOperation,
+            post: {
+              ...mockOperation,
+              summary: 'Create Operation',
+            },
+          },
+        },
+      });
+
+      const uri = new URL('openapi://endpoint/get,post/test%2Fpath');
+      const variables: Variables = {
+        method: ['get', 'post'],
+        path: 'test%2Fpath',
+      };
+
+      const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
+
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+
+      if (!isResourceTextContent(content)) {
+        throw new Error('Expected text content in response');
+      }
+
+      const parsedJson = parseJsonSafely(content.text) as OperationResponse[];
+      expect(parsedJson).toHaveLength(2);
+      expect(parsedJson[0]).toEqual({
+        method: 'GET',
+        path: '/test/path',
+        summary: 'Test Operation',
+        responses: {
+          '200': { description: 'Success' },
+        },
+      });
+      expect(parsedJson[1]).toEqual({
+        method: 'POST',
+        path: '/test/path',
+        summary: 'Create Operation',
+        responses: {
+          '200': { description: 'Success' },
+        },
+      });
+    });
+
+    it('handles multiple paths with multiple methods', async () => {
+      mockSpecLoader.getSpec.mockReturnValue({
+        ...mockSpec,
+        paths: {
+          '/test/path1': {
+            get: mockOperation,
+          },
+          '/test/path2': {
+            post: {
+              ...mockOperation,
+              summary: 'Create Operation',
+            },
+          },
+        },
+      });
+
+      const uri = new URL('openapi://endpoint/get,post/test%2Fpath1,test%2Fpath2');
+      const variables: Variables = {
+        method: ['get', 'post'],
+        path: ['test%2Fpath1', 'test%2Fpath2'],
+      };
+
+      const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
+
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+
+      if (!isResourceTextContent(content)) {
+        throw new Error('Expected text content in response');
+      }
+
+      const parsedJson = parseJsonSafely(content.text) as OperationResponse[];
+      expect(parsedJson).toHaveLength(4);
+
+      // Success cases
+      const successOperations = parsedJson.filter(isApiResponse);
+      expect(
+        successOperations.find(op => op.method === 'GET' && op.path === '/test/path1')
+      ).toBeDefined();
+      expect(
+        successOperations.find(op => op.method === 'POST' && op.path === '/test/path2')
+      ).toBeDefined();
+
+      // Error cases (with error property)
+      const errorOperations = parsedJson.filter(isApiErrorResponse);
+      const notFoundPost = errorOperations.find(
+        op => op.method === 'POST' && op.path === '/test/path1'
+      );
+      expect(notFoundPost?.error).toBe('Method post not found for path: /test/path1');
+
+      const notFoundGet = errorOperations.find(
+        op => op.method === 'GET' && op.path === '/test/path2'
+      );
+      expect(notFoundGet?.error).toBe('Method get not found for path: /test/path2');
+    });
+
+    it('returns error for non-existent path', async () => {
       const uri = new URL('openapi://endpoint/get/wrong%2Fpath');
       const variables: Variables = {
         method: 'get',
         path: 'wrong%2Fpath',
       };
 
-      await expect(handler.handleRequest(uri, variables, { signal: abortSignal })).rejects.toThrow(
-        'Path not found: /wrong/path'
-      );
+      const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
+      const content = result.contents[0];
+
+      if (!isResourceTextContent(content)) {
+        throw new Error('Expected text content in response');
+      }
+
+      const parsedJson = parseJsonSafely(content.text) as OperationResponse;
+      expect(isApiErrorResponse(parsedJson)).toBe(true);
+      expect((parsedJson as ApiErrorResponse).error).toBe('Path not found: /wrong/path');
     });
 
-    it('throws error for non-existent method', async () => {
+    it('returns error for non-existent method', async () => {
       const uri = new URL('openapi://endpoint/post/test%2Fpath');
       const variables: Variables = {
         method: 'post',
         path: 'test%2Fpath',
       };
 
-      await expect(handler.handleRequest(uri, variables, { signal: abortSignal })).rejects.toThrow(
+      const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
+      const content = result.contents[0];
+
+      if (!isResourceTextContent(content)) {
+        throw new Error('Expected text content in response');
+      }
+
+      const parsedJson = parseJsonSafely(content.text) as OperationResponse;
+      expect(isApiErrorResponse(parsedJson)).toBe(true);
+      expect((parsedJson as ApiErrorResponse).error).toBe(
         'Method post not found for path: /test/path'
       );
+    });
+
+    it('normalizes paths with multiple leading slashes', async () => {
+      const uri = new URL('openapi://endpoint/get/%2F%2Ftest%2Fpath');
+      const variables: Variables = {
+        method: 'get',
+        path: '%2F%2Ftest%2Fpath',
+      };
+
+      const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
+
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+
+      if (!isResourceTextContent(content)) {
+        throw new Error('Expected text content in response');
+      }
+
+      const parsedJson = parseJsonSafely(content.text);
+      if (!isApiResponse(parsedJson)) {
+        throw new Error('Invalid API response format');
+      }
+
+      // Should normalize to a single leading slash
+      expect(parsedJson.path).toBe('/test/path');
     });
   });
 });

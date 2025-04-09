@@ -11,6 +11,7 @@ graph TD
 
     subgraph Handlers
         EndpointHandler[Endpoint Handler]
+        EndpointListHandler[Endpoint List Handler]
         SchemaHandler[Schema Handler]
         PathHandler[Path Handler]
     end
@@ -25,11 +26,16 @@ graph TD
   - Handles file loading and caching
 
 ### Handler Layer
-- EndpointHandler: Manages endpoint resources
-  - Resource template definition
-  - Request parameter handling
-  - Response formatting
-  - Error handling
+- EndpointHandler: Dynamic endpoint details
+  - Multiple methods and paths support
+  - Error handling with isError
+  - Path normalization
+  - Method completion
+
+- EndpointListHandler: Token-efficient listing
+  - Text/plain format
+  - Sorted method groups
+  - Consistent output
 
 ### Configuration Layer
 - Environment variables validation
@@ -41,38 +47,49 @@ graph TD
 ### URI Structure
 - Dynamic Resources:
   - `openapi://endpoint/{method}/{path}` - Get endpoint details
+  - `openapi://endpoints/list` - Get all endpoints
   - `openapi://schema/{name}` - Get schema details
 
 ### Response Format Patterns
-1. JSON-based responses for all resources
-2. Consistent structure across resources
-3. Strong typing with OpenAPI v3 types
-4. Clear error messages
+1. Token-Efficient Formats:
+   - text/plain for lists
+   - JSON for detailed views
+   - YAML planned for optimization
+2. Error Handling:
+   - isError flag for errors
+   - Consistent error structure
+   - Informative messages
+3. Type Safety:
+   - Strong typing with OpenAPI v3
+   - Type guards for responses
+   - Error type validation
 
 ## Extension Points
-1. Spec loader for different formats
-2. Resource handlers for new resource types
-3. Response formatters for different outputs
+1. Response formats (JSON/YAML)
+2. Resource handlers
+3. URI resolution for $refs
+4. Parameter validation
 
 ## Testing Strategy
 1. Unit Tests
-   - Handler tests
-   - Service tests
-   - Configuration tests
-   - Type validation tests
+   - Handler tests with type safety
+   - Error handling scenarios
+   - Multiple values support
+   - Path normalization
 
 2. Integration Tests
-   - Resource handler integration
-   - Service integration
-   - Error handling scenarios
+   - Resource handler cooperation
+   - Error propagation
+   - Type validation
 
 3. E2E Tests
-   - Complete server functionality
-   - Complex paths and parameters
-   - Edge cases and errors
+   - Full resource functionality
+   - Complex paths and methods
+   - Error scenarios
+   - Response format validation
 
 4. Test Support
-   - Test fixtures and samples
-   - Mock implementations
+   - Type-safe fixtures
+   - Mock OpenAPI specs
    - Helper utilities
-   - Common test patterns
+   - Response validation
