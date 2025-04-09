@@ -167,17 +167,18 @@ describe('EndpointHandler', () => {
 
       const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
 
-      expect(result.contents).toHaveLength(1);
-      const content = result.contents[0];
-      expect(content.mimeType).toBe('application/json');
+      expect(result.contents).toHaveLength(2);
 
-      if (!isResourceTextContent(content)) {
-        throw new Error('Expected text content in response');
+      const getContent = result.contents[0];
+      expect(getContent.uri).toBe('openapi://endpoint/get/test%2Fpath');
+      expect(getContent.mimeType).toBe('application/json');
+
+      if (!isResourceTextContent(getContent)) {
+        throw new Error('Expected text content in GET response');
       }
 
-      const parsedJson = parseJsonSafely(content.text) as OperationResponse[];
-      expect(parsedJson).toHaveLength(2);
-      expect(parsedJson[0]).toEqual({
+      const getOperation = parseJsonSafely(getContent.text) as ApiResponse;
+      expect(getOperation).toEqual({
         method: 'GET',
         path: '/test/path',
         summary: 'Test Operation',
@@ -185,7 +186,17 @@ describe('EndpointHandler', () => {
           '200': { description: 'Success' },
         },
       });
-      expect(parsedJson[1]).toEqual({
+
+      const postContent = result.contents[1];
+      expect(postContent.uri).toBe('openapi://endpoint/post/test%2Fpath');
+      expect(postContent.mimeType).toBe('application/json');
+
+      if (!isResourceTextContent(postContent)) {
+        throw new Error('Expected text content in POST response');
+      }
+
+      const postOperation = parseJsonSafely(postContent.text) as ApiResponse;
+      expect(postOperation).toEqual({
         method: 'POST',
         path: '/test/path',
         summary: 'Create Operation',
@@ -219,37 +230,61 @@ describe('EndpointHandler', () => {
 
       const result = await handler.handleRequest(uri, variables, { signal: abortSignal });
 
-      expect(result.contents).toHaveLength(1);
-      const content = result.contents[0];
-      expect(content.mimeType).toBe('application/json');
+      expect(result.contents).toHaveLength(4);
 
-      if (!isResourceTextContent(content)) {
-        throw new Error('Expected text content in response');
+      // GET /test/path1 - should succeed
+      const getPath1Content = result.contents.find(
+        c => c.uri === 'openapi://endpoint/get/test%2Fpath1'
+      );
+      expect(getPath1Content).toBeDefined();
+      expect(getPath1Content?.mimeType).toBe('application/json');
+      if (getPath1Content && isResourceTextContent(getPath1Content)) {
+        const operation = parseJsonSafely(getPath1Content.text) as ApiResponse;
+        expect(operation).toEqual({
+          method: 'GET',
+          path: '/test/path1',
+          summary: 'Test Operation',
+          responses: { '200': { description: 'Success' } },
+        });
       }
 
-      const parsedJson = parseJsonSafely(content.text) as OperationResponse[];
-      expect(parsedJson).toHaveLength(4);
-
-      // Success cases
-      const successOperations = parsedJson.filter(isApiResponse);
-      expect(
-        successOperations.find(op => op.method === 'GET' && op.path === '/test/path1')
-      ).toBeDefined();
-      expect(
-        successOperations.find(op => op.method === 'POST' && op.path === '/test/path2')
-      ).toBeDefined();
-
-      // Error cases (with error property)
-      const errorOperations = parsedJson.filter(isApiErrorResponse);
-      const notFoundPost = errorOperations.find(
-        op => op.method === 'POST' && op.path === '/test/path1'
+      // POST /test/path2 - should succeed
+      const postPath2Content = result.contents.find(
+        c => c.uri === 'openapi://endpoint/post/test%2Fpath2'
       );
-      expect(notFoundPost?.error).toBe('Method post not found for path: /test/path1');
+      expect(postPath2Content).toBeDefined();
+      expect(postPath2Content?.mimeType).toBe('application/json');
+      if (postPath2Content && isResourceTextContent(postPath2Content)) {
+        const operation = parseJsonSafely(postPath2Content.text) as ApiResponse;
+        expect(operation).toEqual({
+          method: 'POST',
+          path: '/test/path2',
+          summary: 'Create Operation',
+          responses: { '200': { description: 'Success' } },
+        });
+      }
 
-      const notFoundGet = errorOperations.find(
-        op => op.method === 'GET' && op.path === '/test/path2'
+      // POST /test/path1 - should fail
+      const postPath1Content = result.contents.find(
+        c => c.uri === 'openapi://endpoint/post/test%2Fpath1'
       );
-      expect(notFoundGet?.error).toBe('Method get not found for path: /test/path2');
+      expect(postPath1Content).toBeDefined();
+      expect(postPath1Content?.mimeType).toBe('application/json');
+      if (postPath1Content && isResourceTextContent(postPath1Content)) {
+        const operation = parseJsonSafely(postPath1Content.text) as ApiErrorResponse;
+        expect(operation.error).toBe('Method post not found for path: /test/path1');
+      }
+
+      // GET /test/path2 - should fail
+      const getPath2Content = result.contents.find(
+        c => c.uri === 'openapi://endpoint/get/test%2Fpath2'
+      );
+      expect(getPath2Content).toBeDefined();
+      expect(getPath2Content?.mimeType).toBe('application/json');
+      if (getPath2Content && isResourceTextContent(getPath2Content)) {
+        const operation = parseJsonSafely(getPath2Content.text) as ApiErrorResponse;
+        expect(operation.error).toBe('Method get not found for path: /test/path2');
+      }
     });
 
     it('returns error for non-existent path', async () => {

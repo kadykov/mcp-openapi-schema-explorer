@@ -218,25 +218,32 @@ describe('OpenAPI Explorer MCP Server E2E', () => {
           uri: `openapi://endpoint/get,post/${path}`,
         })) as ResourceResponse;
 
-        expect(response.contents).toHaveLength(1);
-        const content = JSON.parse(response.contents[0].text) as EndpointResponse[];
-        expect(Array.isArray(content)).toBe(true);
-        expect(content).toHaveLength(2);
+        expect(response.contents).toHaveLength(2);
 
         // GET operation
-        const getOperation = content.find(op => op.method === 'GET');
-        expect(getOperation).toBeDefined();
+        const getContent = response.contents.find(c => c.uri === `openapi://endpoint/get/${path}`);
+        expect(getContent).toBeDefined();
+        expect(getContent?.mimeType).toBe('application/json');
+
+        const getOperation = JSON.parse(getContent!.text) as EndpointResponse;
         expect(isEndpointErrorResponse(getOperation)).toBe(false);
-        if (getOperation && !isEndpointErrorResponse(getOperation)) {
+        if (!isEndpointErrorResponse(getOperation)) {
+          expect(getOperation.method).toBe('GET');
           expect(getOperation.parameters).toBeDefined();
           expect(getOperation.parameters).toHaveLength(4); // orgId, projectId, status, sort
         }
 
         // POST operation
-        const postOperation = content.find(op => op.method === 'POST');
-        expect(postOperation).toBeDefined();
+        const postContent = response.contents.find(
+          c => c.uri === `openapi://endpoint/post/${path}`
+        );
+        expect(postContent).toBeDefined();
+        expect(postContent?.mimeType).toBe('application/json');
+
+        const postOperation = JSON.parse(postContent!.text) as EndpointResponse;
         expect(isEndpointErrorResponse(postOperation)).toBe(false);
-        if (postOperation && !isEndpointErrorResponse(postOperation)) {
+        if (!isEndpointErrorResponse(postOperation)) {
+          expect(postOperation.method).toBe('POST');
           expect(postOperation.requestBody).toBeDefined();
           expect(postOperation.requestBody?.required).toBe(true);
         }
@@ -252,21 +259,20 @@ describe('OpenAPI Explorer MCP Server E2E', () => {
           uri: `openapi://endpoint/get/${paths.join(',')}`,
         })) as ResourceResponse;
 
-        expect(response.contents).toHaveLength(1);
-        const content = JSON.parse(response.contents[0].text) as EndpointResponse[];
-        expect(Array.isArray(content)).toBe(true);
-        expect(content).toHaveLength(2);
+        expect(response.contents).toHaveLength(2);
 
-        // All operations should be valid GETs
-        expect(content.every(op => op.method === 'GET')).toBe(true);
-        expect(content.every(op => !isEndpointErrorResponse(op))).toBe(true);
+        // Each content item should be a valid GET operation for the same path
+        for (const content of response.contents) {
+          expect(content.uri).toMatch(/^openapi:\/\/endpoint\/get\//);
+          expect(content.mimeType).toBe('application/json');
 
-        // All paths should be the same since we used the same path twice
-        expect(
-          content.every(
-            op => op.path === '/api/v1/organizations/{orgId}/projects/{projectId}/tasks'
-          )
-        ).toBe(true);
+          const operation = JSON.parse(content.text) as EndpointResponse;
+          expect(isEndpointErrorResponse(operation)).toBe(false);
+          if (!isEndpointErrorResponse(operation)) {
+            expect(operation.method).toBe('GET');
+            expect(operation.path).toBe('/api/v1/organizations/{orgId}/projects/{projectId}/tasks');
+          }
+        }
       });
 
       it('should handle mixed valid and invalid operations', async () => {
@@ -275,18 +281,26 @@ describe('OpenAPI Explorer MCP Server E2E', () => {
           uri: `openapi://endpoint/get,put,post/${path}`,
         })) as ResourceResponse;
 
-        expect(response.contents).toHaveLength(1);
-        const content = JSON.parse(response.contents[0].text) as EndpointResponse[];
-        expect(Array.isArray(content)).toBe(true);
-        expect(content).toHaveLength(3);
+        expect(response.contents).toHaveLength(3);
 
-        // GET and POST should be valid, PUT should have error
-        const getOperation = content.find(op => op.method === 'GET');
-        const postOperation = content.find(op => op.method === 'POST');
-        const putOperation = content.find(op => op.method === 'PUT');
-
+        // GET operation should be valid
+        const getContent = response.contents.find(c => c.uri === `openapi://endpoint/get/${path}`);
+        expect(getContent).toBeDefined();
+        const getOperation = JSON.parse(getContent!.text) as EndpointResponse;
         expect(isEndpointErrorResponse(getOperation)).toBe(false);
+
+        // POST operation should be valid
+        const postContent = response.contents.find(
+          c => c.uri === `openapi://endpoint/post/${path}`
+        );
+        expect(postContent).toBeDefined();
+        const postOperation = JSON.parse(postContent!.text) as EndpointResponse;
         expect(isEndpointErrorResponse(postOperation)).toBe(false);
+
+        // PUT operation should have error
+        const putContent = response.contents.find(c => c.uri === `openapi://endpoint/put/${path}`);
+        expect(putContent).toBeDefined();
+        const putOperation = JSON.parse(putContent!.text) as EndpointResponse;
         expect(isEndpointErrorResponse(putOperation)).toBe(true);
       });
     });

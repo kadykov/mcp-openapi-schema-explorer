@@ -113,28 +113,34 @@ export class EndpointHandler {
       const spec = await Promise.resolve(this.specLoader.getSpec());
 
       // Generate all combinations of methods and paths
-      const operations = paths.flatMap(path =>
-        methods.map(method => {
-          try {
-            return this.getOperationDetails(spec, method, path);
-          } catch (error) {
-            return {
-              method: method.toUpperCase(),
-              path: '/' + decodeURIComponent(path || '').replace(/^\/+/, ''),
-              error: error instanceof Error ? error.message : String(error),
-            };
-          }
-        })
-      );
-
       return {
-        contents: [
-          {
-            uri: uri.href,
-            mimeType: 'application/json',
-            text: JSON.stringify(operations.length === 1 ? operations[0] : operations, null, 2),
-          },
-        ],
+        contents: paths.flatMap(path =>
+          methods.map(method => {
+            try {
+              const operation = this.getOperationDetails(spec, method, path);
+              return {
+                uri: `openapi://endpoint/${method.toLowerCase()}/${path}`,
+                mimeType: 'application/json',
+                text: JSON.stringify(operation, null, 2),
+              };
+            } catch (error) {
+              const decodedPath = '/' + decodeURIComponent(path || '').replace(/^\/+/, '');
+              return {
+                uri: `openapi://endpoint/${method.toLowerCase()}/${path}`,
+                mimeType: 'application/json',
+                text: JSON.stringify(
+                  {
+                    method: method.toUpperCase(),
+                    path: decodedPath,
+                    error: error instanceof Error ? error.message : String(error),
+                  },
+                  null,
+                  2
+                ),
+              };
+            }
+          })
+        ),
       };
     } catch (error) {
       return {
