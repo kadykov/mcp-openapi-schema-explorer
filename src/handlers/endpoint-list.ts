@@ -1,7 +1,4 @@
-import {
-  ReadResourceTemplateCallback,
-  ResourceTemplate,
-} from '@modelcontextprotocol/sdk/server/mcp.js';
+import { ReadResourceCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { OpenAPI, OpenAPIV3 } from 'openapi-types';
 import { SpecLoaderService } from '../types.js';
 
@@ -13,19 +10,10 @@ export class EndpointListHandler {
   constructor(private specLoader: SpecLoaderService) {}
 
   /**
-   * Get resource template for endpoint list
-   */
-  getTemplate(): ResourceTemplate {
-    return new ResourceTemplate('openapi://endpoints/list', {
-      list: undefined,
-    });
-  }
-
-  /**
    * Handle resource request for endpoint list
    * Returns a text/plain list of endpoints in a token-efficient format
    */
-  handleRequest: ReadResourceTemplateCallback = async (uri: URL) => {
+  handleRequest: ReadResourceCallback = async (uri: URL, _extra: { signal: AbortSignal }) => {
     try {
       const spec = await Promise.resolve(this.specLoader.getSpec());
       if (!isOpenAPIV3(spec)) {
@@ -33,8 +21,8 @@ export class EndpointListHandler {
           contents: [
             {
               uri: uri.href,
-              mimeType: 'text/plain',
               text: 'Error: Only OpenAPI v3 specifications are supported',
+              mimeType: 'text/plain',
               isError: true,
             },
           ],
@@ -59,13 +47,13 @@ export class EndpointListHandler {
         }
       }
 
-      // Sort lines for consistent output and join with newline
+      // Sort lines for consistent output
       return {
         contents: [
           {
             uri: uri.href,
-            mimeType: 'text/plain',
             text: lines.sort().join('\n'),
+            mimeType: 'text/plain',
           },
         ],
       };
@@ -74,8 +62,8 @@ export class EndpointListHandler {
         contents: [
           {
             uri: uri.href,
-            mimeType: 'text/plain',
             text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+            mimeType: 'text/plain',
             isError: true,
           },
         ],

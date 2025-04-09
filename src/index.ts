@@ -4,6 +4,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { loadConfig } from './config.js';
 import { createSpecLoader } from './services/spec-loader.js';
 import { EndpointHandler } from './handlers/endpoint.js';
+import { EndpointListHandler } from './handlers/endpoint-list.js';
 
 async function main(): Promise<void> {
   try {
@@ -24,8 +25,10 @@ async function main(): Promise<void> {
 
     // Set up handlers
     const endpointHandler = new EndpointHandler(specLoader);
-    const template = endpointHandler.getTemplate();
+    const endpointListHandler = new EndpointListHandler(specLoader);
 
+    // Add endpoint details resource
+    const template = endpointHandler.getTemplate();
     server.resource(
       'endpoint',
       template,
@@ -35,6 +38,18 @@ async function main(): Promise<void> {
         name: 'endpoint',
       },
       (uri, variables, extra) => endpointHandler.handleRequest(uri, variables, extra)
+    );
+
+    // Add endpoint list resource
+    server.resource(
+      'endpoints-list',
+      'openapi://endpoints/list',
+      {
+        mimeType: 'text/plain',
+        description: 'List of all OpenAPI endpoints',
+        name: 'endpoints-list',
+      },
+      endpointListHandler.handleRequest
     );
 
     // Start server

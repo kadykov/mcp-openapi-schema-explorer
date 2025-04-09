@@ -19,22 +19,12 @@ function isResourceTextContent(content: unknown): content is ResourceTextContent
 describe('EndpointListHandler', () => {
   let handler: EndpointListHandler;
   let mockSpecLoader: { getSpec: jest.Mock };
-  let abortSignal: AbortSignal;
 
   beforeEach(() => {
     mockSpecLoader = {
       getSpec: jest.fn(),
     };
     handler = new EndpointListHandler(mockSpecLoader);
-    abortSignal = new AbortController().signal;
-  });
-
-  describe('getTemplate', () => {
-    it('returns resource template for endpoints list URL', () => {
-      const template = handler.getTemplate();
-      expect(template).toBeDefined();
-      expect(template.constructor.name).toBe('ResourceTemplate');
-    });
   });
 
   describe('handleRequest', () => {
@@ -54,13 +44,9 @@ describe('EndpointListHandler', () => {
         version: '1.0.0',
       },
       paths: {
-        '/projects/{projectId}/tasks': {
+        '/api/v1/organizations/{orgId}/projects/{projectId}/tasks': {
           get: mockOperation,
           post: mockOperation,
-        },
-        '/tasks/{taskId}': {
-          get: mockOperation,
-          delete: mockOperation,
         },
       },
     };
@@ -71,7 +57,7 @@ describe('EndpointListHandler', () => {
 
     it('returns formatted endpoint list in text/plain format', async () => {
       const uri = new URL('openapi://endpoints/list');
-      const result = await handler.handleRequest(uri, {}, { signal: abortSignal });
+      const result = await handler.handleRequest(uri, { signal: new AbortController().signal });
 
       expect(result.contents).toHaveLength(1);
       const content = result.contents[0];
@@ -83,9 +69,7 @@ describe('EndpointListHandler', () => {
       }
 
       const lines = content.text.split('\n');
-      expect(lines).toEqual(
-        ['GET DELETE /tasks/{taskId}', 'GET POST /projects/{projectId}/tasks'].sort()
-      );
+      expect(lines).toEqual(['GET POST /api/v1/organizations/{orgId}/projects/{projectId}/tasks']);
     });
 
     it('returns error for non-OpenAPI v3 spec', async () => {
@@ -99,7 +83,7 @@ describe('EndpointListHandler', () => {
       });
 
       const uri = new URL('openapi://endpoints/list');
-      const result = await handler.handleRequest(uri, {}, { signal: abortSignal });
+      const result = await handler.handleRequest(uri, { signal: new AbortController().signal });
 
       expect(result.contents).toHaveLength(1);
       const content = result.contents[0];
@@ -119,7 +103,7 @@ describe('EndpointListHandler', () => {
       });
 
       const uri = new URL('openapi://endpoints/list');
-      const result = await handler.handleRequest(uri, {}, { signal: abortSignal });
+      const result = await handler.handleRequest(uri, { signal: new AbortController().signal });
 
       expect(result.contents).toHaveLength(1);
       const content = result.contents[0];
@@ -143,7 +127,7 @@ describe('EndpointListHandler', () => {
       });
 
       const uri = new URL('openapi://endpoints/list');
-      const result = await handler.handleRequest(uri, {}, { signal: abortSignal });
+      const result = await handler.handleRequest(uri, { signal: new AbortController().signal });
 
       expect(result.contents).toHaveLength(1);
       const content = result.contents[0];

@@ -305,6 +305,21 @@ describe('OpenAPI Explorer MCP Server E2E', () => {
       });
     });
 
+    describe('List Endpoints Resource', () => {
+      it('should return formatted list of endpoints', async () => {
+        const response = (await client.readResource({
+          uri: 'openapi://endpoints/list',
+        })) as ResourceResponse;
+
+        expect(response.contents).toHaveLength(1);
+        const content = response.contents[0];
+        expect(content.mimeType).toBe('text/plain');
+        expect(content.text).toBe(
+          'GET POST /api/v1/organizations/{orgId}/projects/{projectId}/tasks'
+        );
+      });
+    });
+
     describe('Resource Templates', () => {
       it('should list endpoint template', async () => {
         const response = await client.listResourceTemplates();
