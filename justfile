@@ -35,7 +35,7 @@ audit:
 # Check license compliance
 check-licenses:
     npx license-checker --production \
-        --onlyAllow "MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0" \
+        --onlyAllow "MIT;ISC;BSD-2-Clause;BSD-3-Clause;Apache-2.0;Python-2.0" \
         --excludePrivatePackages \
         --summary
 
