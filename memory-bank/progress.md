@@ -3,7 +3,7 @@
 ## Completed Features
 
 ### Schema Resources (✓)
-1. Schema Listing
+1. Schema Listing (✓)
    - Resource: `openapi://schemas/list`
    - Lists all available schemas
    - Full test coverage

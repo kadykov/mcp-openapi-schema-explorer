@@ -5,6 +5,7 @@ import { loadConfig } from './config.js';
 import { EndpointHandler } from './handlers/endpoint.js';
 import { EndpointListHandler } from './handlers/endpoint-list.js';
 import { SchemaHandler } from './handlers/schema.js'; // Import SchemaHandler
+import { SchemaListHandler } from './handlers/schema-list.js'; // Import SchemaListHandler
 import { OpenAPITransformer, ReferenceTransformService } from './services/reference-transform.js';
 import { SpecLoaderService } from './services/spec-loader.js';
 import { createFormatter } from './services/formatters.js';
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
     const endpointHandler = new EndpointHandler(specLoader, formatter);
     const endpointListHandler = new EndpointListHandler(specLoader);
     const schemaHandler = new SchemaHandler(specLoader, formatter); // Instantiate SchemaHandler
+    const schemaListHandler = new SchemaListHandler(specLoader); // Instantiate SchemaListHandler
 
     // Add endpoint details resource
     const endpointTemplate = endpointHandler.getTemplate(); // Rename variable
@@ -64,6 +66,18 @@ async function main(): Promise<void> {
         name: 'endpoints-list',
       },
       endpointListHandler.handleRequest
+    );
+
+    // Add schema list resource
+    server.resource(
+      'schemas-list',
+      'openapi://schemas/list',
+      {
+        mimeType: 'text/plain',
+        description: 'List of all OpenAPI schemas',
+        name: 'schemas-list',
+      },
+      schemaListHandler.handleRequest
     );
 
     // Add schema details resource
