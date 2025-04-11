@@ -163,4 +163,62 @@ describe('Output Format E2E', () => {
       );
     });
   });
+
+  describe('Minified JSON format', () => {
+    beforeEach(async () => {
+      testContext = await startMcpServer('test/fixtures/complex-endpoint.json', {
+        outputFormat: 'json-minified',
+      });
+      client = testContext.client;
+    });
+
+    it('should return minified JSON for openapi://info', async () => {
+      const result = await client.readResource({ uri: 'openapi://info' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+      if (!hasTextContent(content)) throw new Error('Expected text content');
+      expect(() => safeParse(content.text, 'json')).not.toThrow();
+      const data = safeParse(content.text, 'json');
+      expect(isObject(data) && data['title']).toBe('Complex Endpoint Test API');
+      // Check for lack of pretty-printing whitespace
+      expect(content.text).not.toContain('\n ');
+      expect(content.text).not.toContain('  '); // Double check no indentation
+    });
+
+    it('should return minified JSON for operation detail', async () => {
+      const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
+      const result = await client.readResource({ uri: `openapi://paths/${path}/get` });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+      if (!hasTextContent(content)) throw new Error('Expected text content');
+      expect(() => safeParse(content.text, 'json')).not.toThrow();
+      const data = safeParse(content.text, 'json');
+      expect(isObject(data) && data['operationId']).toBe('getProjectTasks');
+      // Check for lack of pretty-printing whitespace
+      expect(content.text).not.toContain('\n ');
+      expect(content.text).not.toContain('  ');
+    });
+
+    it('should return minified JSON for component detail', async () => {
+      const result = await client.readResource({ uri: 'openapi://components/schemas/Task' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+      if (!hasTextContent(content)) throw new Error('Expected text content');
+      expect(() => safeParse(content.text, 'json')).not.toThrow();
+      const data = safeParse(content.text, 'json');
+      expect(isObject(data) && data['type']).toBe('object');
+      expect(
+        isObject(data) &&
+          isObject(data['properties']) &&
+          isObject(data['properties']['id']) &&
+          data['properties']['id']['type']
+      ).toBe('string');
+      // Check for lack of pretty-printing whitespace
+      expect(content.text).not.toContain('\n ');
+      expect(content.text).not.toContain('  ');
+    });
+  });
 });

@@ -53,25 +53,27 @@
 
    - `src/handlers/`: Contains individual handlers and `handler-utils.ts`.
    - `src/rendering/`: Contains `Renderable*` classes, `types.ts`, `utils.ts`.
-   - `src/services/`: Updated `spec-loader.ts` to use `swagger2openapi`.
+   - `src/services/`: Updated `spec-loader.ts` to use `swagger2openapi`. Added `formatters.ts`.
    - `src/`: `index.ts`, `config.ts`, `types.ts`.
-   - `test/`: Updated unit tests (`spec-loader.test.ts`), added new E2E test (`spec-loading.test.ts`), added v2 fixture.
+   - `test/`: Updated unit tests (`spec-loader.test.ts`, `formatters.test.ts`), added new E2E test (`spec-loading.test.ts`), added v2 fixture. Updated `format.test.ts`. Updated `mcp-test-helpers.ts`.
    - `local-docs/old-implementation/`: Archived previous code.
 
 2. Testing Structure
 
    - Unit tests for rendering classes (`test/__tests__/unit/rendering/`).
    - Unit tests for handlers (`test/__tests__/unit/handlers/`).
-   - Unit tests for services (`spec-loader.test.ts`, `reference-transform.test.ts`).
-   - E2E tests (`refactored-resources.test.ts`, `spec-loading.test.ts`, `format.test.ts`).
+   - Unit tests for services (`spec-loader.test.ts`, `reference-transform.test.ts`, `formatters.test.ts`).
+   - E2E tests (`refactored-resources.test.ts`, `spec-loading.test.ts`, `format.test.ts`). Added tests for `json-minified`.
    - Fixtures (`test/fixtures/`, including v2 and v3).
-   - Test utils (`test/utils/`).
+   - Test utils (`test/utils/`). Updated `StartServerOptions` type.
 
 3. Type System
 
    - OpenAPI v3 types.
    - `RenderableSpecObject`, `RenderContext`, `RenderResultItem` interfaces.
    - `FormattedResultItem` type for handler results.
+   - `OutputFormat` type updated.
+   - `IFormatter` interface.
 
 4. Error Handling
    - Consistent error handling via `createErrorResult` and `formatResults`.
@@ -86,7 +88,12 @@
 
 ### Output Format Enhancement (✓)
 
-- (No changes in this refactor, still active - JSON/YAML supported via `IFormatter`)
+- Added `json-minified` output format option (`--output-format json-minified`).
+- Implemented `MinifiedJsonFormatter` in `src/services/formatters.ts`.
+- Updated configuration (`src/config.ts`) to accept the new format.
+- Added unit tests for the new formatter (`test/__tests__/unit/services/formatters.test.ts`).
+- Added E2E tests (`test/__tests__/e2e/format.test.ts`) to verify the new format.
+- Updated test helper types (`test/utils/mcp-test-helpers.ts`).
 
 ## Planned Features (⏳)
 

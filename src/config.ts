@@ -21,12 +21,13 @@ export function loadConfig(specPath?: string, options?: { outputFormat?: string 
   }
 
   const format = options?.outputFormat || 'json';
-  if (format !== 'json' && format !== 'yaml') {
-    throw new Error('Invalid output format. Supported formats: json, yaml');
+  if (format !== 'json' && format !== 'yaml' && format !== 'json-minified') {
+    throw new Error('Invalid output format. Supported formats: json, yaml, json-minified');
   }
 
   return {
     specPath,
-    outputFormat: format,
+    // Cast is safe here due to the validation above
+    outputFormat: format as OutputFormat,
   };
 }

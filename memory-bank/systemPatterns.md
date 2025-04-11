@@ -28,6 +28,12 @@ graph TD
         ComponentDetailHandler[ComponentDetail Handler (openapi://components/{type}/{name*})]
     end
 
+    subgraph Formatters
+        JsonFormatter[Json Formatter]
+        YamlFormatter[Yaml Formatter]
+        MinifiedJsonFormatter[Minified Json Formatter]
+    end
+
     subgraph Rendering (OOP)
         RenderableDocument[RenderableDocument]
         RenderablePaths[RenderablePaths]
@@ -65,8 +71,10 @@ graph TD
   - Uses `UriBuilder` utility for consistent URI generation.
   - Returns the transformed OpenAPI v3.0 document.
 - **Formatters (`src/services/formatters.ts`):**
-  - Provide implementations for different output formats (JSON, YAML).
+  - Provide implementations for different output formats (JSON, YAML, Minified JSON).
   - Used by handlers to serialize detail view responses.
+  - `IFormatter` interface defines `format()` and `getMimeType()`.
+  - `createFormatter` function instantiates the correct formatter based on `OutputFormat` type (`json`, `yaml`, `json-minified`).
 
 ### Rendering Layer (OOP)
 
@@ -93,7 +101,7 @@ graph TD
   - `OperationHandler`: Handles `openapi://paths/{path}/{method*}`. Uses `RenderablePathItem.renderOperationDetail` for operation details. Handles multi-value `method` variable. Instantiates `RenderablePathItem` with raw path and built suffix.
   - `ComponentMapHandler`: Handles `openapi://components/{type}`. Uses `RenderableComponentMap.renderList` to list component names.
   - `ComponentDetailHandler`: Handles `openapi://components/{type}/{name*}`. Uses `RenderableComponentMap.renderComponentDetail` for component details. Handles multi-value `name` variable.
-- **Utils:** Shared functions (`formatResults`, `isOpenAPIV3`, `FormattedResultItem` type) in `src/handlers/handler-utils.ts`.
+- **Utils:** Shared functions (`formatResults`, `isOpenAPIV3`, `FormattedResultItem` type, validation helpers) in `src/handlers/handler-utils.ts`.
 
 ### Utilities Layer
 
@@ -106,7 +114,7 @@ graph TD
 
 - Parses command-line arguments.
 - Expects a single required argument: the path or URL to the specification file.
-- Supports an optional `--output-format` argument (json/yaml).
+- Supports an optional `--output-format` argument (`json`, `yaml`, `json-minified`).
 - Validates arguments and provides usage instructions on error.
 - Creates the `ServerConfig` object used by the server.
 
@@ -137,7 +145,7 @@ graph TD
    - `openapi://components` format: `- type`
    - `openapi://components/{type}` format: `- name`
 2. **Detail Views:**
-   - Use configured formatter (JSON/YAML via `IFormatter`).
+   - Use configured formatter (JSON/YAML/Minified JSON via `IFormatter`).
    - Handled by `openapi://{field}` (for non-structural fields), `openapi://paths/{path}/{method*}`, `openapi://components/{type}/{name*}`.
 3. **Error Handling:**
    - Handlers catch errors and use `createErrorResult` utility.
@@ -186,7 +194,7 @@ graph TD
      - Local Swagger v2.0 spec (`test/fixtures/sample-v2-api.json`).
      - Remote OpenAPI v3.0 spec (e.g., Petstore URL).
    - **`refactored-resources.test.ts`:** Continue to test detailed resource interactions (multi-value params, specific path/method/component combinations, errors) using the primary complex local v3 fixture (`complex-endpoint.json`).
-   - **`format.test.ts`:** Verify different output formats (JSON/YAML) work as expected.
+   - **`format.test.ts`:** Verify different output formats (JSON/YAML/Minified JSON) work as expected.
 3. **Test Support:**
-   - Type-safe test utilities (`mcp-test-helpers`).
+   - Type-safe test utilities (`mcp-test-helpers`). Updated `StartServerOptions` to include `json-minified`.
    - Test fixtures for v2.0 and v3.0 specs.

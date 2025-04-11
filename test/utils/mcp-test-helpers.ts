@@ -10,7 +10,7 @@ export interface McpTestContext {
 }
 
 interface StartServerOptions {
-  outputFormat?: 'json' | 'yaml';
+  outputFormat?: 'json' | 'yaml' | 'json-minified';
 }
 
 /**

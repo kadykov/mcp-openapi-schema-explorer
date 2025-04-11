@@ -6,6 +6,15 @@ Completed implementation of remote specification loading (via URL) and Swagger v
 
 ## Recent Progress
 
+### Minified JSON Output Format (✓)
+
+1.  **Formatter:** Added `MinifiedJsonFormatter` to `src/services/formatters.ts` and updated `OutputFormat` type and `createFormatter` function.
+2.  **Configuration:** Updated `src/config.ts` to accept `--output-format json-minified`.
+3.  **Unit Tests:** Added unit tests for `MinifiedJsonFormatter` in `test/__tests__/unit/services/formatters.test.ts`.
+4.  **E2E Tests:** Added E2E tests for the `json-minified` format in `test/__tests__/e2e/format.test.ts`.
+5.  **Test Helpers:** Updated `StartServerOptions` type in `test/utils/mcp-test-helpers.ts`.
+6.  **Memory Bank Update (✓):** Updated `techContext.md`, `systemPatterns.md`, `progress.md`, and `activeContext.md`.
+
 ### Remote Spec & Swagger v2.0 Support (✓)
 
 1.  **Remote Loading:** Added support for loading specifications via HTTP/HTTPS URLs using `swagger2openapi` in `SpecLoaderService`.
@@ -49,17 +58,17 @@ Completed implementation of remote specification loading (via URL) and Swagger v
 - Server now loads OpenAPI v3.0 and Swagger v2.0 specs from local files or remote URLs.
 - Swagger v2.0 specs are automatically converted to v3.0.
 - Internal references are transformed to MCP URIs.
-- Core resource exploration functionality remains operational with the new loading mechanism.
-- Unit tests for `SpecLoaderService` are updated.
-- E2E tests cover basic loading scenarios for local v2 and remote v3 specs.
+- **New:** Added `json-minified` output format option.
+- Core resource exploration functionality remains operational with the new loading mechanism and output format.
+- Unit tests for `SpecLoaderService` and `Formatters` are updated.
+- E2E tests cover basic loading scenarios and output formats (JSON, YAML, Minified JSON).
 
 ## Next Actions / Immediate Focus
 
-1.  **Run Tests:** Execute the full test suite (`just test` or `npm test`) to ensure all unit and E2E tests pass after the recent changes. Address any failures.
-2.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
-3.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
-4.  **Code Cleanup:** Address remaining TODOs (e.g., checking warnings in `spec-loader.ts`) and minor ESLint warnings.
-5.  **README Update:** Enhance `README.md` with detailed usage examples and explanations (deferred from this task).
+1.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
+2.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
+3.  **Code Cleanup:** Address remaining TODOs (e.g., checking warnings in `spec-loader.ts`) and minor ESLint warnings.
+4.  **README Update:** Enhance `README.md` with detailed usage examples and explanations, including the new output format (deferred from this task).
 
 ## Future Considerations (Post Immediate Actions)
 

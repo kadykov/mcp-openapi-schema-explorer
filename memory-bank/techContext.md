@@ -72,10 +72,10 @@
 2. Format Service
 
    - Pluggable formatter architecture
-   - Format-specific MIME types
-   - Type-safe formatter interface
-   - Consistent error formatting
-   - CLI-configurable output format
+   - Format-specific MIME types (`application/json`, `text/yaml`)
+   - Type-safe formatter interface (`IFormatter`)
+   - Consistent error formatting (`text/plain`)
+   - CLI-configurable output format (`--output-format`)
 
 3. Implementation
    - Format-specific serialization
@@ -95,7 +95,7 @@
 
 - Command-line argument based configuration (`src/config.ts`).
 - Single required argument: `<path-or-url-to-spec>`.
-- Optional argument: `--output-format <json|yaml>`.
+- Optional argument: `--output-format <json|yaml|json-minified>`.
 - Required argument validation.
 - TypeScript type safety (`ServerConfig` interface).
 - Error handling for missing/invalid arguments.

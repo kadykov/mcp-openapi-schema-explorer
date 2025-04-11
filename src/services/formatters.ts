@@ -3,7 +3,7 @@ import { dump as yamlDump } from 'js-yaml';
 /**
  * Supported output formats
  */
-export type OutputFormat = 'json' | 'yaml';
+export type OutputFormat = 'json' | 'yaml' | 'json-minified';
 
 /**
  * Interface for formatters that handle different output formats
@@ -19,6 +19,19 @@ export interface IFormatter {
 export class JsonFormatter implements IFormatter {
   format(data: unknown): string {
     return JSON.stringify(data, null, 2);
+  }
+
+  getMimeType(): string {
+    return 'application/json';
+  }
+}
+
+/**
+ * Formats data as minified JSON.
+ */
+export class MinifiedJsonFormatter implements IFormatter {
+  format(data: unknown): string {
+    return JSON.stringify(data);
   }
 
   getMimeType(): string {
@@ -52,5 +65,7 @@ export function createFormatter(format: OutputFormat): IFormatter {
       return new JsonFormatter();
     case 'yaml':
       return new YamlFormatter();
+    case 'json-minified':
+      return new MinifiedJsonFormatter();
   }
 }
