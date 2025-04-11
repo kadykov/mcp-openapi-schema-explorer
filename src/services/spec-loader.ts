@@ -1,4 +1,4 @@
-import SwaggerParser from '@apidevtools/swagger-parser';
+import * as swagger2openapi from 'swagger2openapi';
 import { OpenAPI } from 'openapi-types';
 import { ReferenceTransformService, TransformContext } from './reference-transform.js';
 
@@ -14,19 +14,45 @@ export class SpecLoaderService {
   ) {}
 
   /**
-   * Load and parse the OpenAPI specification from file
-   * Only parses the spec without resolving $refs
+   * Load, potentially convert (from v2), and parse the OpenAPI specification.
    */
   async loadSpec(): Promise<OpenAPI.Document> {
+    const options = {
+      patch: true, // Fix minor errors in the spec
+      warnOnly: true, // Add warnings for non-patchable errors instead of throwing
+      origin: this.specPath, // Helps with resolving relative references if needed
+      source: this.specPath,
+    };
+
     try {
-      // Parse spec without resolving refs
-      const parsedSpec = await SwaggerParser.parse(this.specPath);
-      this.specData = parsedSpec;
-      return parsedSpec;
+      let result;
+      // Check if specPath is a URL
+      if (this.specPath.startsWith('http://') || this.specPath.startsWith('https://')) {
+        result = await swagger2openapi.convertUrl(this.specPath, options);
+      } else {
+        result = await swagger2openapi.convertFile(this.specPath, options);
+      }
+
+      // swagger2openapi returns the result in result.openapi
+      if (!result || !result.openapi) {
+        throw new Error('Conversion or parsing failed to produce an OpenAPI document.');
+      }
+
+      // TODO: Check result.options?.warnings for potential issues?
+
+      this.specData = result.openapi as OpenAPI.Document; // Assuming result.openapi is compatible
+      return this.specData;
     } catch (error) {
-      throw new Error(
-        `Failed to load OpenAPI spec: ${error instanceof Error ? error.message : String(error)}`
-      );
+      // Improve error message clarity
+      let message = `Failed to load/convert OpenAPI spec from ${this.specPath}: `;
+      if (error instanceof Error) {
+        message += error.message;
+        // Include stack trace if available and helpful?
+        // console.error(error.stack);
+      } else {
+        message += String(error);
+      }
+      throw new Error(message);
     }
   }
 

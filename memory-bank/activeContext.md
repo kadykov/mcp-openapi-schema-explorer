@@ -2,9 +2,23 @@
 
 ## Current Focus
 
-Completed major refactoring of resource handling and URI structure.
+Completed implementation of remote specification loading (via URL) and Swagger v2.0 support. Updated Memory Bank.
 
-## Recent Progress (Major Refactor - ✓)
+## Recent Progress
+
+### Remote Spec & Swagger v2.0 Support (✓)
+
+1.  **Remote Loading:** Added support for loading specifications via HTTP/HTTPS URLs using `swagger2openapi` in `SpecLoaderService`.
+2.  **Swagger v2.0 Conversion:** Added support for automatically converting Swagger v2.0 specifications to OpenAPI v3.0 using `swagger2openapi` in `SpecLoaderService`.
+3.  **Dependency Change:** Replaced `@apidevtools/swagger-parser` with `swagger2openapi`. Added `@types/swagger2openapi`. Reinstalled `openapi-types`.
+4.  **Configuration:** Confirmed configuration uses CLI arguments (`<path-or-url-to-spec>`).
+5.  **Testing:**
+    - Updated `SpecLoaderService` unit tests (`spec-loader.test.ts`) to mock `swagger2openapi` and cover new scenarios (local/remote, v2/v3). Fixed linting/hoisting issues in mocks.
+    - Created new E2E test file (`spec-loading.test.ts`) to verify loading from local v2 and remote v3 sources. Added necessary helpers and fixed linting issues.
+    - Added v2.0 test fixture (`sample-v2-api.json`).
+6.  **Memory Bank Update (✓):** Updated `productContext.md`, `techContext.md`, `systemPatterns.md`, `progress.md`, and `activeContext.md` to reflect these changes.
+
+### Major Refactor (Previously Completed - ✓)
 
 1.  **Unified URI Structure:** Implemented consistent URIs based on OpenAPI spec hierarchy (`openapi://{field}`, `openapi://paths/...`, `openapi://components/...`).
 2.  **OOP Rendering Layer:** Created `Renderable*` classes for modular rendering logic (`src/rendering/`).
@@ -32,17 +46,20 @@ Completed major refactoring of resource handling and URI structure.
 
 ## Implementation Status
 
-- New architecture with separate rendering and handling layers is in place.
-- Server successfully serves resources based on the new URI structure.
-- Core functionality (listing/detailing paths, operations, components, top-level fields) is working.
-- Unit tests cover rendering logic; E2E tests cover basic resource access.
+- Server now loads OpenAPI v3.0 and Swagger v2.0 specs from local files or remote URLs.
+- Swagger v2.0 specs are automatically converted to v3.0.
+- Internal references are transformed to MCP URIs.
+- Core resource exploration functionality remains operational with the new loading mechanism.
+- Unit tests for `SpecLoaderService` are updated.
+- E2E tests cover basic loading scenarios for local v2 and remote v3 specs.
 
 ## Next Actions / Immediate Focus
 
-1.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
-2.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
-3.  **Code Cleanup:** Address remaining TODOs and minor ESLint warnings (e.g., `any` types in tests where acceptable).
-4.  **Memory Bank Review:** Ensure all Memory Bank files accurately reflect the current state after this large refactor.
+1.  **Run Tests:** Execute the full test suite (`just test` or `npm test`) to ensure all unit and E2E tests pass after the recent changes. Address any failures.
+2.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
+3.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
+4.  **Code Cleanup:** Address remaining TODOs (e.g., checking warnings in `spec-loader.ts`) and minor ESLint warnings.
+5.  **README Update:** Enhance `README.md` with detailed usage examples and explanations (deferred from this task).
 
 ## Future Considerations (Post Immediate Actions)
 

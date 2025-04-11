@@ -1,0 +1,39 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Simple Swagger 2.0 API",
+    "version": "1.0.0",
+    "description": "A simple API definition in Swagger 2.0 format for testing conversion."
+  },
+  "host": "localhost:3000",
+  "basePath": "/v2",
+  "schemes": ["http"],
+  "paths": {
+    "/ping": {
+      "get": {
+        "summary": "Check service health",
+        "description": "Returns a simple pong message.",
+        "produces": ["application/json"],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "$ref": "#/definitions/Pong"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Pong": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "example": "pong"
+        }
+      }
+    }
+  }
+}

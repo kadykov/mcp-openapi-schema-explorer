@@ -34,6 +34,17 @@
 - Endpoint Details (Superseded by `openapi://paths/{path}/{method*}`)
 - Endpoint List (Superseded by `openapi://paths`)
 
+### Remote Spec & Swagger v2.0 Support (✓)
+
+1.  **Remote Loading:** Added support for loading specifications via HTTP/HTTPS URLs using `swagger2openapi`.
+2.  **Swagger v2.0 Conversion:** Added support for automatically converting Swagger v2.0 specifications to OpenAPI v3.0 using `swagger2openapi`.
+3.  **Dependency Change:** Replaced `@apidevtools/swagger-parser` with `swagger2openapi` for loading and conversion.
+4.  **Configuration Update:** Confirmed and documented that configuration uses CLI arguments (`<path-or-url-to-spec>`) instead of environment variables.
+5.  **Testing:**
+    - Updated `SpecLoaderService` unit tests to mock `swagger2openapi` and cover new scenarios (local/remote, v2/v3).
+    - Created new E2E test file (`spec-loading.test.ts`) to verify loading from local v2 and remote v3 sources.
+    - Added v2.0 test fixture (`sample-v2-api.json`).
+
 ## Technical Features (✓)
 
 ### Codebase Organization (Updated)
@@ -42,17 +53,18 @@
 
    - `src/handlers/`: Contains individual handlers and `handler-utils.ts`.
    - `src/rendering/`: Contains `Renderable*` classes, `types.ts`, `utils.ts`.
-   - `src/services/`: Unchanged (SpecLoader, Formatters, Transformer).
+   - `src/services/`: Updated `spec-loader.ts` to use `swagger2openapi`.
    - `src/`: `index.ts`, `config.ts`, `types.ts`.
-   - `test/`: Updated unit and E2E tests reflecting new structure.
+   - `test/`: Updated unit tests (`spec-loader.test.ts`), added new E2E test (`spec-loading.test.ts`), added v2 fixture.
    - `local-docs/old-implementation/`: Archived previous code.
 
 2. Testing Structure
 
    - Unit tests for rendering classes (`test/__tests__/unit/rendering/`).
    - Unit tests for handlers (`test/__tests__/unit/handlers/`).
-   - E2E tests (`test/__tests__/e2e/`).
-   - Fixtures (`test/fixtures/`).
+   - Unit tests for services (`spec-loader.test.ts`, `reference-transform.test.ts`).
+   - E2E tests (`refactored-resources.test.ts`, `spec-loading.test.ts`, `format.test.ts`).
+   - Fixtures (`test/fixtures/`, including v2 and v3).
    - Test utils (`test/utils/`).
 
 3. Type System
@@ -100,8 +112,9 @@
    - Unit tests added for rendering logic.
    - Unit tests updated for URI builder, reference transformer, and path item rendering.
    - E2E tests updated for new structure and complex fixture.
-   - Need handler unit tests.
+   - Unit tests for `SpecLoaderService` updated for `swagger2openapi`.
 
 3. API Design
    - New URI structure implemented, aligned with OpenAPI spec.
    - Consistent list/detail pattern via rendering layer.
+   - Server now accepts remote URLs and Swagger v2.0 specs via CLI argument.

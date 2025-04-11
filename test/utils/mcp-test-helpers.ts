@@ -1,6 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import path from 'path';
+// import path from 'path';
 
 // Export the interface
 export interface McpTestContext {
@@ -29,7 +29,8 @@ export async function startMcpServer(
       command: 'node',
       args: [
         'dist/src/index.js',
-        path.resolve(specPath),
+        // path.resolve(specPath),
+        specPath,
         ...(options.outputFormat ? ['--output-format', options.outputFormat] : []),
       ],
       stderr: 'inherit', // Pass through server errors normally - they're part of E2E testing
