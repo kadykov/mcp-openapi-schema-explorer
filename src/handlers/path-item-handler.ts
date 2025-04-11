@@ -5,13 +5,17 @@ import {
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { SpecLoaderService } from '../types.js';
 import { IFormatter } from '../services/formatters.js';
-import { RenderableDocument } from '../rendering/document.js';
 import { RenderablePathItem } from '../rendering/path-item.js';
 import { RenderContext, RenderResultItem } from '../rendering/types.js';
 import { createErrorResult } from '../rendering/utils.js';
 import { buildPathItemUriSuffix } from '../utils/uri-builder.js'; // Added .js extension
 // Import shared handler utils
-import { formatResults, isOpenAPIV3, FormattedResultItem } from './handler-utils.js'; // Already has .js
+import {
+  formatResults,
+  isOpenAPIV3,
+  FormattedResultItem,
+  getValidatedPathItem, // Import the helper
+} from './handler-utils.js'; // Already has .js
 
 const BASE_URI = 'openapi://';
 
@@ -60,15 +64,13 @@ export class PathItemHandler {
         throw new Error('Only OpenAPI v3 specifications are supported');
       }
 
-      const renderableDoc = new RenderableDocument(spec);
-      // Use the decoded path for lookup in the spec object
-      // Ensure leading slash for consistency if needed (depends on spec structure)
+      // --- Use helper to get validated path item ---
       const lookupPath = decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
-      const pathItemObj = renderableDoc.getPathsObject()?.[lookupPath];
+      const pathItemObj = getValidatedPathItem(spec, lookupPath);
 
-      // Instantiate RenderablePathItem with the raw path and the built suffix
+      // Instantiate RenderablePathItem with the validated pathItemObj
       const renderablePathItem = new RenderablePathItem(
-        pathItemObj,
+        pathItemObj, // pathItemObj retrieved safely via helper
         lookupPath, // Pass the raw, decoded path
         pathUriSuffix // Pass the correctly built suffix
       );

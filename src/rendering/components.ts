@@ -85,7 +85,13 @@ export class RenderableComponents implements RenderableSpecObject {
         | OpenAPIV3.ReferenceObject // Include ReferenceObject
       >
     | undefined {
-    return this.components?.[type];
+    // Use Map for safe access
+    if (!this.components) {
+      return undefined;
+    }
+    const componentsMap = new Map(Object.entries(this.components));
+    // Cast needed as Map.get returns the value type or undefined
+    return componentsMap.get(type) as ReturnType<RenderableComponents['getComponentMap']>;
   }
 }
 
@@ -211,6 +217,12 @@ export class RenderableComponentMap implements RenderableSpecObject {
     | OpenAPIV3.CallbackObject
     | OpenAPIV3.ReferenceObject
     | undefined {
-    return this.componentMap?.[name];
+    // Use Map for safe access
+    if (!this.componentMap) {
+      return undefined;
+    }
+    const detailsMap = new Map(Object.entries(this.componentMap));
+    // No cast needed, Map.get returns the correct type (ValueType | undefined)
+    return detailsMap.get(name);
   }
 }

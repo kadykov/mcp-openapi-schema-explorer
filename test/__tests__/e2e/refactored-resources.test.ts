@@ -137,7 +137,8 @@ describe('E2E Tests for Refactored Resources', () => {
     it('should return error for non-existent path', async () => {
       const encodedPath = encodeURIComponent('nonexistent');
       const uri = `openapi://paths/${encodedPath}`;
-      await checkErrorResponse(uri, 'Path item not found.');
+      // Updated error message from getValidatedPathItem
+      await checkErrorResponse(uri, 'Path "/nonexistent" not found in the specification.');
     });
   });
 
@@ -182,7 +183,11 @@ describe('E2E Tests for Refactored Resources', () => {
       const complexPath = 'api/v1/organizations/{orgId}/projects/{projectId}/tasks';
       const encodedPath = encodeURIComponent(complexPath);
       const uri = `openapi://paths/${encodedPath}/put`;
-      await checkErrorResponse(uri, 'Method "PUT" not found');
+      // Updated error message from getValidatedOperations
+      await checkErrorResponse(
+        uri,
+        'None of the requested methods (put) are valid for path "/api/v1/organizations/{orgId}/projects/{projectId}/tasks". Available methods: get, post'
+      );
     });
   });
 
@@ -243,7 +248,11 @@ describe('E2E Tests for Refactored Resources', () => {
 
     it('should return error for invalid name', async () => {
       const uri = 'openapi://components/schemas/InvalidSchemaName';
-      await checkErrorResponse(uri, 'Component "InvalidSchemaName" of type "schemas" not found');
+      // Updated error message from getValidatedComponentDetails with sorted names
+      await checkErrorResponse(
+        uri,
+        'None of the requested names (InvalidSchemaName) are valid for component type "schemas". Available names: CreateTaskRequest, Task, TaskList'
+      );
     });
   });
 });

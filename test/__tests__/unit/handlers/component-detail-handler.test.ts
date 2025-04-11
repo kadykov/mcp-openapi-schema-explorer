@@ -141,14 +141,18 @@ describe('ComponentDetailHandler', () => {
     it('should return error for non-existent component type in spec', async () => {
       const variables: Variables = { type: 'securitySchemes', name: 'apiKey' };
       const uri = new URL('openapi://components/securitySchemes/apiKey');
+      const expectedLogMessage = /Component type "securitySchemes" not found/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
+      // Expect the specific error message from getValidatedComponentMap
       expect(result.contents[0]).toEqual({
         uri: 'openapi://components/securitySchemes/apiKey',
         mimeType: 'text/plain',
-        text: 'Component map for type "securitySchemes" not found.',
+        text: 'Component type "securitySchemes" not found in the specification. Available types: schemas, parameters',
         isError: true,
       });
     });
@@ -156,38 +160,25 @@ describe('ComponentDetailHandler', () => {
     it('should return error for non-existent component name', async () => {
       const variables: Variables = { type: 'schemas', name: 'NonExistent' };
       const uri = new URL('openapi://components/schemas/NonExistent');
+      const expectedLogMessage = /None of the requested names \(NonExistent\) are valid/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
+      // Expect the specific error message from getValidatedComponentDetails
       expect(result.contents[0]).toEqual({
         uri: 'openapi://components/schemas/NonExistent',
         mimeType: 'text/plain',
-        text: 'Component "NonExistent" of type "schemas" not found.',
+        // Expect sorted names: Error, User
+        text: 'None of the requested names (NonExistent) are valid for component type "schemas". Available names: Error, User',
         isError: true,
       });
     });
 
-    it('should handle mix of valid and invalid component names', async () => {
-      const variables: Variables = { type: 'schemas', name: ['User', 'Invalid'] };
-      const uri = new URL('openapi://components/schemas/User,Invalid');
-
-      const result = await handler.handleRequest(uri, variables, mockExtra);
-
-      expect(result.contents).toHaveLength(2);
-      expect(result.contents).toContainEqual({
-        uri: 'openapi://components/schemas/User',
-        mimeType: 'application/json',
-        text: JSON.stringify(userSchema, null, 2),
-        isError: false,
-      });
-      expect(result.contents).toContainEqual({
-        uri: 'openapi://components/schemas/Invalid',
-        mimeType: 'text/plain',
-        text: 'Component "Invalid" of type "schemas" not found.',
-        isError: true,
-      });
-    });
+    // Remove test for mix of valid/invalid names, as getValidatedComponentDetails throws now
+    // it('should handle mix of valid and invalid component names', async () => { ... });
 
     it('should handle empty name array', async () => {
       const variables: Variables = { type: 'schemas', name: [] };

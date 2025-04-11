@@ -77,6 +77,11 @@ export class RenderablePaths implements RenderableSpecObject {
    * @returns The PathItemObject or undefined if not found.
    */
   getPathItem(path: string): OpenAPIV3.PathItemObject | undefined {
-    return this.paths?.[path];
+    // Use Map for safe access
+    if (!this.paths) {
+      return undefined;
+    }
+    const pathsMap = new Map(Object.entries(this.paths));
+    return pathsMap.get(path); // Map.get returns ValueType | undefined
   }
 }

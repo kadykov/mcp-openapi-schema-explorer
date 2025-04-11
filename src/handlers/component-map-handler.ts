@@ -5,7 +5,6 @@ import {
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { SpecLoaderService } from '../types.js';
 import { IFormatter } from '../services/formatters.js';
-import { RenderableDocument } from '../rendering/document.js';
 import {
   RenderableComponentMap,
   ComponentType,
@@ -14,7 +13,12 @@ import {
 import { RenderContext, RenderResultItem } from '../rendering/types.js';
 import { createErrorResult } from '../rendering/utils.js';
 // Import shared handler utils
-import { formatResults, isOpenAPIV3, FormattedResultItem } from './handler-utils.js'; // Already has .js
+import {
+  formatResults,
+  isOpenAPIV3,
+  FormattedResultItem,
+  getValidatedComponentMap, // Import the helper
+} from './handler-utils.js'; // Already has .js
 
 const BASE_URI = 'openapi://';
 
@@ -65,12 +69,12 @@ export class ComponentMapHandler {
         throw new Error('Only OpenAPI v3 specifications are supported');
       }
 
-      const renderableDoc = new RenderableDocument(spec);
-      const componentMapObj = renderableDoc.getComponentsObject()?.[componentType];
+      // --- Use helper to get validated component map ---
+      const componentMapObj = getValidatedComponentMap(spec, componentType);
 
-      // Instantiate RenderableComponentMap and call its renderList
+      // Instantiate RenderableComponentMap with the validated map
       const renderableMap = new RenderableComponentMap(
-        componentMapObj,
+        componentMapObj, // componentMapObj retrieved safely via helper
         componentType,
         mapUriSuffix
       );

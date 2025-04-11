@@ -109,15 +109,19 @@ describe('ComponentMapHandler', () => {
     it('should handle component type not present in spec (securitySchemes)', async () => {
       const variables: Variables = { type: 'securitySchemes' };
       const uri = new URL('openapi://components/securitySchemes');
+      const expectedLogMessage = /Component type "securitySchemes" not found/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
+      // Expect the specific error message from getValidatedComponentMap
       expect(result.contents[0]).toEqual({
         uri: 'openapi://components/securitySchemes',
         mimeType: 'text/plain',
-        text: 'No components of type "securitySchemes" found.',
-        isError: true, // Treat as error because map is undefined
+        text: 'Component type "securitySchemes" not found in the specification. Available types: schemas, parameters, examples',
+        isError: true,
       });
     });
 

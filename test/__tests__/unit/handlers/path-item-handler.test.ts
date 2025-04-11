@@ -94,14 +94,18 @@ describe('PathItemHandler', () => {
     it('should return error for non-existent path', async () => {
       const variables: Variables = { path: encodedPathNonExistent };
       const uri = new URL(`openapi://paths/${encodedPathNonExistent}`);
+      const expectedLogMessage = /Path "\/nonexistent" not found/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
+      // Expect the specific error message from getValidatedPathItem
       expect(result.contents[0]).toEqual({
         uri: `openapi://paths/${encodedPathNonExistent}`,
         mimeType: 'text/plain',
-        text: 'Path item not found.',
+        text: 'Path "/nonexistent" not found in the specification.',
         isError: true,
       });
     });

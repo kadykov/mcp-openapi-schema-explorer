@@ -5,7 +5,6 @@ import {
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { SpecLoaderService } from '../types.js';
 import { IFormatter } from '../services/formatters.js';
-import { RenderableDocument } from '../rendering/document.js';
 import {
   RenderableComponentMap,
   ComponentType,
@@ -14,7 +13,13 @@ import {
 import { RenderContext, RenderResultItem } from '../rendering/types.js';
 import { createErrorResult } from '../rendering/utils.js';
 // Import shared handler utils
-import { formatResults, isOpenAPIV3, FormattedResultItem } from './handler-utils.js'; // Already has .js
+import {
+  formatResults,
+  isOpenAPIV3,
+  FormattedResultItem,
+  getValidatedComponentMap, // Import helper
+  getValidatedComponentDetails, // Import helper
+} from './handler-utils.js'; // Already has .js
 
 const BASE_URI = 'openapi://';
 
@@ -80,17 +85,26 @@ export class ComponentDetailHandler {
         throw new Error('Only OpenAPI v3 specifications are supported');
       }
 
-      const renderableDoc = new RenderableDocument(spec);
-      const componentMapObj = renderableDoc.getComponentsObject()?.[componentType];
+      // --- Use helper to get validated component map ---
+      const componentMapObj = getValidatedComponentMap(spec, componentType);
 
-      // Instantiate RenderableComponentMap and call its renderComponentDetail
+      // --- Create Map and use helper to get validated component names/details ---
+      // Create the Map from the validated object
+      const detailsMap = new Map(Object.entries(componentMapObj));
+      // Pass the Map to the helper
+      const validDetails = getValidatedComponentDetails(detailsMap, names, componentType);
+      const validNames = validDetails.map(detail => detail.name); // Extract names
+
+      // Instantiate RenderableComponentMap with the validated map object
       const renderableMap = new RenderableComponentMap(
-        componentMapObj,
+        componentMapObj, // componentMapObj retrieved safely via helper
         componentType,
         mapUriSuffix
       );
-      resultItems = renderableMap.renderComponentDetail(context, names);
+      // Pass the validated names to the rendering function
+      resultItems = renderableMap.renderComponentDetail(context, validNames);
     } catch (error: unknown) {
+      // Catch errors from helpers (e.g., type/name not found) or rendering
       const message = error instanceof Error ? error.message : String(error);
       console.error(`Error handling request ${uri.href}: ${message}`);
       // Create a single error item representing the overall request failure

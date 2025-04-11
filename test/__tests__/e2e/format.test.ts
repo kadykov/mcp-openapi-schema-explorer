@@ -157,7 +157,10 @@ describe('Output Format E2E', () => {
       expect(content.mimeType).toBe('text/plain');
       expect(content.isError).toBe(true);
       if (!hasTextContent(content)) throw new Error('Expected text');
-      expect(content.text).toContain('Component "InvalidName" of type "schemas" not found');
+      // Updated error message from getValidatedComponentDetails with sorted names
+      expect(content.text).toContain(
+        'None of the requested names (InvalidName) are valid for component type "schemas". Available names: CreateTaskRequest, Task, TaskList'
+      );
     });
   });
 });
