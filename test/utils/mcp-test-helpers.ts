@@ -2,7 +2,8 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
 import path from 'path';
 
-interface McpTestContext {
+// Export the interface
+export interface McpTestContext {
   client: Client;
   transport: StdioClientTransport;
   cleanup: () => Promise<void>;
@@ -28,7 +29,7 @@ export async function startMcpServer(
       command: 'node',
       args: [
         'dist/src/index.js',
-        path.resolve(process.cwd(), specPath),
+        path.resolve(specPath), // Ensure the path is absolute
         ...(options.outputFormat ? ['--output-format', options.outputFormat] : []),
       ],
       stderr: 'inherit', // Show server errors in test output

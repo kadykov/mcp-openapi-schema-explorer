@@ -1,11 +1,14 @@
 #!/usr/bin/env node
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'; // Ensure McpServer is imported
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { loadConfig } from './config.js';
-import { EndpointHandler } from './handlers/endpoint.js';
-import { EndpointListHandler } from './handlers/endpoint-list.js';
-import { SchemaHandler } from './handlers/schema.js'; // Import SchemaHandler
-import { SchemaListHandler } from './handlers/schema-list.js'; // Import SchemaListHandler
+
+// Import new handlers
+import { TopLevelFieldHandler } from './handlers/top-level-field-handler.js';
+import { PathItemHandler } from './handlers/path-item-handler.js';
+import { OperationHandler } from './handlers/operation-handler.js';
+import { ComponentMapHandler } from './handlers/component-map-handler.js';
+import { ComponentDetailHandler } from './handlers/component-detail-handler.js';
 import { OpenAPITransformer, ReferenceTransformService } from './services/reference-transform.js';
 import { SpecLoaderService } from './services/spec-loader.js';
 import { createFormatter } from './services/formatters.js';
@@ -36,61 +39,74 @@ async function main(): Promise<void> {
       version: '1.0.0',
     });
 
-    // Set up handlers
+    // Set up formatter and new handlers
     const formatter = createFormatter(config.outputFormat);
-    const endpointHandler = new EndpointHandler(specLoader, formatter);
-    const endpointListHandler = new EndpointListHandler(specLoader);
-    const schemaHandler = new SchemaHandler(specLoader, formatter); // Instantiate SchemaHandler
-    const schemaListHandler = new SchemaListHandler(specLoader); // Instantiate SchemaListHandler
+    const topLevelFieldHandler = new TopLevelFieldHandler(specLoader, formatter);
+    const pathItemHandler = new PathItemHandler(specLoader, formatter);
+    const operationHandler = new OperationHandler(specLoader, formatter);
+    const componentMapHandler = new ComponentMapHandler(specLoader, formatter);
+    const componentDetailHandler = new ComponentDetailHandler(specLoader, formatter);
 
-    // Add endpoint details resource
-    const endpointTemplate = endpointHandler.getTemplate(); // Rename variable
+    // Register new resources
+    // 1. openapi://{field}
     server.resource(
-      'endpoint',
-      endpointTemplate, // Use renamed variable
+      'openapi-field', // Unique ID for the resource registration
+      topLevelFieldHandler.getTemplate(),
       {
-        mimeType: formatter.getMimeType(),
-        description: 'OpenAPI endpoint details',
-        name: 'endpoint',
+        // MimeType varies (text/plain for lists, JSON/YAML for details) - SDK might handle this? Or maybe set a default? Let's omit for now.
+        description:
+          'Access top-level fields (info, servers, tags), list paths, or list component types.',
+        name: 'OpenAPI Field/List', // Generic name
       },
-      (uri, variables, extra) => endpointHandler.handleRequest(uri, variables, extra)
+      topLevelFieldHandler.handleRequest
     );
 
-    // Add endpoint list resource
+    // 2. openapi://paths/{path}
     server.resource(
-      'endpoints-list',
-      'openapi://endpoints/list',
+      'openapi-path-methods',
+      pathItemHandler.getTemplate(),
       {
-        mimeType: 'text/plain',
-        description: 'List of all OpenAPI endpoints',
-        name: 'endpoints-list',
+        mimeType: 'text/plain', // This always returns a list
+        description: 'List available HTTP methods for a specific path.',
+        name: 'Path Methods List',
       },
-      endpointListHandler.handleRequest
+      pathItemHandler.handleRequest
     );
 
-    // Add schema list resource
+    // 3. openapi://paths/{path}/{method*}
     server.resource(
-      'schemas-list',
-      'openapi://schemas/list',
+      'openapi-operation-detail',
+      operationHandler.getTemplate(),
       {
-        mimeType: 'text/plain',
-        description: 'List of all OpenAPI schemas',
-        name: 'schemas-list',
+        mimeType: formatter.getMimeType(), // Detail view uses formatter
+        description: 'Get details for one or more specific API operations (methods).',
+        name: 'Operation Detail',
       },
-      schemaListHandler.handleRequest
+      operationHandler.handleRequest
     );
 
-    // Add schema details resource
-    const schemaTemplate = schemaHandler.getTemplate();
+    // 4. openapi://components/{type}
     server.resource(
-      'schema',
-      schemaTemplate,
+      'openapi-component-list',
+      componentMapHandler.getTemplate(),
       {
-        mimeType: formatter.getMimeType(), // Use same formatter for consistency
-        description: 'OpenAPI schema details',
-        name: 'schema',
+        mimeType: 'text/plain', // This always returns a list
+        description: 'List available components of a specific type (e.g., schemas, parameters).',
+        name: 'Component List',
       },
-      (uri, variables, extra) => schemaHandler.handleRequest(uri, variables, extra)
+      componentMapHandler.handleRequest
+    );
+
+    // 5. openapi://components/{type}/{name*}
+    server.resource(
+      'openapi-component-detail',
+      componentDetailHandler.getTemplate(),
+      {
+        mimeType: formatter.getMimeType(), // Detail view uses formatter
+        description: 'Get details for one or more specific components (e.g., schemas, parameters).',
+        name: 'Component Detail',
+      },
+      componentDetailHandler.handleRequest
     );
 
     // Start server

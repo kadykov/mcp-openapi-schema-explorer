@@ -21,11 +21,24 @@ graph TD
     end
 
     subgraph Handlers
-        EndpointHandler[Endpoint Handler]
-        EndpointListHandler[Endpoint List Handler]
-        SchemaHandler[Schema Handler]
-        PathHandler[Path Handler]
+        TopLevelFieldHandler[TopLevelField Handler (openapi://{field})]
+        PathItemHandler[PathItem Handler (openapi://paths/{path})]
+        OperationHandler[Operation Handler (openapi://paths/{path}/{method*})]
+        ComponentMapHandler[ComponentMap Handler (openapi://components/{type})]
+        ComponentDetailHandler[ComponentDetail Handler (openapi://components/{type}/{name*})]
     end
+
+    subgraph Rendering (OOP)
+        RenderableDocument[RenderableDocument]
+        RenderablePaths[RenderablePaths]
+        RenderablePathItem[RenderablePathItem]
+        RenderableComponents[RenderableComponents]
+        RenderableComponentMap[RenderableComponentMap]
+        RenderUtils[Rendering Utils]
+    end
+
+    Handlers --> Rendering
+    SpecLoader --> Rendering
 ```
 
 ## Component Structure
@@ -43,56 +56,68 @@ graph TD
   - Type-safe implementation
   - Extensible for other formats
 
+### Rendering Layer (OOP)
+- **Renderable Classes:** Wrapper classes (`RenderableDocument`, `RenderablePaths`, `RenderablePathItem`, `RenderableComponents`, `RenderableComponentMap`) implement `RenderableSpecObject` interface.
+- **Interface:** `RenderableSpecObject` defines `renderList()` and `renderDetail()` methods returning `RenderResultItem[]`.
+- **RenderResultItem:** Intermediate structure holding data (`unknown`), `uriSuffix`, `isError?`, `errorText?`, `renderAsList?`.
+- **RenderContext:** Passed to render methods, contains `formatter` and `baseUri`.
+- **Utils:** Helper functions (`getOperationSummary`, `generateListHint`, `createErrorResult`) in `src/rendering/utils.ts`.
+
 ### Handler Layer
-- EndpointHandler: Dynamic endpoint details
-  - Multiple methods and paths support
-  - Error handling with isError
-  - Path normalization
-  - Method completion
-
-- EndpointListHandler: Token-efficient listing
-  - Text/plain format
-  - Sorted method groups
-  - Consistent output
-
-- SchemaHandler: Dynamic schema details
-  - Handles `openapi://schema/{name*}` URIs
-  - Supports multiple schema names via `{name*}`
-  - Retrieves schema definitions from `components.schemas`
-  - Uses configured formatter (JSON/YAML) for output
-  - Returns error structure for non-existent schemas
+- **Structure:** Separate handlers for each distinct URI pattern/resource type.
+- **Responsibilities:**
+    - Parse URI variables provided by SDK.
+    - Load/retrieve the transformed spec via `SpecLoaderService`.
+    - Instantiate appropriate `Renderable*` classes.
+    - Invoke the correct rendering method (`renderList` or a specific detail method like `renderTopLevelFieldDetail`, `renderOperationDetail`, `renderComponentDetail`).
+    - Format the `RenderResultItem[]` using `formatResults` from `src/handlers/handler-utils.ts`.
+    - Construct the final `{ contents: ... }` response object.
+- **Handlers:**
+    - `TopLevelFieldHandler`: Handles `openapi://{field}`. Delegates list rendering for `paths`/`components` to `RenderablePaths`/`RenderableComponents`. Renders details for other fields (`info`, `servers`, etc.) via `RenderableDocument.renderTopLevelFieldDetail`.
+    - `PathItemHandler`: Handles `openapi://paths/{path}`. Uses `RenderablePathItem.renderList` to list methods.
+    - `OperationHandler`: Handles `openapi://paths/{path}/{method*}`. Uses `RenderablePathItem.renderOperationDetail` for operation details. Handles multi-value `method` variable.
+    - `ComponentMapHandler`: Handles `openapi://components/{type}`. Uses `RenderableComponentMap.renderList` to list component names.
+    - `ComponentDetailHandler`: Handles `openapi://components/{type}/{name*}`. Uses `RenderableComponentMap.renderComponentDetail` for component details. Handles multi-value `name` variable.
+- **Utils:** Shared functions (`formatResults`, `isOpenAPIV3`, `FormattedResultItem` type) in `src/handlers/handler-utils.ts`.
 
 ### Configuration Layer
-- Environment variables validation
+- Environment variables validation (via `src/config.ts`)
 - Server configuration
 - Spec file path management
 
 ## Resource Design Patterns
 
-### URI Structure
-- Resource URIs:
-  - `openapi://endpoint/{method}/{path}` - Get endpoint details
-  - `openapi://endpoints/list` - Get all endpoints
-  - `openapi://schema/{name}` - Get schema details
-
-- Reference URIs:
-  - `openapi://schema/{name}` - Schema reference
-  - `openapi://parameter/{name}` - Parameter reference
-  - `openapi://response/{name}` - Response reference
+### URI Structure (Revised)
+- Implicit List/Detail based on path depth.
+- Aligned with OpenAPI specification structure.
+- **Templates:**
+    - `openapi://{field}`: Top-level field details (info, servers) or list trigger (paths, components).
+    - `openapi://paths/{path}`: List methods for a specific path.
+    - `openapi://paths/{path}/{method*}`: Operation details (supports multiple methods).
+    - `openapi://components/{type}`: List names for a specific component type.
+    - `openapi://components/{type}/{name*}`: Component details (supports multiple names).
+- **Reference URIs (Unchanged for now):**
+    - `openapi://schema/{name}` - Schema reference (Note: This is how refs are *generated*, but access is via `openapi://components/schemas/{name*}`)
+    - (Potential future: `openapi://parameter/{name}`, `openapi://response/{name}` etc. accessed via `openapi://components/...`)
 
 ### Response Format Patterns
-1. Token-Efficient Formats:
-   - text/plain for lists
-   - JSON for detailed views
-   - YAML planned for optimization
-2. Error Handling:
-   - isError flag for errors
-   - Consistent error structure
-   - Informative messages
-3. Type Safety:
-   - Strong typing with OpenAPI v3
-   - Type guards for responses
-   - Error type validation
+1. **Token-Efficient Lists:**
+   - `text/plain` format used for all list views (`openapi://paths`, `openapi://components`, `openapi://paths/{path}`, `openapi://components/{type}`).
+   - Include hints for navigating to detail views.
+   - `openapi://paths` format: `METHOD1 METHOD2 /path`
+   - `openapi://paths/{path}` format: `METHOD: Summary/OpId`
+   - `openapi://components` format: `- type`
+   - `openapi://components/{type}` format: `- name`
+2. **Detail Views:**
+   - Use configured formatter (JSON/YAML via `IFormatter`).
+   - Handled by `openapi://{field}` (for non-structural fields), `openapi://paths/{path}/{method*}`, `openapi://components/{type}/{name*}`.
+3. **Error Handling:**
+   - Handlers catch errors and use `createErrorResult` utility.
+   - `formatResults` utility formats errors into `FormattedResultItem` with `isError: true`, `mimeType: 'text/plain'`, and error message in `text`.
+4. **Type Safety:**
+   - Strong typing with OpenAPI v3 types.
+   - `Renderable*` classes encapsulate type-specific logic.
+   - `isOpenAPIV3` type guard used in handlers.
 
 ## Extension Points
 1. Reference Transformers:
@@ -103,12 +128,12 @@ graph TD
 2. Resource Handlers:
    - Schema resource handler
    - Additional reference handlers
-   - Custom format handlers
+   - Custom format handlers (via `IFormatter` interface)
 
 3. URI Resolution:
-   - Reference resolution
-   - Cross-resource linking
-   - External references
+   - Reference transformation service (`ReferenceTransformService`) handles converting `#/components/schemas/...` to `openapi://schema/...` URIs during spec loading. (Note: Accessing these requires the new `openapi://components/schemas/...` URI).
+   - Cross-resource linking is implicit via generated URIs in hints and transformed refs.
+   - External references are currently kept as-is.
 
 4. Validation:
    - Parameter validation
@@ -118,21 +143,20 @@ graph TD
 ## Testing Strategy
 1. Unit Tests
    - Handler tests with type safety
-   - Reference transformation tests
-   - Format-specific tests
-   - Edge case handling
+   - Rendering class tests (`Renderable*` classes).
+   - Handler tests (mocking services).
+   - Reference transformation tests.
+   - Format-specific tests.
+   - Edge case handling.
 
-2. Integration Tests
-   - Service cooperation
-   - Reference resolution
-   - Cross-format handling
-   - Error propagation
+2. Integration Tests (Less emphasis due to strong unit/E2E)
+   - Service cooperation (e.g., SpecLoader + Transformer).
 
 3. E2E Tests
-   - Full resource functionality
-   - Reference resolution
-   - Complex references
-   - Error scenarios
+   - Verify server responses for all URI patterns using `mcp-test-helpers`.
+   - Test with complex fixtures (`complex-endpoint.json`).
+   - Cover success and error scenarios.
+   - Test multi-value parameters (`method*`, `name*`).
 
 4. Test Support
    - Type-safe fixtures

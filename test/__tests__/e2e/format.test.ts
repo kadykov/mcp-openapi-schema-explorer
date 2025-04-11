@@ -1,38 +1,41 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { startMcpServer } from '../../utils/mcp-test-helpers.js';
+import { startMcpServer, McpTestContext } from '../../utils/mcp-test-helpers.js'; // Import McpTestContext
 import { load as yamlLoad } from 'js-yaml';
-import { isEndpointErrorResponse } from '../../utils/test-types.js';
-import type { EndpointResponse, ResourceResponse } from '../../utils/test-types.js';
-
-function isValidResponse(obj: unknown): boolean {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'method' in obj &&
-    'path' in obj &&
-    typeof (obj as { method: unknown }).method === 'string' &&
-    typeof (obj as { path: unknown }).path === 'string'
-  );
+// Remove old test types/guards if not needed, or adapt them
+// import { isEndpointErrorResponse } from '../../utils/test-types.js';
+// import type { EndpointResponse, ResourceResponse } from '../../utils/test-types.js';
+// Import specific SDK types needed
+import { ReadResourceResult, TextResourceContents } from '@modelcontextprotocol/sdk/types.js';
+// Generic type guard for simple object check
+function isObject(obj: unknown): obj is Record<string, unknown> {
+  return typeof obj === 'object' && obj !== null;
 }
 
-function parseJson(text: string): unknown {
-  return JSON.parse(text) as unknown;
+// Type guard to check if content is TextResourceContents
+function hasTextContent(
+  content: ReadResourceResult['contents'][0]
+): content is TextResourceContents {
+  // Check for the 'text' property specifically and ensure it's not undefined
+  return content && typeof (content as TextResourceContents).text === 'string';
 }
 
-function parseYaml(text: string): unknown {
+function parseJson(text: string | undefined): unknown {
+  if (text === undefined) throw new Error('Cannot parse undefined text');
+  return JSON.parse(text);
+}
+
+function parseYaml(text: string | undefined): unknown {
+  if (text === undefined) throw new Error('Cannot parse undefined text');
   const result = yamlLoad(text);
   if (result === undefined) {
     throw new Error('Invalid YAML: parsing resulted in undefined');
   }
-  return result as unknown;
+  return result;
 }
 
-function safeParse(text: string, format: 'json' | 'yaml'): unknown {
+function safeParse(text: string | undefined, format: 'json' | 'yaml'): unknown {
   try {
-    if (format === 'json') {
-      return parseJson(text);
-    }
-    return parseYaml(text);
+    return format === 'json' ? parseJson(text) : parseYaml(text);
   } catch (error) {
     throw new Error(
       `Failed to parse ${format} content: ${error instanceof Error ? error.message : String(error)}`
@@ -40,153 +43,121 @@ function safeParse(text: string, format: 'json' | 'yaml'): unknown {
   }
 }
 
-function parseEndpointResponse(text: string, format: 'json' | 'yaml'): EndpointResponse {
-  const parsed = safeParse(text, format);
-  // Validate the response format
-  if (!isEndpointErrorResponse(parsed) && !isValidResponse(parsed)) {
-    throw new Error('Invalid endpoint response format');
-  }
-  return parsed as EndpointResponse;
-}
+// Removed old parseEndpointResponse
 
 describe('Output Format E2E', () => {
-  let cleanup: () => Promise<void>;
+  let testContext: McpTestContext;
+  let client: Client;
 
   afterEach(async () => {
-    if (cleanup) {
-      await cleanup();
-    }
+    await testContext?.cleanup();
   });
 
   describe('JSON format (default)', () => {
-    describe('parsing', () => {
-      it('should throw error for invalid JSON', () => {
-        expect(() => safeParse('invalid json', 'json')).toThrow('Failed to parse json content');
-      });
-
-      it('should throw error for invalid YAML', () => {
-        expect(() => safeParse(': not valid yaml', 'yaml')).toThrow('Failed to parse yaml content');
-      });
-
-      it('should throw error for invalid endpoint response', () => {
-        expect(() => parseEndpointResponse('{}', 'json')).toThrow(
-          'Invalid endpoint response format'
-        );
-        expect(() => parseEndpointResponse('method: GET', 'yaml')).toThrow(
-          'Invalid endpoint response format'
-        );
-      });
-    });
-    let client: Client;
-
     beforeEach(async () => {
-      const context = await startMcpServer('test/fixtures/complex-endpoint.json');
-      client = context.client;
-      cleanup = context.cleanup;
+      testContext = await startMcpServer('test/fixtures/complex-endpoint.json', {
+        outputFormat: 'json',
+      });
+      client = testContext.client;
     });
 
-    it('should return JSON formatted endpoint details', async () => {
-      const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      const response = (await client.readResource({
-        uri: `openapi://endpoint/get/${path}`,
-      })) as ResourceResponse;
-
-      expect(response.contents).toHaveLength(1);
-      const content = response.contents[0];
+    it('should return JSON for openapi://info', async () => {
+      const result = await client.readResource({ uri: 'openapi://info' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
       expect(content.mimeType).toBe('application/json');
-
-      // Verify we can parse the JSON
+      if (!hasTextContent(content)) throw new Error('Expected text content'); // Add guard
       expect(() => safeParse(content.text, 'json')).not.toThrow();
+      const data = safeParse(content.text, 'json');
+      expect(isObject(data) && data['title']).toBe('Complex Endpoint Test API'); // Use bracket notation after guard
+    });
 
-      const result = parseEndpointResponse(content.text, 'json');
-      // Explicitly check if the response matches expected type shape
-      expect('method' in result && 'path' in result).toBe(true);
-      if ('method' in result && 'path' in result) {
-        expect(result.method).toBe('GET');
-        expect(result.path).toBe('/api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      }
+    it('should return JSON for operation detail', async () => {
+      const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
+      const result = await client.readResource({ uri: `openapi://paths/${path}/get` });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+      if (!hasTextContent(content)) throw new Error('Expected text content'); // Add guard
+      expect(() => safeParse(content.text, 'json')).not.toThrow();
+      const data = safeParse(content.text, 'json');
+      expect(isObject(data) && data['operationId']).toBe('getProjectTasks'); // Use bracket notation after guard
+    });
+
+    it('should return JSON for component detail', async () => {
+      const result = await client.readResource({ uri: 'openapi://components/schemas/Task' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('application/json');
+      if (!hasTextContent(content)) throw new Error('Expected text content'); // Add guard
+      expect(() => safeParse(content.text, 'json')).not.toThrow();
+      const data = safeParse(content.text, 'json');
+      expect(isObject(data) && data['type']).toBe('object'); // Use bracket notation after guard
+      expect(
+        isObject(data) &&
+          isObject(data['properties']) &&
+          isObject(data['properties']['id']) &&
+          data['properties']['id']['type']
+      ).toBe('string'); // Use bracket notation with type checking
     });
   });
 
   describe('YAML format', () => {
-    let client: Client;
-
     beforeEach(async () => {
-      const context = await startMcpServer('test/fixtures/complex-endpoint.json', {
+      testContext = await startMcpServer('test/fixtures/complex-endpoint.json', {
         outputFormat: 'yaml',
       });
-      client = context.client;
-      cleanup = context.cleanup;
+      client = testContext.client;
     });
 
-    it('should return YAML formatted endpoint details', async () => {
-      const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      const response = (await client.readResource({
-        uri: `openapi://endpoint/get/${path}`,
-      })) as ResourceResponse;
-
-      expect(response.contents).toHaveLength(1);
-      const content = response.contents[0];
+    it('should return YAML for openapi://info', async () => {
+      const result = await client.readResource({ uri: 'openapi://info' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
       expect(content.mimeType).toBe('text/yaml');
-
-      // Should be valid YAML
-      const result = parseEndpointResponse(content.text, 'yaml');
-      // Explicitly check if the response matches expected type shape
-      expect('method' in result && 'path' in result).toBe(true);
-      if ('method' in result && 'path' in result) {
-        expect(result.method).toBe('GET');
-        expect(result.path).toBe('/api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      }
-
-      // Should have YAML formatting
-      expect(content.text).toContain('method: GET');
-      expect(content.text).toContain(
-        'path: /api/v1/organizations/{orgId}/projects/{projectId}/tasks'
-      );
-      expect(content.text).toMatch(/\n$/); // Should end with newline
+      if (!hasTextContent(content)) throw new Error('Expected text content'); // Add guard
+      expect(() => safeParse(content.text, 'yaml')).not.toThrow();
+      expect(content.text).toContain('title: Complex Endpoint Test API');
+      expect(content.text).toMatch(/\n$/);
     });
 
-    it('should use correct mime type in resource template', async () => {
-      const response = await client.listResourceTemplates();
-
-      expect(response.resourceTemplates).toContainEqual({
-        uriTemplate: 'openapi://endpoint/{method*}/{path*}',
-        name: 'endpoint',
-        description: 'OpenAPI endpoint details',
-        mimeType: 'text/yaml',
-      });
-    });
-
-    it('should handle endpoint errors in YAML format', async () => {
-      const path = encodeURIComponent('does/not/exist');
-      const response = (await client.readResource({
-        uri: `openapi://endpoint/get/${path}`,
-      })) as ResourceResponse;
-
-      expect(response.contents).toHaveLength(1);
-      const content = response.contents[0];
-      expect(content.mimeType).toBe('text/yaml');
-
-      // Should contain error in YAML format
-      expect(content.text).toContain('method: GET');
-      expect(content.text).toContain('path: /does/not/exist');
-      expect(content.text).toContain("error: 'Path not found: /does/not/exist'");
-    });
-
-    it('should handle multiple operations with consistent YAML format', async () => {
+    it('should return YAML for operation detail', async () => {
       const path = encodeURIComponent('api/v1/organizations/{orgId}/projects/{projectId}/tasks');
-      const response = (await client.readResource({
-        uri: `openapi://endpoint/get,post/${path}`,
-      })) as ResourceResponse;
+      const result = await client.readResource({ uri: `openapi://paths/${path}/get` });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('text/yaml');
+      if (!hasTextContent(content)) throw new Error('Expected text content'); // Add guard
+      expect(() => safeParse(content.text, 'yaml')).not.toThrow();
+      expect(content.text).toContain('operationId: getProjectTasks');
+      expect(content.text).toMatch(/\n$/);
+    });
 
-      expect(response.contents).toHaveLength(2);
+    it('should return YAML for component detail', async () => {
+      const result = await client.readResource({ uri: 'openapi://components/schemas/Task' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      expect(content.mimeType).toBe('text/yaml');
+      if (!hasTextContent(content)) throw new Error('Expected text content'); // Add guard
+      expect(() => safeParse(content.text, 'yaml')).not.toThrow();
+      expect(content.text).toContain('type: object');
+      expect(content.text).toContain('properties:');
+      expect(content.text).toContain('id:');
+      expect(content.text).toMatch(/\n$/);
+    });
 
-      for (const content of response.contents) {
-        expect(content.mimeType).toBe('text/yaml');
-        expect(content.text).toContain('method:');
-        expect(content.text).toContain('path:');
-        expect(content.text).toMatch(/\n$/);
-      }
+    // Note: The test for listResourceTemplates is removed as it tested old template structure.
+    // We could add a new test here if needed, but the mimeType for templates isn't explicitly set anymore.
+
+    it('should handle errors in YAML format (e.g., invalid component name)', async () => {
+      const result = await client.readResource({ uri: 'openapi://components/schemas/InvalidName' });
+      expect(result.contents).toHaveLength(1);
+      const content = result.contents[0];
+      // Errors are always text/plain, regardless of configured output format
+      expect(content.mimeType).toBe('text/plain');
+      expect(content.isError).toBe(true);
+      if (!hasTextContent(content)) throw new Error('Expected text');
+      expect(content.text).toContain('Component "InvalidName" of type "schemas" not found');
     });
   });
 });

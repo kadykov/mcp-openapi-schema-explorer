@@ -8,6 +8,8 @@
     "/api/v1/organizations/{orgId}/projects/{projectId}/tasks": {
       "get": {
         "operationId": "getProjectTasks",
+        "summary": "Get Tasks",
+        "description": "Retrieve a list of tasks for a specific project.",
         "parameters": [
           {
             "name": "orgId",
@@ -53,6 +55,8 @@
       },
       "post": {
         "operationId": "createProjectTask",
+        "summary": "Create Task",
+        "description": "Create a new task within a project.",
         "requestBody": {
           "required": true,
           "content": {

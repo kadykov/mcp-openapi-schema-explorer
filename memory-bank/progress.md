@@ -2,135 +2,89 @@
 
 ## Completed Features
 
-### Schema Resources (✓)
-1. Schema Listing (✓)
-   - Resource: `openapi://schemas/list`
-   - Lists all available schemas
-   - Full test coverage
+### Core Refactoring & New Resource Structure (✓)
+1.  **Unified URI Structure:** Implemented a consistent URI structure based on OpenAPI spec hierarchy:
+    *   `openapi://{field}`: Access top-level fields (info, servers, tags) or list paths/component types.
+    *   `openapi://paths/{path}`: List methods for a specific path.
+    *   `openapi://paths/{path}/{method*}`: Get details for one or more operations.
+    *   `openapi://components/{type}`: List names for a specific component type.
+    *   `openapi://components/{type}/{name*}`: Get details for one or more components.
+2.  **OOP Rendering Layer:** Introduced `Renderable*` classes (`RenderableDocument`, `RenderablePaths`, `RenderablePathItem`, `RenderableComponents`, `RenderableComponentMap`) to encapsulate rendering logic.
+    *   Uses `RenderContext` and intermediate `RenderResultItem` structure.
+    *   Supports token-efficient text lists and formatted detail views (JSON/YAML).
+3.  **Refactored Handlers:** Created new, focused handlers for each URI pattern:
+    *   `TopLevelFieldHandler`
+    *   `PathItemHandler`
+    *   `OperationHandler`
+    *   `ComponentMapHandler`
+    *   `ComponentDetailHandler`
+    *   Uses shared utilities (`handler-utils.ts`).
+4.  **Multi-Value Support:** Correctly handles `*` variables (`method*`, `name*`) passed as arrays by the SDK.
+5.  **Testing:**
+    *   Added unit tests for all new `Renderable*` classes.
+    *   Added unit tests for all new handler classes.
+    *   Added E2E tests covering the new URI structure and functionality using `complex-endpoint.json`.
+6.  **Archived Old Code:** Moved previous handler/test implementations to `local-docs/old-implementation/`.
 
-2. Schema Details (✓)
-   - Resource: `openapi://schema/{name*}` (Supports multiple names)
-   - Shows schema structure using configured formatter (JSON/YAML)
-   - Handles non-existent schemas with error structure
-   - Required fields
-   - Full test coverage (Unit & E2E)
-
-### Endpoint Resources (✓)
-1. Endpoint Details
-   - Resource: `openapi://endpoint/{method}/{path}`
-   - JSON format output
-   - Full operation details
-   - Parameters and schemas
-   - Error handling with isError
-   - Multiple values support
-   - Path normalization
-   - HTTP method completion
-   - Test coverage
-     - Unit tests
-     - E2E tests
-     - Error handling tests
-     - Complex paths
-
-2. Endpoint List (✓)
-   - Resource: `openapi://endpoints/list`
-   - Token-efficient text/plain format
-   - Available methods per path
-   - Sorted output for consistency
-   - Full test coverage
-
-3. Core Components
-   - Endpoint handlers
-   - Spec loader service
-   - Configuration management
-   - Type definitions
-   - Test helpers
+### Previous Features (Now Integrated/Superseded)
+*   Schema Listing (Superseded by `openapi://components/schemas`)
+*   Schema Details (Superseded by `openapi://components/schemas/{name*}`)
+*   Endpoint Details (Superseded by `openapi://paths/{path}/{method*}`)
+*   Endpoint List (Superseded by `openapi://paths`)
 
 ## Technical Features (✓)
 
-### Codebase Organization
+### Codebase Organization (Updated)
 1. File Structure
-   - Handlers directory
-   - Services directory
-   - Types file
-   - Config module
+   - `src/handlers/`: Contains individual handlers and `handler-utils.ts`.
+   - `src/rendering/`: Contains `Renderable*` classes, `types.ts`, `utils.ts`.
+   - `src/services/`: Unchanged (SpecLoader, Formatters, Transformer).
+   - `src/`: `index.ts`, `config.ts`, `types.ts`.
+   - `test/`: Updated unit and E2E tests reflecting new structure.
+   - `local-docs/old-implementation/`: Archived previous code.
 
 2. Testing Structure
-   - Unit tests directory
-   - E2E tests directory
-   - Fixtures directory
-   - Test utils
+   - Unit tests for rendering classes (`test/__tests__/unit/rendering/`).
+   - Unit tests for handlers (`test/__tests__/unit/handlers/`).
+   - E2E tests (`test/__tests__/e2e/`).
+   - Fixtures (`test/fixtures/`).
+   - Test utils (`test/utils/`).
 
 3. Type System
-   - OpenAPI v3 types
-   - Resource types
-   - Response types
-   - Service interfaces
+   - OpenAPI v3 types.
+   - `RenderableSpecObject`, `RenderContext`, `RenderResultItem` interfaces.
+   - `FormattedResultItem` type for handler results.
 
 4. Error Handling
-   - MCP-compliant errors with isError
-   - Type-safe error handling
-   - Consistent error format
-   - Proper error testing
-
-## Planned Features
+   - Consistent error handling via `createErrorResult` and `formatResults`.
+   - Errors formatted as `text/plain`.
 
 ### Reference Transformation (✓)
-1. Reference Service
-   - Format-agnostic transformer service
-   - Generic transformer interface
-   - Type-safe implementation
-   - Service registration system
-
-2. OpenAPI Transformer
-   - Schema reference transformation
-   - Token-efficient URI links
-   - Nested reference support
-   - Array references handling
-   - Full test coverage
-
-3. Integration
-   - SpecLoader integration
-   - Type-safe transformations
-   - Generic interface support
-   - Clear error handling
+*   (No changes in this refactor, still active)
 
 ### Output Format Enhancement (✓)
-1. Output Formatters
-   - JSON format (default)
-   - YAML format support
-   - CLI format selection
-   - Content type handling
-   - Full test coverage
-   - Type-safe implementation
+*   (No changes in this refactor, still active - JSON/YAML supported via `IFormatter`)
 
-2. Format Features
-   - Schema resource support
-   - Endpoint resource support
-   - Error response formatting
-   - Multiple operation support
-   - Reference handling
+## Planned Features (⏳)
+*   **Handler Unit Tests:** Complete unit tests for all new handlers (mocking services).
+*   **Refactor Helpers:** Move duplicated helpers (`formatResults`, `isOpenAPIV3`) from handlers to `handler-utils.ts`. (Deferred during refactor).
+*   **Completion Logic:** Implement `complete` callbacks in `ResourceTemplate` definitions within handlers (currently `undefined`).
+*   **Reference Traversal:** Service to resolve `$ref` URIs (e.g., follow `openapi://schema/Task` from an endpoint detail).
+*   **Enhanced Component Support:** Ensure all component types listed in `VALID_COMPONENT_TYPES` are fully handled if present in spec.
+*   **Parameter Validation:** Add validation logic if needed.
+*   **Further Token Optimizations:** Explore more ways to reduce token usage in list/detail views.
 
-### Additional Features (⏳)
-- Reference traversal service
-- Enhanced schema support
-- Parameter validation
-- More token optimizations
-
-## Technical Improvements
+## Technical Improvements (Ongoing)
 1. Code Quality
-   - Generic type system
-   - Format-agnostic design
-   - Clean code structure
-   - Error handling
+   - OOP design for rendering.
+   - Clear separation of concerns (Rendering vs. Handling vs. Services).
+   - Improved type safety in rendering/handling logic.
 
 2. Testing
-   - Comprehensive reference tests
-   - Edge case coverage
-   - Type-safe tests
-   - Mock implementations
+   - Unit tests added for rendering logic.
+   - E2E tests updated for new structure and complex fixture.
+   - Need handler unit tests.
 
 3. API Design
-   - Consistent URI patterns
-   - Clear reference formats
-   - Token efficiency
-   - Type-safe interfaces
+   - New URI structure implemented, aligned with OpenAPI spec.
+   - Consistent list/detail pattern via rendering layer.
