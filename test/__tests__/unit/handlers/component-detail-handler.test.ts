@@ -4,6 +4,7 @@ import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
+import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -121,8 +122,11 @@ describe('ComponentDetailHandler', () => {
     it('should return error for invalid component type', async () => {
       const variables: Variables = { type: 'invalidType', name: 'SomeName' };
       const uri = new URL('openapi://components/invalidType/SomeName');
+      const expectedLogMessage = /Invalid component type: invalidType/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -188,8 +192,11 @@ describe('ComponentDetailHandler', () => {
     it('should handle empty name array', async () => {
       const variables: Variables = { type: 'schemas', name: [] };
       const uri = new URL('openapi://components/schemas/');
+      const expectedLogMessage = /No valid component name specified/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -205,8 +212,11 @@ describe('ComponentDetailHandler', () => {
       mockGetTransformedSpec.mockRejectedValue(error);
       const variables: Variables = { type: 'schemas', name: 'User' };
       const uri = new URL('openapi://components/schemas/User');
+      const expectedLogMessage = /Spec load failed/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -219,11 +229,14 @@ describe('ComponentDetailHandler', () => {
 
     it('should handle non-OpenAPI v3 spec', async () => {
       const invalidSpec = { swagger: '2.0', info: {} };
-      mockGetTransformedSpec.mockResolvedValue(invalidSpec as any);
+      mockGetTransformedSpec.mockResolvedValue(invalidSpec as unknown as OpenAPIV3.Document);
       const variables: Variables = { type: 'schemas', name: 'User' };
       const uri = new URL('openapi://components/schemas/User');
+      const expectedLogMessage = /Only OpenAPI v3 specifications are supported/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({

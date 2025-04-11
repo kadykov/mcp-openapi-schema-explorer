@@ -29,10 +29,10 @@ export async function startMcpServer(
       command: 'node',
       args: [
         'dist/src/index.js',
-        path.resolve(specPath), // Ensure the path is absolute
+        path.resolve(specPath),
         ...(options.outputFormat ? ['--output-format', options.outputFormat] : []),
       ],
-      stderr: 'inherit', // Show server errors in test output
+      stderr: 'inherit', // Pass through server errors normally - they're part of E2E testing
     });
 
     // Initialize client

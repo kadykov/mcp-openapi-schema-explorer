@@ -114,7 +114,8 @@ describe('E2E Tests for Refactored Resources', () => {
     });
 
     it('should return error for invalid field', async () => {
-      await checkErrorResponse('openapi://invalidfield', 'Field "invalidfield" not found');
+      const uri = 'openapi://invalidfield';
+      await checkErrorResponse(uri, 'Field "invalidfield" not found');
     });
   });
 
@@ -135,7 +136,8 @@ describe('E2E Tests for Refactored Resources', () => {
 
     it('should return error for non-existent path', async () => {
       const encodedPath = encodeURIComponent('nonexistent');
-      await checkErrorResponse(`openapi://paths/${encodedPath}`, 'Path item not found.');
+      const uri = `openapi://paths/${encodedPath}`;
+      await checkErrorResponse(uri, 'Path item not found.');
     });
   });
 
@@ -179,8 +181,8 @@ describe('E2E Tests for Refactored Resources', () => {
     it('should return error for invalid method on complex path', async () => {
       const complexPath = 'api/v1/organizations/{orgId}/projects/{projectId}/tasks';
       const encodedPath = encodeURIComponent(complexPath);
-      // Check error message format
-      await checkErrorResponse(`openapi://paths/${encodedPath}/put`, 'Method "PUT" not found');
+      const uri = `openapi://paths/${encodedPath}/put`;
+      await checkErrorResponse(uri, 'Method "PUT" not found');
     });
   });
 
@@ -199,7 +201,8 @@ describe('E2E Tests for Refactored Resources', () => {
     });
 
     it('should return error for invalid type', async () => {
-      await checkErrorResponse('openapi://components/invalid', 'Invalid component type: invalid');
+      const uri = 'openapi://components/invalid';
+      await checkErrorResponse(uri, 'Invalid component type: invalid');
     });
   });
 
@@ -239,10 +242,8 @@ describe('E2E Tests for Refactored Resources', () => {
     });
 
     it('should return error for invalid name', async () => {
-      await checkErrorResponse(
-        'openapi://components/schemas/InvalidSchemaName',
-        'Component "InvalidSchemaName" of type "schemas" not found'
-      );
+      const uri = 'openapi://components/schemas/InvalidSchemaName';
+      await checkErrorResponse(uri, 'Component "InvalidSchemaName" of type "schemas" not found');
     });
   });
 });

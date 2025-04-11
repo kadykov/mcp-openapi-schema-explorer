@@ -4,6 +4,7 @@ import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
+import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -139,8 +140,13 @@ describe('TopLevelFieldHandler', () => {
       mockGetTransformedSpec.mockRejectedValue(error);
       const variables: Variables = { field: 'info' };
       const uri = new URL('openapi://info');
+      // Match the core error message using RegExp
+      const expectedLogMessage = /Failed to load spec/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      // Use the helper, letting TypeScript infer the return type
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -156,8 +162,13 @@ describe('TopLevelFieldHandler', () => {
       mockGetTransformedSpec.mockResolvedValue(invalidSpec as unknown as OpenAPIV3.Document);
       const variables: Variables = { field: 'info' };
       const uri = new URL('openapi://info');
+      // Match the core error message using RegExp
+      const expectedLogMessage = /Only OpenAPI v3 specifications are supported/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      // Use the helper, letting TypeScript infer the return type
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({

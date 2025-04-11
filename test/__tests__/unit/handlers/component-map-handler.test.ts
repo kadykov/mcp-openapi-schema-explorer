@@ -4,6 +4,7 @@ import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
+import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -123,8 +124,11 @@ describe('ComponentMapHandler', () => {
     it('should return error for invalid component type', async () => {
       const variables: Variables = { type: 'invalidType' };
       const uri = new URL('openapi://components/invalidType');
+      const expectedLogMessage = /Invalid component type: invalidType/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -141,8 +145,11 @@ describe('ComponentMapHandler', () => {
       mockGetTransformedSpec.mockRejectedValue(error);
       const variables: Variables = { type: 'schemas' };
       const uri = new URL('openapi://components/schemas');
+      const expectedLogMessage = /Spec load failed/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -158,8 +165,11 @@ describe('ComponentMapHandler', () => {
       mockGetTransformedSpec.mockResolvedValue(invalidSpec as unknown as OpenAPIV3.Document);
       const variables: Variables = { type: 'schemas' };
       const uri = new URL('openapi://components/schemas');
+      const expectedLogMessage = /Only OpenAPI v3 specifications are supported/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({

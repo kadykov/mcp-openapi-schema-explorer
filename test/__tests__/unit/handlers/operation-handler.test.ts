@@ -4,6 +4,7 @@ import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
+import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -153,8 +154,11 @@ describe('OperationHandler', () => {
     it('should handle empty method array', async () => {
       const variables: Variables = { path: encodedPathItems, method: [] };
       const uri = new URL(`openapi://paths/${encodedPathItems}/`);
+      const expectedLogMessage = /No valid HTTP method specified/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -170,8 +174,11 @@ describe('OperationHandler', () => {
       mockGetTransformedSpec.mockRejectedValue(error);
       const variables: Variables = { path: encodedPathItems, method: 'get' };
       const uri = new URL(`openapi://paths/${encodedPathItems}/get`);
+      const expectedLogMessage = /Spec load failed/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
@@ -184,11 +191,14 @@ describe('OperationHandler', () => {
 
     it('should handle non-OpenAPI v3 spec', async () => {
       const invalidSpec = { swagger: '2.0', info: {} };
-      mockGetTransformedSpec.mockResolvedValue(invalidSpec as any);
+      mockGetTransformedSpec.mockResolvedValue(invalidSpec as unknown as OpenAPIV3.Document);
       const variables: Variables = { path: encodedPathItems, method: 'get' };
       const uri = new URL(`openapi://paths/${encodedPathItems}/get`);
+      const expectedLogMessage = /Only OpenAPI v3 specifications are supported/;
 
-      const result = await handler.handleRequest(uri, variables, mockExtra);
+      const result = await suppressExpectedConsoleError(expectedLogMessage, () =>
+        handler.handleRequest(uri, variables, mockExtra)
+      );
 
       expect(result.contents).toHaveLength(1);
       expect(result.contents[0]).toEqual({
