@@ -33,9 +33,16 @@ async function main(): Promise<void> {
     const specLoader = new SpecLoaderService(config.specPath, referenceTransform);
     await specLoader.loadSpec();
 
-    // Create MCP server
+    // Get the loaded spec to extract the title
+    const spec = await specLoader.getSpec();
+    const defaultServerName = 'OpenAPI Schema Explorer';
+    const serverName = spec.info?.title
+      ? `Schema Explorer for ${spec.info.title}`
+      : defaultServerName;
+
+    // Create MCP server with dynamic name
     const server = new McpServer({
-      name: 'openapi-explorer',
+      name: serverName,
       version: '1.0.0',
     });
 

@@ -95,6 +95,12 @@
 - Added E2E tests (`test/__tests__/e2e/format.test.ts`) to verify the new format.
 - Updated test helper types (`test/utils/mcp-test-helpers.ts`).
 
+### Dynamic Server Name (✓)
+
+- Modified `src/index.ts` to load the OpenAPI spec before server initialization.
+- Extracted `info.title` from the loaded spec.
+- Set the `McpServer` name dynamically using the format `Schema Explorer for {title}` with a fallback.
+
 ## Planned Features (⏳)
 
 - **Handler Unit Tests:** Complete unit tests for all new handlers (mocking services).

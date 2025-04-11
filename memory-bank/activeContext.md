@@ -2,9 +2,17 @@
 
 ## Current Focus
 
-Completed implementation of remote specification loading (via URL) and Swagger v2.0 support. Updated Memory Bank.
+Completed implementation of dynamic server name based on OpenAPI `info.title`. Updated Memory Bank.
 
 ## Recent Progress
+
+### Dynamic Server Name (✓)
+
+1.  **Spec Loading:** Modified `src/index.ts` to load the OpenAPI spec using `createSpecLoader` _before_ initializing `McpServer`.
+2.  **Name Generation:** Extracted `info.title` from the loaded spec and constructed a dynamic server name (`Schema Explorer for {title}`) with a fallback to `'OpenAPI Schema Explorer'`.
+3.  **Server Initialization:** Updated `McpServer` constructor in `src/index.ts` to use the generated dynamic name.
+4.  **Dependency Injection:** Confirmed handlers already receive the shared `specLoader` instance correctly, requiring no changes to handler constructors.
+5.  **Memory Bank Update (✓):** Updated `activeContext.md` and `progress.md`.
 
 ### Minified JSON Output Format (✓)
 
@@ -58,8 +66,9 @@ Completed implementation of remote specification loading (via URL) and Swagger v
 - Server now loads OpenAPI v3.0 and Swagger v2.0 specs from local files or remote URLs.
 - Swagger v2.0 specs are automatically converted to v3.0.
 - Internal references are transformed to MCP URIs.
-- **New:** Added `json-minified` output format option.
-- Core resource exploration functionality remains operational with the new loading mechanism and output format.
+- Added `json-minified` output format option.
+- **New:** Server name is now dynamically set based on the loaded spec's `info.title` (e.g., "Schema Explorer for Petstore API").
+- Core resource exploration functionality remains operational.
 - Unit tests for `SpecLoaderService` and `Formatters` are updated.
 - E2E tests cover basic loading scenarios and output formats (JSON, YAML, Minified JSON).
 
