@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
+import { buildComponentDetailUri } from '../utils/uri-builder.js'; // Added .js extension
 
 export interface TransformContext {
   resourceType: 'endpoint' | 'schema';
@@ -79,16 +80,21 @@ export class OpenAPITransformer implements ReferenceTransform<OpenAPIV3.Document
       return { $ref: ref }; // Keep external refs as-is
     }
 
+    // Example ref: #/components/schemas/MySchema
     const parts = ref.split('/');
-    // Handle schema references
-    if (parts[1] === 'components' && parts[2] === 'schemas') {
-      const schemaName = parts[3];
+    // Check if it's an internal component reference
+    if (parts[0] === '#' && parts[1] === 'components' && parts.length === 4) {
+      const componentType = parts[2];
+      const componentName = parts[3];
+
+      // Use the centralized builder to create the correct URI
+      const newUri = buildComponentDetailUri(componentType, componentName);
       return {
-        $ref: `openapi://schema/${schemaName}`,
+        $ref: newUri,
       };
     }
 
-    // Keep other internal references as-is for now
+    // Keep other internal references (#/paths/...) and external references as-is
     return { $ref: ref };
   }
 

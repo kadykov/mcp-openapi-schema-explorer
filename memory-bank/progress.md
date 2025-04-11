@@ -59,8 +59,11 @@
    - Consistent error handling via `createErrorResult` and `formatResults`.
    - Errors formatted as `text/plain`.
 
-### Reference Transformation (✓)
-*   (No changes in this refactor, still active)
+### Reference Transformation (✓ - Updated)
+*   Centralized URI generation logic in `src/utils/uri-builder.ts`.
+*   `ReferenceTransformService` now correctly transforms all `#/components/...` refs to `openapi://components/{type}/{name}` using the URI builder.
+*   Path encoding corrected to remove leading slashes before encoding.
+*   Unit tests updated and passing for URI builder and transformer.
 
 ### Output Format Enhancement (✓)
 *   (No changes in this refactor, still active - JSON/YAML supported via `IFormatter`)
@@ -69,8 +72,8 @@
 *   **Handler Unit Tests:** Complete unit tests for all new handlers (mocking services).
 *   **Refactor Helpers:** Move duplicated helpers (`formatResults`, `isOpenAPIV3`) from handlers to `handler-utils.ts`. (Deferred during refactor).
 *   **Completion Logic:** Implement `complete` callbacks in `ResourceTemplate` definitions within handlers (currently `undefined`).
-*   **Reference Traversal:** Service to resolve `$ref` URIs (e.g., follow `openapi://schema/Task` from an endpoint detail).
-*   **Enhanced Component Support:** Ensure all component types listed in `VALID_COMPONENT_TYPES` are fully handled if present in spec.
+*   **Reference Traversal:** Service to resolve `$ref` URIs (e.g., follow `openapi://components/schemas/Task` from an endpoint detail).
+*   **Enhanced Component Support:** Ensure all component types listed in `VALID_COMPONENT_TYPES` are fully handled if present in spec. (Reference transformation now supports all types).
 *   **Parameter Validation:** Add validation logic if needed.
 *   **Further Token Optimizations:** Explore more ways to reduce token usage in list/detail views.
 
@@ -82,6 +85,7 @@
 
 2. Testing
    - Unit tests added for rendering logic.
+   - Unit tests updated for URI builder, reference transformer, and path item rendering.
    - E2E tests updated for new structure and complex fixture.
    - Need handler unit tests.
 

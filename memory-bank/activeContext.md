@@ -19,6 +19,13 @@ Completed major refactoring of resource handling and URI structure.
     *   Added/passed E2E tests for the new URI structure using `complex-endpoint.json`.
 7.  **Documentation:** Updated `systemPatterns.md` and `progress.md`.
 8.  **Archived Old Code:** Moved previous implementations to `local-docs/old-implementation/`.
+9.  **URI Generation Refactor (✓):**
+    *   Created centralized URI builder utility (`src/utils/uri-builder.ts`).
+    *   Updated `$ref` transformation (`src/services/reference-transform.ts`) to use the builder and support all component types (`openapi://components/{type}/{name}`).
+    *   Updated hint generation (`src/rendering/utils.ts`, `components.ts`, `path-item.ts`) to use the builder.
+    *   Corrected path encoding in builder (removed leading slash encoding).
+    *   Updated relevant unit tests (`uri-builder.test.ts`, `reference-transform.test.ts`, `path-item.test.ts`).
+    *   Fixed `RenderablePathItem` instantiation in handlers (`path-item-handler.ts`, `operation-handler.ts`).
 
 ## Implementation Status
 *   New architecture with separate rendering and handling layers is in place.

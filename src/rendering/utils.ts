@@ -1,5 +1,24 @@
+// NOTE: This block replaces the previous import block to ensure types/interfaces are defined correctly.
 import { OpenAPIV3 } from 'openapi-types';
-import { RenderResultItem } from './types.js'; // Add .js
+import { RenderContext, RenderResultItem } from './types.js'; // Add .js
+import {
+  buildComponentDetailUriSuffix,
+  buildComponentMapUriSuffix,
+  buildOperationUriSuffix,
+  // buildPathItemUriSuffix, // Not currently used by generateListHint
+} from '../utils/uri-builder.js'; // Added .js extension
+
+// Define possible types for list items to guide hint generation
+type ListItemType = 'componentType' | 'componentName' | 'pathMethod';
+
+// Define context needed for generating the correct detail URI suffix
+interface HintContext {
+  itemType: ListItemType;
+  // For componentName hints, the parent component type is needed
+  parentComponentType?: string;
+  // For pathMethod hints, the parent path is needed
+  parentPath?: string;
+}
 
 /**
  * Safely retrieves the summary from an Operation object.
@@ -16,21 +35,57 @@ export function getOperationSummary(
 }
 
 /**
- * Helper to generate a standard hint text for list views.
- * @param context - The rendering context.
- * @param currentUriSuffix - The suffix for the current list view (e.g., 'paths', 'components/schemas').
- * @param itemType - A descriptive name for the items being listed (e.g., 'path', 'schema').
- * @param detailUriPattern - The pattern for accessing item details (e.g., 'paths/{encoded_path}/{method}', 'components/schemas/{name}').
+ * Helper to generate a standard hint text for list views, using the centralized URI builders.
+ * @param renderContext - The rendering context containing the base URI.
+ * @param hintContext - Context about the type of items being listed and their parent context.
  * @returns The hint string.
  */
-export function generateListHint(
-  context: { baseUri: string },
-  _currentUriSuffix: string, // Prefix with _ as it's not directly used in the string
-  itemType: string,
-  detailUriPattern: string // This pattern should already include the necessary path/type prefix
-): string {
-  // The detailUriPattern should be relative to the baseUri, e.g., 'paths/{encoded_path}/{method}' or 'components/schemas/{name}'
-  return `\nHint: Use '${context.baseUri}${detailUriPattern}' to view details for a specific ${itemType}.`;
+export function generateListHint(renderContext: RenderContext, hintContext: HintContext): string {
+  let detailUriSuffixPattern: string;
+  let itemTypeName: string; // User-friendly name for the item type in the hint text
+
+  switch (hintContext.itemType) {
+    case 'componentType':
+      // Listing component types (e.g., schemas, responses) at openapi://components
+      // Hint should point to openapi://components/{type}
+      detailUriSuffixPattern = buildComponentMapUriSuffix('{type}'); // Use placeholder
+      itemTypeName = 'component type';
+      break;
+    case 'componentName':
+      // Listing component names (e.g., MySchema, User) at openapi://components/{type}
+      // Hint should point to openapi://components/{type}/{name}
+      if (!hintContext.parentComponentType) {
+        console.warn('generateListHint called for componentName without parentComponentType');
+        return ''; // Avoid generating a broken hint
+      }
+      // Use the actual parent type and a placeholder for the name
+      detailUriSuffixPattern = buildComponentDetailUriSuffix(
+        hintContext.parentComponentType,
+        '{name}'
+      );
+      itemTypeName = hintContext.parentComponentType.slice(0, -1); // e.g., 'schema' from 'schemas'
+      break;
+    case 'pathMethod':
+      // Listing methods (e.g., get, post) at openapi://paths/{path}
+      // Hint should point to openapi://paths/{path}/{method}
+      if (!hintContext.parentPath) {
+        console.warn('generateListHint called for pathMethod without parentPath');
+        return ''; // Avoid generating a broken hint
+      }
+      // Use the actual parent path and a placeholder for the method
+      detailUriSuffixPattern = buildOperationUriSuffix(hintContext.parentPath, '{method}');
+      itemTypeName = 'operation'; // Or 'method'? 'operation' seems clearer
+      break;
+    default:
+      // Explicitly cast to string to avoid potential 'never' type issue in template literal
+      console.warn(`Unknown itemType in generateListHint: ${String(hintContext.itemType)}`);
+      return ''; // Avoid generating a hint if context is unknown
+  }
+
+  // Construct the full hint URI pattern using the base URI
+  const fullHintPattern = `${renderContext.baseUri}${detailUriSuffixPattern}`;
+
+  return `\nHint: Use '${fullHintPattern}' to view details for a specific ${itemTypeName}.`;
 }
 
 /**

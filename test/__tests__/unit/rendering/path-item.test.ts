@@ -30,12 +30,15 @@ const samplePathItem: OpenAPIV3.PathItemObject = {
   ],
 };
 
-const pathUriSuffix = 'paths/items';
+// Define both the raw path and the expected suffix (built using the builder logic)
+const rawPath = '/items';
+const pathUriSuffix = 'paths/items'; // Builder removes leading '/' and encodes, but '/items' has no special chars
 
 describe('RenderablePathItem', () => {
   describe('renderList (List Methods)', () => {
     it('should render a list of methods correctly', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       const result = renderable.renderList(mockContext);
 
       expect(result).toHaveLength(1);
@@ -43,9 +46,11 @@ describe('RenderablePathItem', () => {
       expect(result[0].renderAsList).toBe(true);
       expect(result[0].isError).toBeUndefined();
 
-      // Define expected output lines based on the new format
+      // Define expected output lines based on the new format and builder logic
+      // generateListHint uses buildOperationUriSuffix which encodes the path
+      // Since rawPath is '/items', encoded is 'items'.
       const expectedHint =
-        "Hint: Use 'openapi://paths/items/{method}' to view details for a specific operation."; // Updated hint text
+        "Hint: Use 'openapi://paths/items/{method}' to view details for a specific operation.";
       const expectedLineDelete = 'DELETE'; // No summary/opId
       const expectedLineGet = 'GET: Get Item'; // Summary exists
       const expectedLinePost = 'POST: Create Item'; // Summary exists
@@ -59,7 +64,8 @@ describe('RenderablePathItem', () => {
       const noMethodsPathItem: OpenAPIV3.PathItemObject = {
         parameters: samplePathItem.parameters,
       };
-      const renderable = new RenderablePathItem(noMethodsPathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(noMethodsPathItem, rawPath, pathUriSuffix);
       const result = renderable.renderList(mockContext);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
@@ -70,7 +76,8 @@ describe('RenderablePathItem', () => {
     });
 
     it('should return error if path item is undefined', () => {
-      const renderable = new RenderablePathItem(undefined, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(undefined, rawPath, pathUriSuffix);
       const result = renderable.renderList(mockContext);
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
@@ -84,7 +91,8 @@ describe('RenderablePathItem', () => {
 
   describe('renderOperationDetail (Get Operation Detail)', () => {
     it('should return detail for a single valid method', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       const result = renderable.renderOperationDetail(mockContext, ['get']);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
@@ -94,7 +102,8 @@ describe('RenderablePathItem', () => {
     });
 
     it('should return details for multiple valid methods', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       const result = renderable.renderOperationDetail(mockContext, ['post', 'delete']);
       expect(result).toHaveLength(2);
       expect(result).toContainEqual({
@@ -108,7 +117,8 @@ describe('RenderablePathItem', () => {
     });
 
     it('should return error for non-existent method', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       const result = renderable.renderOperationDetail(mockContext, ['put']);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
@@ -121,7 +131,8 @@ describe('RenderablePathItem', () => {
     });
 
     it('should handle mix of valid and invalid methods', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       const result = renderable.renderOperationDetail(mockContext, ['get', 'patch']);
       expect(result).toHaveLength(2);
       expect(result).toContainEqual({
@@ -138,7 +149,8 @@ describe('RenderablePathItem', () => {
     });
 
     it('should return error if path item is undefined', () => {
-      const renderable = new RenderablePathItem(undefined, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(undefined, rawPath, pathUriSuffix);
       const result = renderable.renderOperationDetail(mockContext, ['get']);
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual({
@@ -153,7 +165,8 @@ describe('RenderablePathItem', () => {
 
   describe('renderDetail (Interface Method)', () => {
     it('should delegate to renderList', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       const listResult = renderable.renderList(mockContext);
       const detailResult = renderable.renderDetail(mockContext);
       expect(detailResult).toEqual(listResult);
@@ -162,19 +175,22 @@ describe('RenderablePathItem', () => {
 
   describe('getOperation', () => {
     it('should return correct operation object (case-insensitive)', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       expect(renderable.getOperation('get')).toBe(samplePathItem.get);
       expect(renderable.getOperation('POST')).toBe(samplePathItem.post);
       expect(renderable.getOperation('Delete')).toBe(samplePathItem.delete);
     });
 
     it('should return undefined for non-existent method', () => {
-      const renderable = new RenderablePathItem(samplePathItem, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(samplePathItem, rawPath, pathUriSuffix);
       expect(renderable.getOperation('put')).toBeUndefined();
     });
 
     it('should return undefined if path item is undefined', () => {
-      const renderable = new RenderablePathItem(undefined, pathUriSuffix);
+      // Provide all 3 arguments to constructor
+      const renderable = new RenderablePathItem(undefined, rawPath, pathUriSuffix);
       expect(renderable.getOperation('get')).toBeUndefined();
     });
   });

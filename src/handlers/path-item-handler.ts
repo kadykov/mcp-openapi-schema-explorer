@@ -9,6 +9,7 @@ import { RenderableDocument } from '../rendering/document.js';
 import { RenderablePathItem } from '../rendering/path-item.js';
 import { RenderContext, RenderResultItem } from '../rendering/types.js';
 import { createErrorResult } from '../rendering/utils.js';
+import { buildPathItemUriSuffix } from '../utils/uri-builder.js'; // Added .js extension
 // Import shared handler utils
 import { formatResults, isOpenAPIV3, FormattedResultItem } from './handler-utils.js'; // Already has .js
 
@@ -41,7 +42,10 @@ export class PathItemHandler {
     variables: Variables
   ): Promise<{ contents: FormattedResultItem[] }> => {
     const encodedPath = variables.path as string;
-    const pathUriSuffix = `paths/${encodedPath}`;
+    // Decode the path received from the URI variable
+    const decodedPath = decodeURIComponent(encodedPath || '');
+    // Use the builder to create the suffix, which will re-encode the path correctly
+    const pathUriSuffix = buildPathItemUriSuffix(decodedPath);
     const context: RenderContext = { formatter: this.formatter, baseUri: BASE_URI };
     let resultItems: RenderResultItem[];
 
@@ -57,12 +61,17 @@ export class PathItemHandler {
       }
 
       const renderableDoc = new RenderableDocument(spec);
-      // Use robust path normalization from old implementation
-      const lookupPath = '/' + decodeURIComponent(encodedPath || '').replace(/^\/+/, '');
+      // Use the decoded path for lookup in the spec object
+      // Ensure leading slash for consistency if needed (depends on spec structure)
+      const lookupPath = decodedPath.startsWith('/') ? decodedPath : `/${decodedPath}`;
       const pathItemObj = renderableDoc.getPathsObject()?.[lookupPath];
 
-      // Instantiate RenderablePathItem and call its renderList
-      const renderablePathItem = new RenderablePathItem(pathItemObj, pathUriSuffix);
+      // Instantiate RenderablePathItem with the raw path and the built suffix
+      const renderablePathItem = new RenderablePathItem(
+        pathItemObj,
+        lookupPath, // Pass the raw, decoded path
+        pathUriSuffix // Pass the correctly built suffix
+      );
       resultItems = renderablePathItem.renderList(context);
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);

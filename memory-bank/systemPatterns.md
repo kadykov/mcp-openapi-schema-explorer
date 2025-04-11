@@ -39,6 +39,13 @@ graph TD
 
     Handlers --> Rendering
     SpecLoader --> Rendering
+
+    subgraph Utils
+        UriBuilder[URI Builder (src/utils)]
+    end
+
+    UriBuilder --> Transform
+    UriBuilder --> RenderUtils
 ```
 
 ## Component Structure
@@ -61,7 +68,7 @@ graph TD
 - **Interface:** `RenderableSpecObject` defines `renderList()` and `renderDetail()` methods returning `RenderResultItem[]`.
 - **RenderResultItem:** Intermediate structure holding data (`unknown`), `uriSuffix`, `isError?`, `errorText?`, `renderAsList?`.
 - **RenderContext:** Passed to render methods, contains `formatter` and `baseUri`.
-- **Utils:** Helper functions (`getOperationSummary`, `generateListHint`, `createErrorResult`) in `src/rendering/utils.ts`.
+- **Utils:** Helper functions (`getOperationSummary`, `generateListHint`, `createErrorResult`) in `src/rendering/utils.ts`. `generateListHint` now uses centralized URI builder logic.
 
 ### Handler Layer
 - **Structure:** Separate handlers for each distinct URI pattern/resource type.
@@ -72,13 +79,20 @@ graph TD
     - Invoke the correct rendering method (`renderList` or a specific detail method like `renderTopLevelFieldDetail`, `renderOperationDetail`, `renderComponentDetail`).
     - Format the `RenderResultItem[]` using `formatResults` from `src/handlers/handler-utils.ts`.
     - Construct the final `{ contents: ... }` response object.
+    - Instantiate `RenderablePathItem` correctly with raw path and built suffix.
 - **Handlers:**
     - `TopLevelFieldHandler`: Handles `openapi://{field}`. Delegates list rendering for `paths`/`components` to `RenderablePaths`/`RenderableComponents`. Renders details for other fields (`info`, `servers`, etc.) via `RenderableDocument.renderTopLevelFieldDetail`.
-    - `PathItemHandler`: Handles `openapi://paths/{path}`. Uses `RenderablePathItem.renderList` to list methods.
-    - `OperationHandler`: Handles `openapi://paths/{path}/{method*}`. Uses `RenderablePathItem.renderOperationDetail` for operation details. Handles multi-value `method` variable.
+    - `PathItemHandler`: Handles `openapi://paths/{path}`. Uses `RenderablePathItem.renderList` to list methods. Instantiates `RenderablePathItem` with raw path and built suffix.
+    - `OperationHandler`: Handles `openapi://paths/{path}/{method*}`. Uses `RenderablePathItem.renderOperationDetail` for operation details. Handles multi-value `method` variable. Instantiates `RenderablePathItem` with raw path and built suffix.
     - `ComponentMapHandler`: Handles `openapi://components/{type}`. Uses `RenderableComponentMap.renderList` to list component names.
     - `ComponentDetailHandler`: Handles `openapi://components/{type}/{name*}`. Uses `RenderableComponentMap.renderComponentDetail` for component details. Handles multi-value `name` variable.
 - **Utils:** Shared functions (`formatResults`, `isOpenAPIV3`, `FormattedResultItem` type) in `src/handlers/handler-utils.ts`.
+
+### Utilities Layer
+- **URI Builder (`src/utils/uri-builder.ts`):**
+    - Centralized functions for building full URIs (`openapi://...`) and URI suffixes.
+    - Handles encoding of path components (removing leading slash first).
+    - Used by `ReferenceTransformService` and the rendering layer (`generateListHint`, `Renderable*` classes) to ensure consistency.
 
 ### Configuration Layer
 - Environment variables validation (via `src/config.ts`)
@@ -96,14 +110,15 @@ graph TD
     - `openapi://paths/{path}/{method*}`: Operation details (supports multiple methods).
     - `openapi://components/{type}`: List names for a specific component type.
     - `openapi://components/{type}/{name*}`: Component details (supports multiple names).
-- **Reference URIs (Unchanged for now):**
-    - `openapi://schema/{name}` - Schema reference (Note: This is how refs are *generated*, but access is via `openapi://components/schemas/{name*}`)
-    - (Potential future: `openapi://parameter/{name}`, `openapi://response/{name}` etc. accessed via `openapi://components/...`)
+- **Reference URIs (Corrected):**
+    - Internal `$ref`s like `#/components/schemas/MySchema` are transformed by `ReferenceTransformService` into resolvable MCP URIs: `openapi://components/schemas/MySchema`.
+    - This applies to all component types under `#/components/`.
+    - External references remain unchanged.
 
 ### Response Format Patterns
 1. **Token-Efficient Lists:**
    - `text/plain` format used for all list views (`openapi://paths`, `openapi://components`, `openapi://paths/{path}`, `openapi://components/{type}`).
-   - Include hints for navigating to detail views.
+   - Include hints for navigating to detail views, generated via `generateListHint` using the centralized URI builder.
    - `openapi://paths` format: `METHOD1 METHOD2 /path`
    - `openapi://paths/{path}` format: `METHOD: Summary/OpId`
    - `openapi://components` format: `- type`
@@ -131,7 +146,7 @@ graph TD
    - Custom format handlers (via `IFormatter` interface)
 
 3. URI Resolution:
-   - Reference transformation service (`ReferenceTransformService`) handles converting `#/components/schemas/...` to `openapi://schema/...` URIs during spec loading. (Note: Accessing these requires the new `openapi://components/schemas/...` URI).
+   - Reference transformation service (`ReferenceTransformService`) handles converting `#/components/{type}/{name}` to `openapi://components/{type}/{name}` URIs during spec loading.
    - Cross-resource linking is implicit via generated URIs in hints and transformed refs.
    - External references are currently kept as-is.
 
@@ -145,9 +160,10 @@ graph TD
    - Handler tests with type safety
    - Rendering class tests (`Renderable*` classes).
    - Handler tests (mocking services).
-   - Reference transformation tests.
+   - Reference transformation tests (verifying correct URI format).
+   - URI builder utility tests.
    - Format-specific tests.
-   - Edge case handling.
+   - Edge case handling (path encoding).
 
 2. Integration Tests (Less emphasis due to strong unit/E2E)
    - Service cooperation (e.g., SpecLoader + Transformer).

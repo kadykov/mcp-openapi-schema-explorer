@@ -46,7 +46,8 @@ export class RenderableComponents implements RenderableSpecObject {
       listText += `- ${type}\n`;
     });
 
-    listText += generateListHint(context, 'components', 'component type', 'components/{type}');
+    // Use the new hint generator structure
+    listText += generateListHint(context, { itemType: 'componentType' });
 
     return [
       {
@@ -119,12 +120,11 @@ export class RenderableComponentMap implements RenderableSpecObject {
       listText += `- ${name}\n`;
     });
 
-    listText += generateListHint(
-      context,
-      this.mapUriSuffix,
-      this.componentType.slice(0, -1), // singularize (naive)
-      `${this.mapUriSuffix}/{name}`
-    );
+    // Use the new hint generator structure, providing parent type
+    listText += generateListHint(context, {
+      itemType: 'componentName',
+      parentComponentType: this.componentType,
+    });
 
     return [
       {

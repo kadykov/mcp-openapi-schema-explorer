@@ -10,7 +10,8 @@ import { getOperationSummary, createErrorResult, generateListHint } from './util
 export class RenderablePathItem implements RenderableSpecObject {
   constructor(
     private pathItem: OpenAPIV3.PathItemObject | undefined,
-    private pathUriSuffix: string // e.g., 'paths/users'
+    private path: string, // The raw, decoded path string e.g., "/users/{userId}"
+    private pathUriSuffix: string // Built using buildPathItemUriSuffix(path) e.g., 'paths/users%7BuserId%7D'
   ) {}
 
   /**
@@ -42,13 +43,11 @@ export class RenderablePathItem implements RenderableSpecObject {
       ];
     }
 
-    // Generate hint first
-    const hint = generateListHint(
-      context,
-      this.pathUriSuffix,
-      'operation',
-      `${this.pathUriSuffix}/{method}` // Detail pattern
-    );
+    // Generate hint first using the new structure
+    const hint = generateListHint(context, {
+      itemType: 'pathMethod',
+      parentPath: this.path, // Use the stored raw path
+    });
     // Hint includes leading newline, so start output with it directly
     let outputLines: string[] = [hint.trim(), '']; // Trim leading newline from hint for first line
 
