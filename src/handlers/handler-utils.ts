@@ -79,49 +79,6 @@ export function isOpenAPIV3(spec: unknown): spec is OpenAPIV3.Document {
 }
 
 /**
- * Validates that the provided key(s) exist as own properties in the given object.
- * Throws an McpError with ErrorCode.NotFound if validation fails.
- * Returns the validated key(s) if successful.
- *
- * @param obj The object to check against (e.g., spec.paths, spec.components[type]).
- * @param keys The key or array of keys to validate (e.g., path, method, type, name).
- * @param objectNameForError A descriptive name for the object being checked, used in error messages (e.g., 'path', 'component type', 'method', 'component name').
- * @returns The validated key or array of keys.
- * @throws {McpError} If the object is invalid or any key is not found.
- */
-export function ensureValidKeys<T extends string | string[]>(
-  obj: unknown,
-  keys: T,
-  objectNameForError: string
-): T {
-  if (typeof obj !== 'object' || obj === null) {
-    // Use standard Error
-    throw new Error(
-      `Invalid object provided for key validation (${objectNameForError}). Expected an object, got ${typeof obj}.`
-    );
-  }
-
-  const actualKeys = Object.keys(obj);
-  const keysToCheck = Array.isArray(keys) ? keys : [keys];
-
-  for (const key of keysToCheck) {
-    if (typeof key !== 'string' || !actualKeys.includes(key)) {
-      // Avoid logging potentially sensitive keys directly in the error message if needed,
-      // but for this context, showing the invalid key is helpful for debugging.
-      // Explicitly cast `key` to string to satisfy linter rule
-      const errorMessage = `Invalid ${objectNameForError} key: "${String(key)}". Not found in available keys.`;
-      // Use standard Error
-      throw new Error(errorMessage);
-    }
-  }
-
-  // If all keys are valid, return the original input (single string or array)
-  return keys;
-}
-
-// Removed unused getValidatedValue function
-
-/**
  * Safely retrieves a PathItemObject from the specification using a Map.
  * Throws an McpError if the path is not found.
  *
