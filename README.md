@@ -2,6 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/mcp-openapi-schema-explorer.svg)](https://badge.fury.io/js/mcp-openapi-schema-explorer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![codecov](https://codecov.io/gh/kadykov/mcp-openapi-schema-explorer/graph/badge.svg?token=LFDOMJ6W4W)](https://codecov.io/gh/kadykov/mcp-openapi-schema-explorer)
 
 An MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resources**.
 
