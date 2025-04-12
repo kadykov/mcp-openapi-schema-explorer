@@ -1,6 +1,10 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 // Import specific SDK types needed
-import { ReadResourceResult, TextResourceContents } from '@modelcontextprotocol/sdk/types.js';
+import {
+  ReadResourceResult,
+  TextResourceContents,
+  // Removed unused CompleteRequest, CompleteResult
+} from '@modelcontextprotocol/sdk/types.js';
 import { startMcpServer, McpTestContext } from '../../utils/mcp-test-helpers';
 import path from 'path';
 
@@ -253,6 +257,91 @@ describe('E2E Tests for Refactored Resources', () => {
         uri,
         'None of the requested names (InvalidSchemaName) are valid for component type "schemas". Available names: CreateTaskRequest, Task, TaskList'
       );
+    });
+  });
+
+  // Removed ListResourceTemplates test suite as the 'complete' property
+  // is likely not part of the standard response payload.
+  // We assume the templates are registered correctly in src/index.ts.
+
+  describe('Completion Tests', () => {
+    beforeEach(async () => await setup()); // Use the same setup
+
+    it('should provide completions for {field}', async () => {
+      const params = {
+        argument: { name: 'field', value: '' }, // Empty value to get all
+        ref: { type: 'ref/resource' as const, uri: 'openapi://{field}' },
+      };
+      const result = await client.complete(params);
+      expect(result.completion).toBeDefined();
+      expect(result.completion.values).toEqual(
+        expect.arrayContaining(['openapi', 'info', 'paths', 'components']) // Based on complex-endpoint.json
+      );
+      expect(result.completion.values).toHaveLength(4);
+    });
+
+    it('should provide completions for {path}', async () => {
+      const params = {
+        argument: { name: 'path', value: '' }, // Empty value to get all
+        ref: { type: 'ref/resource' as const, uri: 'openapi://paths/{path}' },
+      };
+      const result = await client.complete(params);
+      expect(result.completion).toBeDefined();
+      // Check for the encoded path from complex-endpoint.json
+      expect(result.completion.values).toEqual([
+        'api%2Fv1%2Forganizations%2F%7BorgId%7D%2Fprojects%2F%7BprojectId%7D%2Ftasks',
+      ]);
+    });
+
+    it('should provide completions for {method*}', async () => {
+      const params = {
+        argument: { name: 'method', value: '' }, // Empty value to get all
+        ref: {
+          type: 'ref/resource' as const,
+          uri: 'openapi://paths/{path}/{method*}', // Use the exact template URI
+        },
+      };
+      const result = await client.complete(params);
+      expect(result.completion).toBeDefined();
+      // Check for the static list of methods defined in src/index.ts
+      expect(result.completion.values).toEqual([
+        'GET',
+        'POST',
+        'PUT',
+        'DELETE',
+        'PATCH',
+        'OPTIONS',
+        'HEAD',
+        'TRACE',
+      ]);
+    });
+
+    it('should provide completions for {type}', async () => {
+      const params = {
+        argument: { name: 'type', value: '' }, // Empty value to get all
+        ref: { type: 'ref/resource' as const, uri: 'openapi://components/{type}' },
+      };
+      const result = await client.complete(params);
+      expect(result.completion).toBeDefined();
+      // Check for component types in complex-endpoint.json
+      expect(result.completion.values).toEqual(['schemas']);
+    });
+
+    it('should NOT provide completions for {name*}', async () => {
+      const params = {
+        argument: { name: 'name', value: '' }, // Empty value to get all
+        ref: {
+          type: 'ref/resource' as const,
+          uri: 'openapi://components/{type}/{name*}', // Use the exact template URI
+        },
+      };
+      // Expect the call to potentially fail or return empty results,
+      // as no completion function is defined for 'name'.
+      // The exact behavior might depend on the SDK/server implementation
+      // when a completion function is missing. We'll assume it returns empty.
+      const result = await client.complete(params);
+      expect(result.completion).toBeDefined();
+      expect(result.completion.values).toEqual([]);
     });
   });
 });

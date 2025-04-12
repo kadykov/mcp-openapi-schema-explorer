@@ -18,7 +18,8 @@ const BASE_URI_SCHEME = 'openapi://';
  * @param path The path string to encode.
  * @returns The encoded path string, with leading slashes removed before encoding.
  */
-function encodeUriPathComponent(path: string): string {
+export function encodeUriPathComponent(path: string): string {
+  // Added export
   // Remove leading slashes before encoding
   const pathWithoutLeadingSlash = path.replace(/^\/+/, '');
   return encodeURIComponent(pathWithoutLeadingSlash);
