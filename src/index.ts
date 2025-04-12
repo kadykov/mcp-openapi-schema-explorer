@@ -96,7 +96,8 @@ async function main(): Promise<void> {
       pathTemplate,
       {
         mimeType: 'text/plain', // This always returns a list
-        description: 'List available HTTP methods for a specific path.',
+        description:
+          'List available HTTP methods for a specific path. (Note: {path} must be URL-encoded, e.g., /users/{id} becomes users%2F%7Bid%7D)',
         name: 'Path Methods List',
       },
       pathItemHandler.handleRequest
@@ -125,7 +126,8 @@ async function main(): Promise<void> {
       operationTemplate,
       {
         mimeType: formatter.getMimeType(), // Detail view uses formatter
-        description: 'Get details for one or more specific API operations (methods).',
+        description:
+          'Get details for one or more specific API operations (methods). (Note: {path} must be URL-encoded, e.g., /users/{id} becomes users%2F%7Bid%7D)',
         name: 'Operation Detail',
       },
       operationHandler.handleRequest
