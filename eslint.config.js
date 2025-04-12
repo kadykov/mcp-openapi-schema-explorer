@@ -77,8 +77,8 @@ export default [
       globals: {
         ...globals.node, // Enable Node.js global variables
       },
-      ecmaVersion: 2020, // Or appropriate version
-      sourceType: 'commonjs', // Explicitly set for require/module.exports if needed
+      ecmaVersion: 2022, // Use a recent version supporting top-level await etc.
+      sourceType: 'module', // Treat .js files in scripts/ as ES Modules
     },
     rules: {
       // Add any specific rules for scripts if needed, e.g., allow console
