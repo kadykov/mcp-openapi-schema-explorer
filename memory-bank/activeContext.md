@@ -2,9 +2,35 @@
 
 ## Current Focus
 
-Completed implementation of resource completion logic. Updated Memory Bank.
+Completed setup of automated versioning and releases using `semantic-release` and updated the CI workflow. Corrected dependency categorization in `package.json`. Updated Memory Bank.
 
 ## Recent Progress
+
+### Dependency Cleanup & Release Automation (✓)
+
+1.  **Dependency Correction:**
+    - Moved `swagger2openapi` from `devDependencies` to `dependencies` in `package.json`.
+    - Moved `@types/js-yaml` from `dependencies` to `devDependencies` in `package.json`.
+    - Removed unused `@types/swagger-parser` from `devDependencies` in `package.json`.
+    - Ran `npm install` to update `package-lock.json`.
+2.  **Semantic Release Setup:**
+    - Installed `semantic-release` and plugins (`@semantic-release/commit-analyzer`, `@semantic-release/release-notes-generator`, `@semantic-release/changelog`, `@semantic-release/npm`, `@semantic-release/github`, `@semantic-release/git`, `@semantic-release/exec`) as dev dependencies.
+    - Created `scripts/generate-version.js` to write the release version to `src/version.ts`.
+    - Created `.releaserc.json` configuring the release workflow, including using `@semantic-release/exec` to run the generation script and `@semantic-release/git` to commit `src/version.ts`.
+    - Updated `eslint.config.js` to correctly lint the `generate-version.js` script.
+3.  **Dynamic Versioning:**
+    - Created a default `src/version.ts` file (with version `0.0.0-dev`) tracked by Git to ensure local/CI builds work.
+    - Updated `src/index.ts` to import `VERSION` from `src/version.ts` and use it in the `McpServer` constructor.
+    - The default `src/version.ts` will be overwritten with the correct release version by `semantic-release` during the release process.
+4.  **CI Workflow Adaptation:**
+    - Updated `.github/workflows/ci.yml`.
+    - Removed Docker Compose dependency from the `test` job.
+    - Standardized on Node 22 for `test` and `security` jobs.
+    - Added `extractions/setup-just@v3` action to both jobs.
+    - Updated `test` job to run checks via `just all`.
+    - Updated `security` job to run checks via `just security` (keeping CodeQL separate).
+    - Added a new `release` job triggered on pushes to `main` (after `test` and `security` pass) that runs `npx semantic-release`. Configured necessary permissions and environment variables (`GITHUB_TOKEN`, placeholder for `NPM_TOKEN`).
+5.  **Memory Bank Update (✓):** Updated `activeContext.md`, `progress.md`, `systemPatterns.md`, and `techContext.md`.
 
 ### Dynamic Server Name (✓)
 
@@ -86,17 +112,26 @@ Completed implementation of resource completion logic. Updated Memory Bank.
 - Internal references are transformed to MCP URIs.
 - Added `json-minified` output format option.
 - Server name is now dynamically set based on the loaded spec's `info.title`.
-- **New:** Resource completion logic implemented for `{field}`, `{path}`, `{method*}`, `{type}`, and conditionally for `{name*}`.
+- **New:** Automated versioning and release process implemented using `semantic-release`.
+- **New:** CI workflow adapted for Node 22, uses `just` for checks, and includes a release job.
+- Dependencies correctly categorized (`swagger2openapi` in `dependencies`, types in `devDependencies`).
+- Resource completion logic implemented.
+- Dynamic server name implemented.
+- Minified JSON output format added.
+- Remote spec loading and Swagger v2.0 conversion support added.
 - Core resource exploration functionality remains operational.
 - Unit tests for `SpecLoaderService` and `Formatters` are updated.
-- E2E tests cover basic loading scenarios, output formats, resource exploration, and **resource completion**.
+- E2E tests cover basic loading scenarios, output formats, resource exploration, and resource completion.
 
 ## Next Actions / Immediate Focus
 
-1.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
-2.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
-3.  **Code Cleanup:** Address remaining TODOs (e.g., checking warnings in `spec-loader.ts`) and minor ESLint warnings.
-4.  **README Update:** Enhance `README.md` with detailed usage examples and explanations, including the new output format (deferred from this task).
+1.  **README Update:** Enhance `README.md` with:
+    - Details about the automated release process and the requirement for Conventional Commits.
+    - Instructions for setting up the `NPM_TOKEN` secret for publishing.
+    - Updated usage examples and explanations (including `json-minified` format).
+2.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
+3.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
+4.  **Code Cleanup:** Address remaining TODOs (e.g., checking warnings in `spec-loader.ts`) and minor ESLint warnings.
 
 ## Future Considerations (Post Immediate Actions)
 

@@ -101,6 +101,13 @@
 - Extracted `info.title` from the loaded spec.
 - Set the `McpServer` name dynamically using the format `Schema Explorer for {title}` with a fallback.
 
+### Dependency Cleanup & Release Automation (✓)
+
+1.  **Dependency Correction:** Correctly categorized runtime (`swagger2openapi`) vs. development (`@types/*`) dependencies in `package.json`. Removed unused types.
+2.  **Automated Releases:** Implemented `semantic-release` with conventional commit analysis, changelog generation, npm publishing, and GitHub releases.
+3.  **Dynamic Versioning:** Server version is now dynamically injected via `src/version.ts`, which is generated during the release process by `semantic-release` using `scripts/generate-version.js`. A default version file is tracked in Git for local builds.
+4.  **CI Workflow:** Updated `.github/workflows/ci.yml` to use Node 22, remove Docker Compose, use `just` for running checks (`just all`, `just security`), and added a `release` job to automate publishing on pushes to `main`.
+
 ## Planned Features (⏳)
 
 - **Handler Unit Tests:** Complete unit tests for all new handlers (mocking services).
@@ -126,6 +133,7 @@
    - Unit tests updated for URI builder, reference transformer, and path item rendering.
    - E2E tests updated for new structure and complex fixture. Added tests for resource completion.
    - Unit tests for `SpecLoaderService` updated for `swagger2openapi`.
+   - CI workflow updated to use `just` and includes automated release job.
 
 3. API Design
    - New URI structure implemented, aligned with OpenAPI spec.

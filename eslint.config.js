@@ -70,4 +70,19 @@ export default [
       'no-console': 'off', // Allow console in tests
     },
   },
+  // Configuration for scripts (like generate-version.js)
+  {
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node, // Enable Node.js global variables
+      },
+      ecmaVersion: 2020, // Or appropriate version
+      sourceType: 'commonjs', // Explicitly set for require/module.exports if needed
+    },
+    rules: {
+      // Add any specific rules for scripts if needed, e.g., allow console
+      'no-console': 'off',
+    },
+  },
 ];

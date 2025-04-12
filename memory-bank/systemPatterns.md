@@ -116,7 +116,21 @@ graph TD
 - Expects a single required argument: the path or URL to the specification file.
 - Supports an optional `--output-format` argument (`json`, `yaml`, `json-minified`).
 - Validates arguments and provides usage instructions on error.
-- Creates the `ServerConfig` object used by the server.
+  - Creates the `ServerConfig` object used by the server.
+
+## Release Automation (`semantic-release`)
+
+- **Configuration:** Defined in `.releaserc.json`.
+- **Workflow:**
+  1.  `@semantic-release/commit-analyzer`: Determines release type from conventional commits.
+  2.  `@semantic-release/release-notes-generator`: Generates release notes.
+  3.  `@semantic-release/changelog`: Updates `CHANGELOG.md`.
+  4.  `@semantic-release/npm`: Updates `version` in `package.json`.
+  5.  `@semantic-release/exec`: Runs `scripts/generate-version.js` to create/update `src/version.ts` with the new version.
+  6.  `@semantic-release/git`: Commits `package.json`, `package-lock.json`, `CHANGELOG.md`, and `src/version.ts`. Creates Git tag.
+  7.  `@semantic-release/github`: Creates GitHub Release.
+- **Trigger:** Executed by the `release` job in the GitHub Actions workflow (`.github/workflows/ci.yml`) on pushes to the `main` branch.
+- **Versioning:** The server version in `src/index.ts` is dynamically imported from the generated `src/version.ts`. A default `src/version.ts` (with `0.0.0-dev`) is kept in the repository for local builds.
 
 ## Resource Design Patterns
 
@@ -204,3 +218,7 @@ graph TD
 3. **Test Support:**
    - Type-safe test utilities (`mcp-test-helpers`). Updated `StartServerOptions` to include `json-minified`.
    - Test fixtures for v2.0 and v3.0 specs.
+4. **CI Integration (`.github/workflows/ci.yml`):**
+   - **`test` Job:** Runs on push/PR to `main`. Uses Node 22, installs `just`, runs `npm ci`, then `just all` (format, lint, build, test). Uploads coverage.
+   - **`security` Job:** Runs on push/PR to `main`. Uses Node 22, installs `just`, runs `npm ci`, then `just security` (audit, licenses). Runs CodeQL analysis separately.
+   - **`release` Job:** Runs _only_ on push to `main` after `test` and `security` pass. Checks out full history, installs dependencies, runs `npx semantic-release` using `GITHUB_TOKEN` and `NPM_TOKEN`.

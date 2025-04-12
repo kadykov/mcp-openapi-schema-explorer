@@ -15,6 +15,7 @@ import { SpecLoaderService } from './services/spec-loader.js';
 import { createFormatter } from './services/formatters.js';
 import { encodeUriPathComponent } from './utils/uri-builder.js'; // Import specific function
 import { isOpenAPIV3, getValidatedComponentMap } from './handlers/handler-utils.js'; // Import type guard and helper
+import { VERSION } from './version.js'; // Import the generated version
 
 async function main(): Promise<void> {
   try {
@@ -52,7 +53,7 @@ async function main(): Promise<void> {
     // Create MCP server with dynamic name
     const server = new McpServer({
       name: serverName,
-      version: '1.0.0',
+      version: VERSION, // Use the imported version
     });
 
     // Set up formatter and new handlers

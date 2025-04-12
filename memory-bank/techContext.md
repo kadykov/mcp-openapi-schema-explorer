@@ -9,11 +9,18 @@
 
 ## Key Dependencies
 
-- @modelcontextprotocol/sdk - Core MCP functionality
-- swagger2openapi - OpenAPI/Swagger spec loading, parsing, and v2->v3 conversion
-- openapi-types - OpenAPI type definitions
-- TypeScript compiler and types
-- @types/swagger2openapi (devDependency) - Type definitions for swagger2openapi
+- `@modelcontextprotocol/sdk`: Core MCP functionality
+- `swagger2openapi`: OpenAPI/Swagger spec loading, parsing, and v2->v3 conversion (Runtime dependency)
+- `js-yaml`: YAML parsing (Runtime dependency)
+- `zod`: Schema validation (Runtime dependency)
+- `openapi-types`: OpenAPI type definitions (devDependency)
+- `typescript`: TypeScript compiler (devDependency)
+- `@types/*`: Various type definitions (devDependencies)
+- `jest`: Testing framework (devDependency)
+- `eslint`: Code linting (devDependency)
+- `prettier`: Code formatting (devDependency)
+- `semantic-release` & plugins (`@semantic-release/*`): Automated releases (devDependencies)
+- `just`: Task runner (Used locally, installed via action in CI)
 
 ## Technical Requirements
 
@@ -30,6 +37,8 @@
 - Jest testing framework with coverage
 - ESLint for code quality
 - Prettier for code formatting
+- `just` task runner (`justfile`) for common development tasks (build, test, lint, etc.)
+- Conventional Commits standard for commit messages (required for `semantic-release`)
 - Test fixtures and helpers
 
 ## Code Organization
@@ -58,7 +67,10 @@
   - Verify resource completion logic using `client.complete()`.
 - Type-safe test utilities (`mcp-test-helpers`).
 - Test fixtures (including v2.0 and v3.0 examples).
-- Coverage reporting.
+- Coverage reporting via Jest and upload to Codecov via GitHub Actions.
+- CI Integration (`.github/workflows/ci.yml`):
+  - Runs checks (`just all`, `just security`, CodeQL) on pushes/PRs to `main`.
+  - Uses Node 22 environment.
 
 ## Response Formats
 
@@ -85,12 +97,14 @@
    - Multiple operation support
    - Reference transformation
 
-## Deployment
+## Deployment / Release Process
 
-- Published as npm package
-- Versioned releases
-- Documentation for installation and usage
-- Example configurations
+- Automated publishing to npm via `semantic-release` triggered by pushes to `main` branch in GitHub Actions.
+- Relies on Conventional Commits to determine version bumps.
+- Creates version tags (e.g., `v1.2.3`) and GitHub Releases automatically.
+- Requires `NPM_TOKEN` secret configured in GitHub repository for publishing.
+- `CHANGELOG.md` is automatically generated and updated.
+- Server version is dynamically set at runtime based on the release version.
 
 ## Configuration
 
