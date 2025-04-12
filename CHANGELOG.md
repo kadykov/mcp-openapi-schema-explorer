@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.0.0...v1.0.1) (2025-04-12)
+
+### Bug Fixes
+
+- add openapi-types dependency to package.json and package-lock.json ([d348fb9](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/d348fb92a30cdb9d213ee92f1779258f43bbbcd9))
+
 # 1.0.0 (2025-04-12)
 
 ### Bug Fixes
