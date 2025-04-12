@@ -2,9 +2,27 @@
 
 ## Current Focus
 
-Completed implementation of dynamic server name based on OpenAPI `info.title`. Updated Memory Bank.
+Completed implementation of resource completion logic. Updated Memory Bank.
 
 ## Recent Progress
+
+### Dynamic Server Name (✓)
+
+1.  **Spec Loading:** Modified `src/index.ts` to load the OpenAPI spec using `createSpecLoader` _before_ initializing `McpServer`.
+2.  **Name Generation:** Extracted `info.title` from the loaded spec and constructed a dynamic server name (`Schema Explorer for {title}`) with a fallback to `'OpenAPI Schema Explorer'`.
+3.  **Server Initialization:** Updated `McpServer` constructor in `src/index.ts` to use the generated dynamic name.
+4.  **Dependency Injection:** Confirmed handlers already receive the shared `specLoader` instance correctly, requiring no changes to handler constructors.
+5.  **Memory Bank Update (✓):** Updated `activeContext.md` and `progress.md`.
+
+### Resource Completion Logic (✓)
+
+1.  **Implementation:** Modified `src/index.ts` to define `ResourceTemplate` objects directly within `server.resource()` calls. Added `complete` property with functions providing suggestions for `{field}`, `{path}`, `{method*}`, and `{type}` based on the loaded `transformedSpec`.
+2.  **Conditional Name Completion:** Implemented logic for the `{name*}` completion in the `openapi://components/{type}/{name*}` template. It now provides component names only if the spec contains exactly one component type (e.g., only `schemas`). Otherwise, it returns an empty list. Used `getValidatedComponentMap` helper for safe access.
+3.  **Testing:**
+    - Added new E2E test suite (`Completion Tests`) to `test/__tests__/e2e/resources.test.ts` using the `client.complete()` method.
+    - Added new test fixture `test/fixtures/multi-component-types.json` to cover the multi-type scenario for name completion.
+    - Verified all tests pass.
+4.  **Memory Bank Update (✓):** Updated `activeContext.md`, `progress.md`, `systemPatterns.md`, and `projectbrief.md`.
 
 ### Dynamic Server Name (✓)
 
@@ -67,10 +85,11 @@ Completed implementation of dynamic server name based on OpenAPI `info.title`. U
 - Swagger v2.0 specs are automatically converted to v3.0.
 - Internal references are transformed to MCP URIs.
 - Added `json-minified` output format option.
-- **New:** Server name is now dynamically set based on the loaded spec's `info.title` (e.g., "Schema Explorer for Petstore API").
+- Server name is now dynamically set based on the loaded spec's `info.title`.
+- **New:** Resource completion logic implemented for `{field}`, `{path}`, `{method*}`, `{type}`, and conditionally for `{name*}`.
 - Core resource exploration functionality remains operational.
 - Unit tests for `SpecLoaderService` and `Formatters` are updated.
-- E2E tests cover basic loading scenarios and output formats (JSON, YAML, Minified JSON).
+- E2E tests cover basic loading scenarios, output formats, resource exploration, and **resource completion**.
 
 ## Next Actions / Immediate Focus
 
@@ -81,6 +100,5 @@ Completed implementation of dynamic server name based on OpenAPI `info.title`. U
 
 ## Future Considerations (Post Immediate Actions)
 
-- Implement `complete` callbacks for resource templates.
 - Implement reference traversal/resolution service.
 - Enhance support for all component types.

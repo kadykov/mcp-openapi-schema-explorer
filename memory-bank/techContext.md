@@ -55,6 +55,7 @@
   - Verify resource access for local v3, local v2, and remote v3 specs.
   - Test multi-value parameters.
   - Cover success and error scenarios.
+  - Verify resource completion logic using `client.complete()`.
 - Type-safe test utilities (`mcp-test-helpers`).
 - Test fixtures (including v2.0 and v3.0 examples).
 - Coverage reporting.

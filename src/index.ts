@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'; // Import ResourceTemplate
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { OpenAPI } from 'openapi-types'; // Import OpenAPI namespace
+import { OpenAPI } from 'openapi-types'; // Import OpenAPIV3 as well
 import { loadConfig } from './config.js';
 
 // Import new handlers
@@ -14,7 +14,7 @@ import { OpenAPITransformer, ReferenceTransformService } from './services/refere
 import { SpecLoaderService } from './services/spec-loader.js';
 import { createFormatter } from './services/formatters.js';
 import { encodeUriPathComponent } from './utils/uri-builder.js'; // Import specific function
-import { isOpenAPIV3 } from './handlers/handler-utils.js'; // Import type guard
+import { isOpenAPIV3, getValidatedComponentMap } from './handlers/handler-utils.js'; // Import type guard and helper
 
 async function main(): Promise<void> {
   try {
@@ -164,8 +164,29 @@ async function main(): Promise<void> {
             return Object.keys(transformedSpec.components ?? {});
           }
           return []; // Return empty array if not V3
+        }, // <<< Added missing closing brace
+        name: (): string[] => {
+          // Provide names only if there's exactly one component type defined
+          if (
+            isOpenAPIV3(transformedSpec) &&
+            transformedSpec.components &&
+            Object.keys(transformedSpec.components).length === 1
+          ) {
+            // Get the single component type key (e.g., 'schemas')
+            const componentTypeKey = Object.keys(transformedSpec.components)[0];
+            // Use the helper to safely get the map
+            try {
+              const componentTypeMap = getValidatedComponentMap(transformedSpec, componentTypeKey);
+              return Object.keys(componentTypeMap);
+            } catch (error) {
+              // Should not happen if key came from Object.keys, but handle defensively
+              console.error(`Error getting component map for key ${componentTypeKey}:`, error);
+              return [];
+            }
+          }
+          // Otherwise, return no completions for name
+          return [];
         },
-        // Omit 'name' to indicate no completion is available
       },
     });
     server.resource(

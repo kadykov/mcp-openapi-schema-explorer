@@ -327,20 +327,42 @@ describe('E2E Tests for Refactored Resources', () => {
       expect(result.completion.values).toEqual(['schemas']);
     });
 
-    it('should NOT provide completions for {name*}', async () => {
+    // Updated test for conditional name completion
+    it('should provide completions for {name*} when only one component type exists', async () => {
+      // complex-endpoint.json only has 'schemas'
       const params = {
-        argument: { name: 'name', value: '' }, // Empty value to get all
+        argument: { name: 'name', value: '' },
         ref: {
           type: 'ref/resource' as const,
           uri: 'openapi://components/{type}/{name*}', // Use the exact template URI
         },
       };
-      // Expect the call to potentially fail or return empty results,
-      // as no completion function is defined for 'name'.
-      // The exact behavior might depend on the SDK/server implementation
-      // when a completion function is missing. We'll assume it returns empty.
       const result = await client.complete(params);
       expect(result.completion).toBeDefined();
+      // Expect schema names from complex-endpoint.json
+      expect(result.completion.values).toEqual(
+        expect.arrayContaining(['CreateTaskRequest', 'Task', 'TaskList'])
+      );
+      expect(result.completion.values).toHaveLength(3);
+    });
+
+    // New test for multiple component types
+    it('should NOT provide completions for {name*} when multiple component types exist', async () => {
+      // Need to restart the server with the multi-component spec
+      await testContext?.cleanup(); // Clean up previous server
+      const multiSpecPath = path.resolve(__dirname, '../../fixtures/multi-component-types.json');
+      await setup(multiSpecPath); // Restart server with new spec
+
+      const params = {
+        argument: { name: 'name', value: '' },
+        ref: {
+          type: 'ref/resource' as const,
+          uri: 'openapi://components/{type}/{name*}', // Use the exact template URI
+        },
+      };
+      const result = await client.complete(params);
+      expect(result.completion).toBeDefined();
+      // Expect empty array because multiple types (schemas, parameters) exist
       expect(result.completion.values).toEqual([]);
     });
   });

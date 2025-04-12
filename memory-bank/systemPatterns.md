@@ -130,6 +130,11 @@ graph TD
   - `openapi://paths/{path}/{method*}`: Operation details (supports multiple methods).
   - `openapi://components/{type}`: List names for a specific component type.
   - `openapi://components/{type}/{name*}`: Component details (supports multiple names).
+- **Completions:**
+  - Defined directly in `src/index.ts` within `ResourceTemplate` definitions passed to `server.resource()`.
+  - Uses the `transformedSpec` object loaded before server initialization.
+  - Provides suggestions for `{field}`, `{path}`, `{method*}`, `{type}`.
+  - Provides suggestions for `{name*}` _only_ if the spec contains exactly one component type.
 - **Reference URIs (Corrected):**
   - Internal `$ref`s like `#/components/schemas/MySchema` are transformed by `ReferenceTransformService` into resolvable MCP URIs: `openapi://components/schemas/MySchema`.
   - This applies to all component types under `#/components/`.
@@ -195,6 +200,7 @@ graph TD
      - Remote OpenAPI v3.0 spec (e.g., Petstore URL).
    - **`refactored-resources.test.ts`:** Continue to test detailed resource interactions (multi-value params, specific path/method/component combinations, errors) using the primary complex local v3 fixture (`complex-endpoint.json`).
    - **`format.test.ts`:** Verify different output formats (JSON/YAML/Minified JSON) work as expected.
+   - **Completion Tests:** Added to `refactored-resources.test.ts` using `client.complete()` to verify completion logic.
 3. **Test Support:**
    - Type-safe test utilities (`mcp-test-helpers`). Updated `StartServerOptions` to include `json-minified`.
    - Test fixtures for v2.0 and v3.0 specs.

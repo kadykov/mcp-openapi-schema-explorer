@@ -106,7 +106,7 @@
 - **Handler Unit Tests:** Complete unit tests for all new handlers (mocking services).
 - **Refactor Helpers:** Move duplicated helpers (`formatResults`, `isOpenAPIV3`) from handlers to `handler-utils.ts`. (Deferred during refactor).
 - **Security Validation (✓):** Implemented Map-based validation helpers in `handler-utils.ts` and refactored handlers/rendering classes to resolve object injection warnings.
-- **Completion Logic:** Implement `complete` callbacks in `ResourceTemplate` definitions within handlers (currently `undefined`).
+- **Completion Logic (✓):** Implemented `complete` callbacks in `ResourceTemplate` definitions within `src/index.ts` for `{field}`, `{path}`, `{method*}`, `{type}`, and conditionally for `{name*}`. Added E2E tests using `client.complete()`.
 - **Reference Traversal:** Service to resolve `$ref` URIs (e.g., follow `openapi://components/schemas/Task` from an endpoint detail).
 - **Enhanced Component Support:** Ensure all component types listed in `VALID_COMPONENT_TYPES` are fully handled if present in spec. (Reference transformation now supports all types).
 - **Parameter Validation:** Add validation logic if needed. (Current Map-based approach handles key validation).
@@ -124,7 +124,7 @@
 
    - Unit tests added for rendering logic.
    - Unit tests updated for URI builder, reference transformer, and path item rendering.
-   - E2E tests updated for new structure and complex fixture.
+   - E2E tests updated for new structure and complex fixture. Added tests for resource completion.
    - Unit tests for `SpecLoaderService` updated for `swagger2openapi`.
 
 3. API Design
