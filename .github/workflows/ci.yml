@@ -94,6 +94,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Match Dockerfile and other jobs
+          cache: 'npm'
+
+      - name: Install all dependencies
+        run: npm ci --include=dev
+
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         env:
