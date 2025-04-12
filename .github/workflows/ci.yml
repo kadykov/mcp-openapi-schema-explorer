@@ -1,0 +1,101 @@
+name: CI
+
+permissions: # Add default permissions, release job will override if needed
+  contents: read
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Match Dockerfile
+          cache: 'npm'
+
+      - name: Setup Just
+        uses: extractions/setup-just@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run all checks (format, lint, build, test)
+        run: just all # Uses justfile for consistency
+
+      - name: Upload coverage reports artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.run_id }} # Unique name per run
+          path: coverage/
+        if: always() # Upload even if previous steps fail
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+        # fail_ci_if_error: true # Optional: fail CI if upload fails
+
+  security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Needed for checkout and CodeQL
+      security-events: write # Needed for CodeQL alert uploads
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Match Dockerfile and test job
+          cache: 'npm'
+
+      - name: Setup Just
+        uses: extractions/setup-just@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Security Checks (Audit, Licenses)
+        run: just security # Uses justfile, includes npm audit and license-checker
+        continue-on-error: true # Allow workflow to continue even if npm audit finds vulnerabilities
+
+      # Static code analysis with CodeQL (Keep separate as it's not in justfile)
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        # Auto-detect languages: javascript, typescript
+        # queries: +security-extended # Optional: run more queries
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [test, security] # Run after test and security checks pass
+    # Run only on pushes to main, not on tags (semantic-release creates tags)
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write # Allow tagging, committing package.json/changelog/version.ts
+      issues: write # Allow commenting on issues/PRs
+      pull-requests: write # Allow commenting on issues/PRs
+      id-token: write # Needed for provenance publishing to npm (alternative to NPM_TOKEN)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Semantic Release
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
