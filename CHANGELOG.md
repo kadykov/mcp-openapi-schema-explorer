@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.0.1...v1.0.2) (2025-04-13)
+
+### Bug Fixes
+
+- update CI workflow to use RELEASE_TOKEN and disable credential persistence ([e7b18f9](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/e7b18f9055b95f0e2c6e2a356cb87482db6205da))
+
 ## [1.0.1](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.0.0...v1.0.1) (2025-04-12)
 
 ### Bug Fixes
