@@ -1,3 +1,9 @@
+# [1.1.0](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.0.2...v1.1.0) (2025-04-13)
+
+### Features
+
+- enhance component and path item rendering with descriptions and examples in hints ([6989159](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/698915972338b4a16419c9cea3e2377b7701f50b))
+
 ## [1.0.2](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.0.1...v1.0.2) (2025-04-13)
 
 ### Bug Fixes
