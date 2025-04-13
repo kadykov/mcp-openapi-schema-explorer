@@ -27,21 +27,52 @@ While other MCP servers exist that provide access to OpenAPI specs via _Tools_, 
 
 For more details on MCP clients and their capabilities, see the [MCP Client Documentation](https://modelcontextprotocol.io/clients).
 
-## Usage with MCP Clients (Recommended)
+## Installation
 
-This server is designed to be run by MCP clients. The recommended way to configure it is using `npx`, which downloads and runs the package without requiring a global installation.
+For the recommended usage methods (`npx` and Docker, described below), **no separate installation step is required**. Your MCP client will download the package or pull the Docker image automatically based on the configuration you provide.
 
-**Example Configuration (Claude Desktop - `claude_desktop_config.json`):**
+However, if you prefer or need to install the server explicitly, you have two options:
+
+1.  **Global Installation:** You can install the package globally using npm:
+
+    ```bash
+    npm install -g mcp-openapi-schema-explorer
+    ```
+
+    See **Method 3** below for how to configure your MCP client to use a globally installed server.
+
+2.  **Local Development/Installation:** You can clone the repository and build it locally:
+    ```bash
+    git clone https://github.com/kadykov/mcp-openapi-schema-explorer.git
+    cd mcp-openapi-schema-explorer
+    npm install
+    npm run build
+    ```
+    See **Method 4** below for how to configure your MCP client to run the server from your local build using `node`.
+
+## Adding the Server to your MCP Client
+
+This server is designed to be run by MCP clients (like Claude Desktop, Windsurf, Cline, etc.). To use it, you add a configuration entry to your client's settings file (often a JSON file). This entry tells the client how to execute the server process (e.g., using `npx`, `docker`, or `node`). The server itself doesn't require separate configuration beyond the command-line arguments specified in the client settings entry.
+
+Below are the common methods for adding the server entry to your client's configuration.
+
+### Method 1: npx (Recommended)
+
+Using `npx` is recommended as it avoids global/local installation and ensures the client uses the latest published version.
+
+**Example Client Configuration Entry (npx Method):**
+
+Add the following JSON object to the `mcpServers` section of your MCP client's configuration file. This entry instructs the client on how to run the server using `npx`:
 
 ```json
 {
   "mcpServers": {
-    "My API Spec": {
+    "My API Spec (npx)": {
       "command": "npx",
       "args": [
         "-y",
-        "mcp-openapi-schema-explorer",
-        "/path/to/your/local/openapi.json",
+        "mcp-openapi-schema-explorer@latest",
+        "<path-or-url-to-spec>",
         "--output-format",
         "yaml"
       ],
@@ -51,52 +82,22 @@ This server is designed to be run by MCP clients. The recommended way to configu
 }
 ```
 
-**Configuration Details:**
+**Configuration Notes:**
 
-- **`"My API Spec"`:** Choose a descriptive name for this server instance. This is how you'll identify it within your MCP client.
-- **`command`:** Use `"npx"` to run the package directly.
-- **`args`:**
-  - `"-y"`: Auto-confirms the `npx` installation prompt if needed the first time.
-  - `"mcp-openapi-schema-explorer"`: The name of the package to execute.
-  - `"/path/to/your/local/openapi.json"`: **Required.** The absolute path to your local spec file or the full URL to a remote spec (e.g., `"https://remote/url/spec.json"`).
-  - `"--output-format", "yaml"`: **Optional.** Specifies the output format for detailed resource views. Defaults to `"json"`. Other options are `"yaml"` and `"json-minified"`.
-- **`env`:** Currently, no environment variables are needed for this server.
+- Replace `"My API Spec (npx)"` with a unique name for this server instance in your client.
+- Replace `<path-or-url-to-spec>` with the absolute local file path or full remote URL of your specification.
+- The `--output-format` is optional (`json`, `yaml`, `json-minified`), defaulting to `json`.
+- To explore multiple specifications, add separate entries in `mcpServers`, each with a unique name and pointing to a different spec.
 
-**Notes:**
+### Method 2: Docker
 
-- This server handles one specification per instance. To explore multiple specifications simultaneously, configure multiple entries under `mcpServers` in your client's configuration file, each pointing to a different spec file or URL and using a unique server name.
+You can instruct your MCP client to run the server using the official Docker image: `kadykov/mcp-openapi-schema-explorer`.
 
-## Usage with Docker
+**Example Client Configuration Entries (Docker Method):**
 
-As an alternative to `npx` or global installation, you can run the server using Docker. The official image is available on Docker Hub: `kadykov/mcp-openapi-schema-explorer`.
-
-**Running the Container:**
-
-The container expects the path or URL to the OpenAPI specification as a command-line argument, similar to the `npx` usage.
+Add one of the following JSON objects to the `mcpServers` section of your MCP client's configuration file. These entries instruct the client on how to run the server using `docker run`:
 
 - **Remote URL:** Pass the URL directly to `docker run`.
-
-  ```bash
-  docker run --rm -i kadykov/mcp-openapi-schema-explorer:latest https://petstore3.swagger.io/api/v3/openapi.json
-  ```
-
-- **Local File:** Mount the local file into the container using the `-v` flag and provide the path _inside the container_ as the argument.
-
-  ```bash
-  # Example: Mount local file ./my-spec.yaml to /spec/api.yaml inside the container
-  docker run --rm -i -v "$(pwd)/my-spec.yaml:/spec/api.yaml" kadykov/mcp-openapi-schema-explorer:latest /spec/api.yaml
-  ```
-
-  _(Note: Replace `$(pwd)/my-spec.yaml` with the actual path to your local file)_
-
-- **Output Format:** You can still use the `--output-format` flag:
-  ```bash
-  docker run --rm -i kadykov/mcp-openapi-schema-explorer:latest https://petstore3.swagger.io/api/v3/openapi.json --output-format yaml
-  ```
-
-**Example MCP Client Configuration (Docker):**
-
-Here's how you might configure this in a client like Claude Desktop (`claude_desktop_config.json`):
 
 - **Using a Remote URL:**
 
@@ -110,7 +111,7 @@ Here's how you might configure this in a client like Claude Desktop (`claude_des
           "--rm",
           "-i",
           "kadykov/mcp-openapi-schema-explorer:latest",
-          "https://petstore3.swagger.io/api/v3/openapi.json"
+          "<remote-url-to-spec>"
         ],
         "env": {}
       }
@@ -118,7 +119,7 @@ Here's how you might configure this in a client like Claude Desktop (`claude_des
   }
   ```
 
-- **Using a Local File:**
+- **Using a Local File:** (Requires mounting the file into the container)
   ```json
   {
     "mcpServers": {
@@ -129,7 +130,7 @@ Here's how you might configure this in a client like Claude Desktop (`claude_des
           "--rm",
           "-i",
           "-v",
-          "/full/path/to/your/local/openapi.yaml:/spec/api.yaml",
+          "/full/host/path/to/spec.yaml:/spec/api.yaml",
           "kadykov/mcp-openapi-schema-explorer:latest",
           "/spec/api.yaml",
           "--output-format",
@@ -140,20 +141,69 @@ Here's how you might configure this in a client like Claude Desktop (`claude_des
     }
   }
   ```
-  _(Remember to replace `/full/path/to/your/local/openapi.yaml` with the correct absolute path on your host machine)_
+  **Important:** Replace `/full/host/path/to/spec.yaml` with the correct absolute path on your host machine. The path `/spec/api.yaml` is the corresponding path inside the container.
 
-## Alternative: Global Installation (Less Common)
+### Method 3: Global Installation (Less Common)
 
-If you prefer, you can install the server globally:
+If you have installed the package globally using `npm install -g`, you can configure your client to run it directly.
 
 ```bash
+# Run this command once in your terminal
 npm install -g mcp-openapi-schema-explorer
 ```
 
-If installed globally, your MCP client configuration would change:
+**Example Client Configuration Entry (Global Install Method):**
 
-- `command`: Likely `mcp-openapi-schema-explorer` (or the full path if needed).
-- `args`: Would only contain the `<path-or-url-to-spec>` and optional `--output-format` flag (omit `npx` and `-y`).
+Add the following entry to your MCP client's configuration file. This assumes the `mcp-openapi-schema-explorer` command is accessible in the client's execution environment PATH.
+
+```json
+{
+  "mcpServers": {
+    "My API Spec (Global)": {
+      "command": "mcp-openapi-schema-explorer",
+      "args": ["<path-or-url-to-spec>", "--output-format", "yaml"],
+      "env": {}
+    }
+  }
+}
+```
+
+- Ensure the `command` (`mcp-openapi-schema-explorer`) is accessible in the PATH environment variable used by your MCP client.
+
+### Method 4: Local Development/Installation
+
+This method is useful if you have cloned the repository locally for development or to run a modified version.
+
+**Setup Steps (Run once in your terminal):**
+
+1.  Clone the repository: `git clone https://github.com/kadykov/mcp-openapi-schema-explorer.git`
+2.  Navigate into the directory: `cd mcp-openapi-schema-explorer`
+3.  Install dependencies: `npm install`
+4.  Build the project: `npm run build` (or `just build`)
+
+**Example Client Configuration Entry (Local Development Method):**
+
+Add the following entry to your MCP client's configuration file. This instructs the client to run the locally built server using `node`.
+
+```json
+{
+  "mcpServers": {
+    "My API Spec (Local Dev)": {
+      "command": "node",
+      "args": [
+        "/full/path/to/cloned/mcp-openapi-schema-explorer/dist/src/index.js",
+        "<path-or-url-to-spec>",
+        "--output-format",
+        "yaml"
+      ],
+
+      "env": {}
+    }
+  }
+}
+```
+
+**Important:** Replace `/full/path/to/cloned/mcp-openapi-schema-explorer/dist/src/index.js` with the correct absolute path to the built `index.js` file in your cloned repository.
 
 ## Features
 
