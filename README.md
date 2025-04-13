@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo-400.png" alt="MCP OpenAPI Schema Explorer Logo" width="200">
+</p>
+
 # MCP OpenAPI Schema Explorer
 
 [![npm version](https://badge.fury.io/js/mcp-openapi-schema-explorer.svg)](https://badge.fury.io/js/mcp-openapi-schema-explorer)
