@@ -96,7 +96,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      # Node setup and npm install are handled by the semantic-release-action via extra_plugins
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Match Dockerfile and other jobs
+          cache: 'npm'
+
+      - name: Install all dependencies
+        run: npm ci --include=dev
 
       # Docker setup steps (Still needed for the environment where the action runs)
       - name: Set up QEMU
