@@ -128,8 +128,11 @@ graph TD
   4.  `@semantic-release/npm`: Updates `version` in `package.json`.
   5.  `@semantic-release/exec`: Runs `scripts/generate-version.js` to create/update `src/version.ts` with the new version.
   6.  `@semantic-release/git`: Commits `package.json`, `package-lock.json`, `CHANGELOG.md`, and `src/version.ts`. Creates Git tag.
-  7.  `@semantic-release/github`: Creates GitHub Release.
-- **Trigger:** Executed by the `release` job in the GitHub Actions workflow (`.github/workflows/ci.yml`) on pushes to the `main` branch.
+  7.  `@codedependant/semantic-release-docker`: Builds the Docker image using `./Dockerfile` and pushes it to Docker Hub (`kadykov/mcp-openapi-schema-explorer`) with `latest` and version tags.
+  8.  `@semantic-release/github`: Creates GitHub Release.
+- **Trigger:** Executed by the `release` job in the GitHub Actions workflow (`.github/workflows/ci.yml`) on pushes to the `main` branch, using `cycjimmy/semantic-release-action@v4`.
+- **CI Action:** The `cycjimmy/semantic-release-action` handles installing `semantic-release` and the plugins listed in its `extra_plugins` input (`@semantic-release/changelog`, `@semantic-release/exec`, `@semantic-release/git`, `@codedependant/semantic-release-docker`).
+- **Docker Environment:** The CI job sets up Docker QEMU, Buildx, and logs into Docker Hub before running the semantic-release action.
 - **Versioning:** The server version in `src/index.ts` is dynamically imported from the generated `src/version.ts`. A default `src/version.ts` (with `0.0.0-dev`) is kept in the repository for local builds.
 
 ## Resource Design Patterns
@@ -221,4 +224,4 @@ graph TD
 4. **CI Integration (`.github/workflows/ci.yml`):**
    - **`test` Job:** Runs on push/PR to `main`. Uses Node 22, installs `just`, runs `npm ci`, then `just all` (format, lint, build, test). Uploads coverage.
    - **`security` Job:** Runs on push/PR to `main`. Uses Node 22, installs `just`, runs `npm ci`, then `just security` (audit, licenses). Runs CodeQL analysis separately.
-   - **`release` Job:** Runs _only_ on push to `main` after `test` and `security` pass. Checks out full history, installs dependencies, runs `npx semantic-release` using `GITHUB_TOKEN` and `NPM_TOKEN`.
+   - **`release` Job:** Runs _only_ on push to `main` after `test` and `security` pass. Checks out full history, sets up Docker (QEMU, Buildx, Login), then runs `cycjimmy/semantic-release-action@v4` with necessary `extra_plugins` and environment variables (`GITHUB_TOKEN`, `NPM_TOKEN`, Docker Hub credentials handled by login action).

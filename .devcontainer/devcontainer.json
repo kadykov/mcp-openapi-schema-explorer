@@ -1,6 +1,6 @@
 {
   "name": "MCP OpenAPI Schema Explorer",
-  "dockerFile": "../Dockerfile",
+  "dockerFile": "Dockerfile", // Updated path
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
       "username": "vscode"

@@ -19,7 +19,7 @@
 - `jest`: Testing framework (devDependency)
 - `eslint`: Code linting (devDependency)
 - `prettier`: Code formatting (devDependency)
-- `semantic-release` & plugins (`@semantic-release/*`): Automated releases (devDependencies)
+- `semantic-release` & plugins (`@semantic-release/*`, `@codedependant/semantic-release-docker`): Automated releases (devDependencies)
 - `just`: Task runner (Used locally, installed via action in CI)
 
 ## Technical Requirements
@@ -71,6 +71,7 @@
 - CI Integration (`.github/workflows/ci.yml`):
   - Runs checks (`just all`, `just security`, CodeQL) on pushes/PRs to `main`.
   - Uses Node 22 environment.
+  - Includes automated release job using `cycjimmy/semantic-release-action@v4`.
 
 ## Response Formats
 
@@ -99,10 +100,12 @@
 
 ## Deployment / Release Process
 
-- Automated publishing to npm via `semantic-release` triggered by pushes to `main` branch in GitHub Actions.
+- Automated publishing to npm **and Docker Hub** (`kadykov/mcp-openapi-schema-explorer`) via `semantic-release` triggered by pushes to `main` branch in GitHub Actions.
+- Uses `cycjimmy/semantic-release-action@v4` in the CI workflow.
 - Relies on Conventional Commits to determine version bumps.
+- Uses `@codedependant/semantic-release-docker` plugin for Docker build and push.
 - Creates version tags (e.g., `v1.2.3`) and GitHub Releases automatically.
-- Requires `NPM_TOKEN` secret configured in GitHub repository for publishing.
+- Requires `NPM_TOKEN`, `DOCKERHUB_USERNAME`, and `DOCKERHUB_TOKEN` secrets/variables configured in GitHub repository.
 - `CHANGELOG.md` is automatically generated and updated.
 - Server version is dynamically set at runtime based on the release version.
 
