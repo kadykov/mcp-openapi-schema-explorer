@@ -1,15 +1,19 @@
-# [1.2.0](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.1.0...v1.2.0) (2025-04-13)
-
+## [1.2.1](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.2.0...v1.2.1) (2025-04-13)
 
 ### Bug Fixes
 
-* remove husky.sh sourcing from pre-commit hook ([2cf9455](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/2cf9455f1432cb0c6cbda71d61cad9f2f87031ab))
-* update Docker Hub login to use secrets for credentials ([ab2136b](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/ab2136bd8c052d7287ef1fd6d2768a9fd93148c8))
+- update Node.js setup to match Dockerfile version and include dev dependencies ([8658705](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/86587059268ad4c18d219729b39e4e4f990e05e9))
 
+# [1.2.0](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.1.0...v1.2.0) (2025-04-13)
+
+### Bug Fixes
+
+- remove husky.sh sourcing from pre-commit hook ([2cf9455](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/2cf9455f1432cb0c6cbda71d61cad9f2f87031ab))
+- update Docker Hub login to use secrets for credentials ([ab2136b](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/ab2136bd8c052d7287ef1fd6d2768a9fd93148c8))
 
 ### Features
 
-* implement Docker support with multi-stage builds and CI integration ([910dc02](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/910dc021b3e203574dee93198ce5896a9e8aa16d))
+- implement Docker support with multi-stage builds and CI integration ([910dc02](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/910dc021b3e203574dee93198ce5896a9e8aa16d))
 
 # [1.1.0](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.0.2...v1.1.0) (2025-04-13)
 
