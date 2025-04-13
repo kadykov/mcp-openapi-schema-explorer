@@ -33,26 +33,34 @@ This server is designed to be run by MCP clients. The recommended way to configu
 {
   "mcpServers": {
     "My API Spec": {
-      // Choose a descriptive name for this server instance
       "command": "npx",
       "args": [
-        "-y", // Auto-confirm npx installation if needed the first time
+        "-y",
         "mcp-openapi-schema-explorer",
-        "/path/to/your/local/openapi.json" // Or "https://remote/url/spec.json"
-        // Optional: Specify output format for detail views (defaults to 'json')
-        // "--output-format", "yaml" // Other options: "json", "json-minified"
+        "/path/to/your/local/openapi.json",
+        "--output-format",
+        "yaml"
       ],
-      "env": {} // No environment variables needed currently
+      "env": {}
     }
   }
 }
 ```
 
+**Configuration Details:**
+
+- **`"My API Spec"`:** Choose a descriptive name for this server instance. This is how you'll identify it within your MCP client.
+- **`command`:** Use `"npx"` to run the package directly.
+- **`args`:**
+  - `"-y"`: Auto-confirms the `npx` installation prompt if needed the first time.
+  - `"mcp-openapi-schema-explorer"`: The name of the package to execute.
+  - `"/path/to/your/local/openapi.json"`: **Required.** The absolute path to your local spec file or the full URL to a remote spec (e.g., `"https://remote/url/spec.json"`).
+  - `"--output-format", "yaml"`: **Optional.** Specifies the output format for detailed resource views. Defaults to `"json"`. Other options are `"yaml"` and `"json-minified"`.
+- **`env`:** Currently, no environment variables are needed for this server.
+
 **Notes:**
 
-- Replace `/path/to/your/local/openapi.json` with the actual **absolute path** to your local spec file or the full URL to a remote spec.
-- The server name (`"My API Spec"` in the example) is how you'll identify this specific server instance within your MCP client.
-- This server handles one specification per instance. To explore multiple specifications simultaneously, configure multiple entries under `mcpServers` in your client's configuration file, each pointing to a different spec file or URL.
+- This server handles one specification per instance. To explore multiple specifications simultaneously, configure multiple entries under `mcpServers` in your client's configuration file, each pointing to a different spec file or URL and using a unique server name.
 
 ## Alternative: Global Installation
 
@@ -79,40 +87,56 @@ If installed globally, your MCP client configuration would change:
 
 ## Available MCP Resources
 
-This server exposes the following MCP resource templates for exploring the OpenAPI specification:
+This server exposes the following MCP resource templates for exploring the OpenAPI specification.
+
+**Understanding Multi-Value Parameters (`*`)**
+
+Some resource templates include parameters ending with an asterisk (`*`), like `{method*}` or `{name*}`. This indicates that the parameter accepts **multiple comma-separated values**. For example, to request details for both the `GET` and `POST` methods of a path, you would use a URI like `openapi://paths/users/get,post`. This allows fetching details for multiple items in a single request.
+
+**Resource Templates:**
 
 - **`openapi://{field}`**
 
-  - **Description:** Accesses top-level fields of the OpenAPI document (`info`, `servers`, `tags`, etc.) or lists the contents of `paths` or `components`.
-  - **Parameter:** `{field}` - The name of the top-level field (e.g., `info`, `paths`, `components`).
+  - **Description:** Accesses top-level fields of the OpenAPI document (e.g., `info`, `servers`, `tags`) or lists the contents of `paths` or `components`. The specific available fields depend on the loaded specification.
+  - **Example:** `openapi://info`
   - **Output:** `text/plain` list for `paths` and `components`; configured format (JSON/YAML/minified JSON) for other fields.
+  - **Completions:** Provides dynamic suggestions for `{field}` based on the actual top-level keys found in the loaded spec.
 
 - **`openapi://paths/{path}`**
 
   - **Description:** Lists the available HTTP methods (operations) for a specific API path.
   - **Parameter:** `{path}` - The API path string. **Must be URL-encoded** (e.g., `/users/{id}` becomes `users%2F%7Bid%7D`).
+  - **Example:** `openapi://paths/users%2F%7Bid%7D`
   - **Output:** `text/plain` list of methods.
+  - **Completions:** Provides dynamic suggestions for `{path}` based on the paths found in the loaded spec (URL-encoded).
 
 - **`openapi://paths/{path}/{method*}`**
 
   - **Description:** Gets the detailed specification for one or more operations (HTTP methods) on a specific API path.
   - **Parameters:**
     - `{path}` - The API path string. **Must be URL-encoded**.
-    - `{method*}` - One or more HTTP methods (e.g., `GET`, `POST`). Can be a single method or multiple separated by a comma (e.g., `GET,POST`).
+    - `{method*}` - One or more HTTP methods (e.g., `get`, `post`, `get,post`). Case-insensitive.
+  - **Example (Single):** `openapi://paths/users%2F%7Bid%7D/get`
+  - **Example (Multiple):** `openapi://paths/users%2F%7Bid%7D/get,post`
   - **Output:** Configured format (JSON/YAML/minified JSON).
+  - **Completions:** Provides dynamic suggestions for `{path}`. Provides static suggestions for `{method*}` (common HTTP verbs like GET, POST, PUT, DELETE, etc.).
 
 - **`openapi://components/{type}`**
 
-  - **Description:** Lists the names of all defined components of a specific type.
-  - **Parameter:** `{type}` - The component type (e.g., `schemas`, `responses`, `parameters`, `examples`, `requestBodies`, `headers`, `securitySchemes`, `links`, `callbacks`).
-  - **Output:** `text/plain` list of component names.
+  - **Description:** Lists the names of all defined components of a specific type (e.g., `schemas`, `responses`, `parameters`). The specific available types depend on the loaded specification. Also provides a short description for each listed type.
+  - **Example:** `openapi://components/schemas`
+  - **Output:** `text/plain` list of component names with descriptions.
+  - **Completions:** Provides dynamic suggestions for `{type}` based on the component types found in the loaded spec.
 
 - **`openapi://components/{type}/{name*}`**
   - **Description:** Gets the detailed specification for one or more named components of a specific type.
   - **Parameters:**
     - `{type}` - The component type.
-    - `{name*}` - One or more component names. Can be a single name or multiple separated by a comma (e.g., `SchemaA,SchemaB`).
+    - `{name*}` - One or more component names (e.g., `User`, `Order`, `User,Order`). Case-sensitive.
+  - **Example (Single):** `openapi://components/schemas/User`
+  - **Example (Multiple):** `openapi://components/schemas/User,Order`
   - **Output:** Configured format (JSON/YAML/minified JSON).
+  - **Completions:** Provides dynamic suggestions for `{type}`. Provides dynamic suggestions for `{name*}` _only if_ the loaded spec contains exactly one component type overall (e.g., only `schemas`). This limitation exists because the MCP SDK currently doesn't support providing completions scoped to the selected `{type}`; providing all names across all types could be misleading.
 
 ## Contributing
 

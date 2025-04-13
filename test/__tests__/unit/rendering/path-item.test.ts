@@ -49,8 +49,9 @@ describe('RenderablePathItem', () => {
       // Define expected output lines based on the new format and builder logic
       // generateListHint uses buildOperationUriSuffix which encodes the path
       // Since rawPath is '/items', encoded is 'items'.
+      // The first sorted method is 'delete'.
       const expectedHint =
-        "Hint: Use 'openapi://paths/items/{method}' to view details for a specific operation.";
+        "Hint: Use 'openapi://paths/items/{method}' to view details for a specific operation. (e.g., openapi://paths/items/delete)";
       const expectedLineDelete = 'DELETE'; // No summary/opId
       const expectedLineGet = 'GET: Get Item'; // Summary exists
       const expectedLinePost = 'POST: Create Item'; // Summary exists
