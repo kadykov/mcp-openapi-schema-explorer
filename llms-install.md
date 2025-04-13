@@ -15,7 +15,7 @@ The MCP OpenAPI Schema Explorer server is typically run using `npx` directly wit
 
 #### For Cline (or similar MCP clients)
 
-1.  Create or modify the MCP configuration file (e.g., `~/.config/cline/mcp_config.json` or the relevant path for your client):
+1.  Create or modify the MCP configuration file:
 
     ```json
     {
