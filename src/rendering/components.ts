@@ -17,6 +17,22 @@ export const VALID_COMPONENT_TYPES: ComponentType[] = [
   // 'pathItems' is technically allowed but we handle paths separately
 ];
 
+// Simple descriptions for component types
+const componentTypeDescriptions: Record<ComponentType, string> = {
+  schemas: 'Reusable data structures (models)',
+  responses: 'Reusable API responses',
+  parameters: 'Reusable request parameters (query, path, header, cookie)',
+  examples: 'Reusable examples of media type payloads',
+  requestBodies: 'Reusable request body definitions',
+  headers: 'Reusable header definitions for responses',
+  securitySchemes: 'Reusable security scheme definitions (e.g., API keys, OAuth2)',
+  links: 'Reusable descriptions of links between responses and operations',
+  callbacks: 'Reusable descriptions of callback operations',
+  // pathItems: 'Reusable path item definitions (rarely used directly here)' // Excluded as per comment above
+};
+// Use a Map for safer lookups against prototype pollution
+const componentDescriptionsMap = new Map(Object.entries(componentTypeDescriptions));
+
 /**
  * Wraps an OpenAPIV3.ComponentsObject to make it renderable.
  * Handles listing the available component types.
@@ -43,11 +59,16 @@ export class RenderableComponents implements RenderableSpecObject {
 
     let listText = 'Available Component Types:\n\n';
     availableTypes.sort().forEach(type => {
-      listText += `- ${type}\n`;
+      const description = componentDescriptionsMap.get(type) ?? 'Unknown component type'; // Removed unnecessary 'as ComponentType'
+      listText += `- ${type}: ${description}\n`;
     });
 
-    // Use the new hint generator structure
-    listText += generateListHint(context, { itemType: 'componentType' });
+    // Use the new hint generator structure, providing the first type as an example
+    const firstTypeExample = availableTypes.length > 0 ? availableTypes[0] : undefined;
+    listText += generateListHint(context, {
+      itemType: 'componentType',
+      firstItemExample: firstTypeExample,
+    });
 
     return [
       {
@@ -126,10 +147,12 @@ export class RenderableComponentMap implements RenderableSpecObject {
       listText += `- ${name}\n`;
     });
 
-    // Use the new hint generator structure, providing parent type
+    // Use the new hint generator structure, providing parent type and first name as example
+    const firstNameExample = names.length > 0 ? names[0] : undefined;
     listText += generateListHint(context, {
       itemType: 'componentName',
       parentComponentType: this.componentType,
+      firstItemExample: firstNameExample,
     });
 
     return [

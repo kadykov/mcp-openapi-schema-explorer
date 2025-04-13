@@ -43,15 +43,21 @@ export class RenderablePathItem implements RenderableSpecObject {
       ];
     }
 
-    // Generate hint first using the new structure
+    // Sort methods first to get the correct example
+    methods.sort();
+    const firstMethodExample = methods.length > 0 ? methods[0] : undefined;
+
+    // Generate hint using the new structure, providing the first *sorted* method as an example
     const hint = generateListHint(context, {
       itemType: 'pathMethod',
       parentPath: this.path, // Use the stored raw path
+      firstItemExample: firstMethodExample,
     });
     // Hint includes leading newline, so start output with it directly
     let outputLines: string[] = [hint.trim(), '']; // Trim leading newline from hint for first line
 
-    methods.sort().forEach(method => {
+    // Iterate over the already sorted methods
+    methods.forEach(method => {
       const operation = this.getOperation(method);
       // Use summary or operationId (via getOperationSummary)
       const summaryText = getOperationSummary(operation);

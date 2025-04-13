@@ -40,13 +40,18 @@ describe('RenderableComponents (List Types)', () => {
     expect(result[0].renderAsList).toBe(true);
     expect(result[0].isError).toBeUndefined();
     expect(result[0].data).toContain('Available Component Types:');
-    // Check sorted types
-    expect(result[0].data).toMatch(/-\s+examples\n/); // Empty but present
-    expect(result[0].data).toMatch(/-\s+parameters\n/);
-    expect(result[0].data).toMatch(/-\s+responses\n/);
-    expect(result[0].data).toMatch(/-\s+schemas\n/);
+    // Check sorted types with descriptions
+    expect(result[0].data).toMatch(/-\s+examples: Reusable examples of media type payloads\n/);
+    expect(result[0].data).toMatch(
+      /-\s+parameters: Reusable request parameters \(query, path, header, cookie\)\n/
+    );
+    expect(result[0].data).toMatch(/-\s+responses: Reusable API responses\n/);
+    expect(result[0].data).toMatch(/-\s+schemas: Reusable data structures \(models\)\n/);
     expect(result[0].data).not.toContain('- securitySchemes'); // Missing type
-    expect(result[0].data).toContain("Hint: Use 'openapi://components/{type}'");
+    // Check hint with example
+    expect(result[0].data).toContain(
+      "Hint: Use 'openapi://components/{type}' to view details for a specific component type. (e.g., openapi://components/examples)"
+    );
   });
 
   it('should handle empty components object', () => {
@@ -121,7 +126,10 @@ describe('RenderableComponentMap (List/Detail Names)', () => {
       expect(result[0].data).toContain('Available schemas:');
       expect(result[0].data).toMatch(/-\s+Error\n/); // Sorted
       expect(result[0].data).toMatch(/-\s+User\n/);
-      expect(result[0].data).toContain("Hint: Use 'openapi://components/schemas/{name}'");
+      // Check hint with example
+      expect(result[0].data).toContain(
+        "Hint: Use 'openapi://components/schemas/{name}' to view details for a specific schema. (e.g., openapi://components/schemas/Error)"
+      );
     });
 
     it('should list component names correctly (parameters)', () => {
@@ -131,7 +139,10 @@ describe('RenderableComponentMap (List/Detail Names)', () => {
       expect(result[0].uriSuffix).toBe(paramsUriSuffix);
       expect(result[0].data).toContain('Available parameters:');
       expect(result[0].data).toMatch(/-\s+userIdParam\n/);
-      expect(result[0].data).toContain("Hint: Use 'openapi://components/parameters/{name}'");
+      // Check hint with example
+      expect(result[0].data).toContain(
+        "Hint: Use 'openapi://components/parameters/{name}' to view details for a specific parameter. (e.g., openapi://components/parameters/userIdParam)"
+      );
     });
 
     it('should handle empty component map', () => {

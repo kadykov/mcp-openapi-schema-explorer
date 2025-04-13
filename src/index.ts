@@ -64,7 +64,18 @@ async function main(): Promise<void> {
     const componentMapHandler = new ComponentMapHandler(specLoader, formatter);
     const componentDetailHandler = new ComponentDetailHandler(specLoader, formatter);
 
-    // Register new resources
+    // --- Define Resource Templates and Register Handlers ---
+
+    // Helper to get dynamic field list for descriptions
+    const getFieldList = (): string => Object.keys(transformedSpec).join(', ');
+    // Helper to get dynamic component type list for descriptions
+    const getComponentTypeList = (): string => {
+      if (isOpenAPIV3(transformedSpec) && transformedSpec.components) {
+        return Object.keys(transformedSpec.components).join(', ');
+      }
+      return ''; // Return empty if no components or not V3
+    };
+
     // 1. openapi://{field}
     const fieldTemplate = new ResourceTemplate('openapi://{field}', {
       list: undefined, // List is handled by the handler logic based on field value
@@ -76,9 +87,8 @@ async function main(): Promise<void> {
       'openapi-field', // Unique ID for the resource registration
       fieldTemplate,
       {
-        // MimeType varies (text/plain for lists, JSON/YAML for details) - SDK might handle this? Or maybe set a default? Let's omit for now.
-        description:
-          'Access top-level fields (info, servers, tags), list paths, or list component types.',
+        // MimeType varies (text/plain for lists, JSON/YAML for details)
+        description: `Access top-level fields like ${getFieldList()}. (e.g., openapi://info)`,
         name: 'OpenAPI Field/List', // Generic name
       },
       topLevelFieldHandler.handleRequest
@@ -97,7 +107,7 @@ async function main(): Promise<void> {
       {
         mimeType: 'text/plain', // This always returns a list
         description:
-          'List available HTTP methods for a specific path. (Note: {path} must be URL-encoded, e.g., /users/{id} becomes users%2F%7Bid%7D)',
+          'List methods for a specific path (URL encode paths with slashes). (e.g., openapi://paths/users%2F%7Bid%7D)',
         name: 'Path Methods List',
       },
       pathItemHandler.handleRequest
@@ -127,7 +137,7 @@ async function main(): Promise<void> {
       {
         mimeType: formatter.getMimeType(), // Detail view uses formatter
         description:
-          'Get details for one or more specific API operations (methods). (Note: {path} must be URL-encoded, e.g., /users/{id} becomes users%2F%7Bid%7D)',
+          'Get details for one or more operations (comma-separated). (e.g., openapi://paths/users%2F%7Bid%7D/get,post)',
         name: 'Operation Detail',
       },
       operationHandler.handleRequest
@@ -151,7 +161,7 @@ async function main(): Promise<void> {
       componentMapTemplate,
       {
         mimeType: 'text/plain', // This always returns a list
-        description: 'List available components of a specific type (e.g., schemas, parameters).',
+        description: `List components of a specific type like ${getComponentTypeList()}. (e.g., openapi://components/schemas)`,
         name: 'Component List',
       },
       componentMapHandler.handleRequest
@@ -167,7 +177,7 @@ async function main(): Promise<void> {
             return Object.keys(transformedSpec.components ?? {});
           }
           return []; // Return empty array if not V3
-        }, // <<< Added missing closing brace
+        },
         name: (): string[] => {
           // Provide names only if there's exactly one component type defined
           if (
@@ -197,7 +207,8 @@ async function main(): Promise<void> {
       componentDetailTemplate,
       {
         mimeType: formatter.getMimeType(), // Detail view uses formatter
-        description: 'Get details for one or more specific components (e.g., schemas, parameters).',
+        description:
+          'Get details for one or more components (comma-separated). (e.g., openapi://components/schemas/User,Task)',
         name: 'Component Detail',
       },
       componentDetailHandler.handleRequest

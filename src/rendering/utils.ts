@@ -14,6 +14,7 @@ type ListItemType = 'componentType' | 'componentName' | 'pathMethod';
 // Define context needed for generating the correct detail URI suffix
 interface HintContext {
   itemType: ListItemType;
+  firstItemExample?: string; // Example value from the first item in the list
   // For componentName hints, the parent component type is needed
   parentComponentType?: string;
   // For pathMethod hints, the parent path is needed
@@ -43,6 +44,7 @@ export function getOperationSummary(
 export function generateListHint(renderContext: RenderContext, hintContext: HintContext): string {
   let detailUriSuffixPattern: string;
   let itemTypeName: string; // User-friendly name for the item type in the hint text
+  let exampleUriSuffix: string | undefined; // To hold the generated example URI
 
   switch (hintContext.itemType) {
     case 'componentType':
@@ -50,6 +52,9 @@ export function generateListHint(renderContext: RenderContext, hintContext: Hint
       // Hint should point to openapi://components/{type}
       detailUriSuffixPattern = buildComponentMapUriSuffix('{type}'); // Use placeholder
       itemTypeName = 'component type';
+      if (hintContext.firstItemExample) {
+        exampleUriSuffix = buildComponentMapUriSuffix(hintContext.firstItemExample);
+      }
       break;
     case 'componentName':
       // Listing component names (e.g., MySchema, User) at openapi://components/{type}
@@ -64,6 +69,12 @@ export function generateListHint(renderContext: RenderContext, hintContext: Hint
         '{name}'
       );
       itemTypeName = hintContext.parentComponentType.slice(0, -1); // e.g., 'schema' from 'schemas'
+      if (hintContext.firstItemExample) {
+        exampleUriSuffix = buildComponentDetailUriSuffix(
+          hintContext.parentComponentType,
+          hintContext.firstItemExample
+        );
+      }
       break;
     case 'pathMethod':
       // Listing methods (e.g., get, post) at openapi://paths/{path}
@@ -75,6 +86,13 @@ export function generateListHint(renderContext: RenderContext, hintContext: Hint
       // Use the actual parent path and a placeholder for the method
       detailUriSuffixPattern = buildOperationUriSuffix(hintContext.parentPath, '{method}');
       itemTypeName = 'operation'; // Or 'method'? 'operation' seems clearer
+      if (hintContext.firstItemExample) {
+        // Ensure the example method is valid if needed, though usually it's just 'get', 'post' etc.
+        exampleUriSuffix = buildOperationUriSuffix(
+          hintContext.parentPath,
+          hintContext.firstItemExample
+        );
+      }
       break;
     default:
       // Explicitly cast to string to avoid potential 'never' type issue in template literal
@@ -84,8 +102,16 @@ export function generateListHint(renderContext: RenderContext, hintContext: Hint
 
   // Construct the full hint URI pattern using the base URI
   const fullHintPattern = `${renderContext.baseUri}${detailUriSuffixPattern}`;
+  const fullExampleUri = exampleUriSuffix
+    ? `${renderContext.baseUri}${exampleUriSuffix}`
+    : undefined;
 
-  return `\nHint: Use '${fullHintPattern}' to view details for a specific ${itemTypeName}.`;
+  let hintText = `\nHint: Use '${fullHintPattern}' to view details for a specific ${itemTypeName}.`;
+  if (fullExampleUri) {
+    hintText += ` (e.g., ${fullExampleUri})`;
+  }
+
+  return hintText;
 }
 
 /**
