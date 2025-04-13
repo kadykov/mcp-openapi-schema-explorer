@@ -29,8 +29,23 @@ Completed setup of automated versioning and releases using `semantic-release` an
     - Added `extractions/setup-just@v3` action to both jobs.
     - Updated `test` job to run checks via `just all`.
     - Updated `security` job to run checks via `just security` (keeping CodeQL separate).
-    - Added a new `release` job triggered on pushes to `main` (after `test` and `security` pass) that runs `npx semantic-release`. Configured necessary permissions and environment variables (`GITHUB_TOKEN`, placeholder for `NPM_TOKEN`).
+    - Added a new `release` job triggered on pushes to `main` (after `test` and `security` pass) that uses `cycjimmy/semantic-release-action@v4`. Configured necessary permissions and environment variables (`GITHUB_TOKEN`, `NPM_TOKEN`).
 5.  **Memory Bank Update (✓):** Updated `activeContext.md`, `progress.md`, `systemPatterns.md`, and `techContext.md`.
+
+### Docker Support Implementation (✓)
+
+1.  **Dockerfile Strategy:**
+    - Moved existing devcontainer `Dockerfile` to `.devcontainer/Dockerfile`.
+    - Updated `.devcontainer/devcontainer.json` to reference the new path.
+    - Created a new multi-stage production `Dockerfile` at the project root (`./Dockerfile`).
+2.  **Docker Plugin:**
+    - Installed `@codedependant/semantic-release-docker` dev dependency.
+    - Configured the plugin in `.releaserc.json` to publish to `kadykov/mcp-openapi-schema-explorer` on Docker Hub, disabling the plugin's built-in login.
+3.  **CI Workflow Update (`.github/workflows/ci.yml`):**
+    - Added Docker setup steps (QEMU, Buildx, Login using `docker/login-action@v3` with `DOCKERHUB_USERNAME` var and `DOCKERHUB_TOKEN` secret) to the `release` job.
+    - Updated the `cycjimmy/semantic-release-action@v4` step to include `@codedependant/semantic-release-docker` in `extra_plugins`.
+    - Removed redundant Node.js setup and `npm ci` steps from the `release` job, as the action handles plugin installation.
+4.  **Documentation:** Updated `README.md` with a "Usage with Docker" section, including `docker run` examples and MCP client configuration examples for local and remote specs.
 
 ### Dynamic Server Name (✓)
 
@@ -113,7 +128,8 @@ Completed setup of automated versioning and releases using `semantic-release` an
 - Added `json-minified` output format option.
 - Server name is now dynamically set based on the loaded spec's `info.title`.
 - **New:** Automated versioning and release process implemented using `semantic-release`.
-- **New:** CI workflow adapted for Node 22, uses `just` for checks, and includes a release job.
+- **New:** CI workflow adapted for Node 22, uses `just` for checks, and includes a `release` job using `cycjimmy/semantic-release-action@v4`.
+- **New:** Docker support added, including a production `Dockerfile`, integration with `semantic-release` via `@codedependant/semantic-release-docker`, and updated CI workflow for automated Docker Hub publishing.
 - Dependencies correctly categorized (`swagger2openapi` in `dependencies`, types in `devDependencies`).
 - Resource completion logic implemented.
 - Dynamic server name implemented.
@@ -125,10 +141,10 @@ Completed setup of automated versioning and releases using `semantic-release` an
 
 ## Next Actions / Immediate Focus
 
-1.  **README Update:** Enhance `README.md` with:
-    - Details about the automated release process and the requirement for Conventional Commits.
-    - Instructions for setting up the `NPM_TOKEN` secret for publishing.
-    - Updated usage examples and explanations (including `json-minified` format).
+1.  **README Update (Partially Done):**
+    - **Done:** Added Docker usage instructions.
+    - **TODO:** Add details about the automated release process (npm + Docker) and Conventional Commits requirement.
+    - **TODO:** Add instructions for setting up `NPM_TOKEN`, `DOCKERHUB_USERNAME`, and `DOCKERHUB_TOKEN` secrets/variables.
 2.  **Handler Unit Tests:** Implement comprehensive unit tests for each handler class (`TopLevelFieldHandler`, `PathItemHandler`, etc.), mocking `SpecLoaderService` and `IFormatter`.
 3.  **Refactor Helpers:** Consolidate duplicated helper functions (`formatResults`, `isOpenAPIV3`) fully into `handler-utils.ts` and remove from individual handlers.
 4.  **Code Cleanup:** Address remaining TODOs (e.g., checking warnings in `spec-loader.ts`) and minor ESLint warnings.

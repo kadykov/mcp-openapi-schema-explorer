@@ -45,6 +45,13 @@
     - Created new E2E test file (`spec-loading.test.ts`) to verify loading from local v2 and remote v3 sources.
     - Added v2.0 test fixture (`sample-v2-api.json`).
 
+### Docker Support (✓)
+
+1.  **Dockerfile:** Added a multi-stage production `Dockerfile` at the root. Moved the devcontainer Dockerfile to `.devcontainer/`.
+2.  **Release Integration:** Added `@codedependant/semantic-release-docker` plugin to `.releaserc.json` to automate Docker image building and publishing to Docker Hub (`kadykov/mcp-openapi-schema-explorer`).
+3.  **CI Workflow:** Updated the `release` job in `.github/workflows/ci.yml` to set up Docker environment (QEMU, Buildx, Login) and use `cycjimmy/semantic-release-action@v4` with the Docker plugin included in `extra_plugins`. Removed redundant Node setup/install steps from the release job.
+4.  **Documentation:** Updated `README.md` with instructions and examples for running the server via Docker.
+
 ## Technical Features (✓)
 
 ### Codebase Organization (Updated)
@@ -106,7 +113,7 @@
 1.  **Dependency Correction:** Correctly categorized runtime (`swagger2openapi`) vs. development (`@types/*`) dependencies in `package.json`. Removed unused types.
 2.  **Automated Releases:** Implemented `semantic-release` with conventional commit analysis, changelog generation, npm publishing, and GitHub releases.
 3.  **Dynamic Versioning:** Server version is now dynamically injected via `src/version.ts`, which is generated during the release process by `semantic-release` using `scripts/generate-version.js`. A default version file is tracked in Git for local builds.
-4.  **CI Workflow:** Updated `.github/workflows/ci.yml` to use Node 22, remove Docker Compose, use `just` for running checks (`just all`, `just security`), and added a `release` job to automate publishing on pushes to `main`.
+4.  **CI Workflow:** Updated `.github/workflows/ci.yml` to use Node 22, use `just` for running checks (`just all`, `just security`), and includes a `release` job using `cycjimmy/semantic-release-action@v4` to automate npm and Docker Hub publishing on pushes to `main`.
 
 ## Planned Features (⏳)
 
@@ -118,6 +125,7 @@
 - **Enhanced Component Support:** Ensure all component types listed in `VALID_COMPONENT_TYPES` are fully handled if present in spec. (Reference transformation now supports all types).
 - **Parameter Validation:** Add validation logic if needed. (Current Map-based approach handles key validation).
 - **Further Token Optimizations:** Explore more ways to reduce token usage in list/detail views.
+- **README Enhancements:** Add details on release process, secrets/vars setup. (Partially done).
 
 ## Technical Improvements (Ongoing)
 
@@ -133,7 +141,7 @@
    - Unit tests updated for URI builder, reference transformer, and path item rendering.
    - E2E tests updated for new structure and complex fixture. Added tests for resource completion.
    - Unit tests for `SpecLoaderService` updated for `swagger2openapi`.
-   - CI workflow updated to use `just` and includes automated release job.
+   - CI workflow updated to use `just` and includes automated release job for npm and Docker.
 
 3. API Design
    - New URI structure implemented, aligned with OpenAPI spec.

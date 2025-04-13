@@ -62,7 +62,83 @@ This server is designed to be run by MCP clients. The recommended way to configu
 
 - This server handles one specification per instance. To explore multiple specifications simultaneously, configure multiple entries under `mcpServers` in your client's configuration file, each pointing to a different spec file or URL and using a unique server name.
 
-## Alternative: Global Installation
+## Usage with Docker
+
+As an alternative to `npx` or global installation, you can run the server using Docker. The official image is available on Docker Hub: `kadykov/mcp-openapi-schema-explorer`.
+
+**Running the Container:**
+
+The container expects the path or URL to the OpenAPI specification as a command-line argument, similar to the `npx` usage.
+
+- **Remote URL:** Pass the URL directly to `docker run`.
+
+  ```bash
+  docker run --rm -i kadykov/mcp-openapi-schema-explorer:latest https://petstore3.swagger.io/api/v3/openapi.json
+  ```
+
+- **Local File:** Mount the local file into the container using the `-v` flag and provide the path _inside the container_ as the argument.
+
+  ```bash
+  # Example: Mount local file ./my-spec.yaml to /spec/api.yaml inside the container
+  docker run --rm -i -v "$(pwd)/my-spec.yaml:/spec/api.yaml" kadykov/mcp-openapi-schema-explorer:latest /spec/api.yaml
+  ```
+
+  _(Note: Replace `$(pwd)/my-spec.yaml` with the actual path to your local file)_
+
+- **Output Format:** You can still use the `--output-format` flag:
+  ```bash
+  docker run --rm -i kadykov/mcp-openapi-schema-explorer:latest https://petstore3.swagger.io/api/v3/openapi.json --output-format yaml
+  ```
+
+**Example MCP Client Configuration (Docker):**
+
+Here's how you might configure this in a client like Claude Desktop (`claude_desktop_config.json`):
+
+- **Using a Remote URL:**
+
+  ```json
+  {
+    "mcpServers": {
+      "My API Spec (Docker Remote)": {
+        "command": "docker",
+        "args": [
+          "run",
+          "--rm",
+          "-i",
+          "kadykov/mcp-openapi-schema-explorer:latest",
+          "https://petstore3.swagger.io/api/v3/openapi.json"
+        ],
+        "env": {}
+      }
+    }
+  }
+  ```
+
+- **Using a Local File:**
+  ```json
+  {
+    "mcpServers": {
+      "My API Spec (Docker Local)": {
+        "command": "docker",
+        "args": [
+          "run",
+          "--rm",
+          "-i",
+          "-v",
+          "/full/path/to/your/local/openapi.yaml:/spec/api.yaml",
+          "kadykov/mcp-openapi-schema-explorer:latest",
+          "/spec/api.yaml",
+          "--output-format",
+          "yaml"
+        ],
+        "env": {}
+      }
+    }
+  }
+  ```
+  _(Remember to replace `/full/path/to/your/local/openapi.yaml` with the correct absolute path on your host machine)_
+
+## Alternative: Global Installation (Less Common)
 
 If you prefer, you can install the server globally:
 
@@ -148,4 +224,4 @@ This project uses [`semantic-release`](https://github.com/semantic-release/seman
 
 ## Future Plans
 
-- Docker container support for easier deployment.
+(Future plans to be determined)
