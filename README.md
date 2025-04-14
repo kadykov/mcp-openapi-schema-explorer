@@ -5,6 +5,7 @@
 # MCP OpenAPI Schema Explorer
 
 [![npm version](https://badge.fury.io/js/mcp-openapi-schema-explorer.svg)](https://badge.fury.io/js/mcp-openapi-schema-explorer)
+[![NPM Downloads](https://img.shields.io/npm/dw/mcp-openapi-schema-explorer)](https://badge.fury.io/js/mcp-openapi-schema-explorer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/kadykov/mcp-openapi-schema-explorer/graph/badge.svg?token=LFDOMJ6W4W)](https://codecov.io/gh/kadykov/mcp-openapi-schema-explorer)
 
