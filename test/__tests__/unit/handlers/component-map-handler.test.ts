@@ -48,7 +48,11 @@ describe('ComponentMapHandler', () => {
   });
 
   describe('handleRequest (List Component Names)', () => {
-    const mockExtra = { signal: new AbortController().signal };
+    const mockExtra = {
+      signal: new AbortController().signal,
+      sendNotification: jest.fn(),
+      sendRequest: jest.fn(),
+    };
 
     it('should list names for a valid component type (schemas)', async () => {
       const variables: Variables = { type: 'schemas' };

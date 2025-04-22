@@ -58,7 +58,11 @@ describe('OperationHandler', () => {
   });
 
   describe('handleRequest', () => {
-    const mockExtra = { signal: new AbortController().signal };
+    const mockExtra = {
+      signal: new AbortController().signal,
+      sendNotification: jest.fn(),
+      sendRequest: jest.fn(),
+    };
 
     it('should return detail for a single valid method', async () => {
       const variables: Variables = { path: encodedPathItems, method: 'get' }; // Use 'method' key

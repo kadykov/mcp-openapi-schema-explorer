@@ -62,7 +62,11 @@ describe('ComponentDetailHandler', () => {
   });
 
   describe('handleRequest', () => {
-    const mockExtra = { signal: new AbortController().signal };
+    const mockExtra = {
+      signal: new AbortController().signal,
+      sendNotification: jest.fn(),
+      sendRequest: jest.fn(),
+    };
 
     it('should return detail for a single valid component (schema)', async () => {
       const variables: Variables = { type: 'schemas', name: 'User' }; // Use 'name' key

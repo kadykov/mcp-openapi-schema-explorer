@@ -50,7 +50,11 @@ describe('PathItemHandler', () => {
   });
 
   describe('handleRequest (List Methods)', () => {
-    const mockExtra = { signal: new AbortController().signal };
+    const mockExtra = {
+      signal: new AbortController().signal,
+      sendNotification: jest.fn(),
+      sendRequest: jest.fn(),
+    };
 
     it('should list methods for a valid path', async () => {
       const variables: Variables = { path: encodedPathItems };
