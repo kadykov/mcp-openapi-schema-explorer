@@ -40,14 +40,11 @@ describe('TopLevelFieldHandler', () => {
   });
 
   describe('handleRequest', () => {
-    // Create a mock extra object with the required signal property
     const mockExtra = {
       signal: new AbortController().signal,
+      sendNotification: jest.fn(),
+      sendRequest: jest.fn(),
     };
-    // Cast to the expected type for the handler call signature if needed,
-    // but the object structure itself is simpler.
-    // Note: We might need to cast this later if strict type checks complain,
-    // but let's try the minimal structure first.
 
     it('should handle request for "info" field', async () => {
       mockGetTransformedSpec.mockResolvedValue(sampleSpec);
