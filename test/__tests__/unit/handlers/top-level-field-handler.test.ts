@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
+import { RequestId } from '@modelcontextprotocol/sdk/types.js';
 import { TopLevelFieldHandler } from '../../../../src/handlers/top-level-field-handler';
 import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
@@ -44,6 +45,7 @@ describe('TopLevelFieldHandler', () => {
       signal: new AbortController().signal,
       sendNotification: jest.fn(),
       sendRequest: jest.fn(),
+      requestId: 'test-request-id' as RequestId,
     };
 
     it('should handle request for "info" field', async () => {

@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
+import { RequestId } from '@modelcontextprotocol/sdk/types.js';
 import { ComponentMapHandler } from '../../../../src/handlers/component-map-handler';
 import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
@@ -52,6 +53,7 @@ describe('ComponentMapHandler', () => {
       signal: new AbortController().signal,
       sendNotification: jest.fn(),
       sendRequest: jest.fn(),
+      requestId: 'test-request-id' as RequestId,
     };
 
     it('should list names for a valid component type (schemas)', async () => {
