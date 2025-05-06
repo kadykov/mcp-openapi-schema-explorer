@@ -2,12 +2,13 @@
 
 ## Current Focus
 
-Successfully upgraded @modelcontextprotocol/sdk and addressed breaking changes in test mocks.
+Successfully upgraded @modelcontextprotocol/sdk from 1.10.1 to 1.11.0 and addressed breaking changes in test mocks.
 
 ## Implementation Status
 
-- @modelcontextprotocol/sdk updated from 1.8.0 to 1.10.1
-- Updated all test mocks to include new RequestHandlerExtra properties (sendNotification, sendRequest)
+- @modelcontextprotocol/sdk updated from 1.10.1 to 1.11.0
+- Updated all test mocks to include new `RequestHandlerExtra` property (`requestId`).
+- Corrected import path for `RequestId` to `@modelcontextprotocol/sdk/types.js`.
 - Modified test files:
   - component-map-handler.test.ts
   - component-detail-handler.test.ts
@@ -34,17 +35,22 @@ Successfully upgraded @modelcontextprotocol/sdk and addressed breaking changes i
 
 ## Recent Changes
 
-### SDK Update & Test Fixes (✓)
+### SDK Update to v1.11.0 & Test Fixes (✓)
 
 1. **Dependency Update:**
 
-   - Updated @modelcontextprotocol/sdk from 1.8.0 to 1.10.1 in package.json
-   - Identified breaking changes in RequestHandlerExtra type requiring sendNotification and sendRequest properties
+   - Updated @modelcontextprotocol/sdk from 1.10.1 to 1.11.0 in `package.json`.
+   - Identified breaking change in `RequestHandlerExtra` type requiring a new `requestId` property.
 
 2. **Test Suite Updates:**
-   - Added missing RequestHandlerExtra properties to mockExtra objects in all handler tests
-   - Confirmed test fixes by running full test suite
-   - Verified no other test files needed similar updates
+   - Added the `requestId` property to `mockExtra` objects in all handler unit tests:
+     - `test/__tests__/unit/handlers/top-level-field-handler.test.ts`
+     - `test/__tests__/unit/handlers/component-map-handler.test.ts`
+     - `test/__tests__/unit/handlers/path-item-handler.test.ts`
+     - `test/__tests__/unit/handlers/operation-handler.test.ts`
+     - `test/__tests__/unit/handlers/component-detail-handler.test.ts`
+   - Corrected the import path for `RequestId` to `import { RequestId } from '@modelcontextprotocol/sdk/types.js';` in these files. This resolved previous TypeScript import errors and an ESLint warning regarding unsafe assignment also disappeared.
+   - Confirmed all test fixes by running `just build && just test` successfully.
 
 ## Next Actions
 

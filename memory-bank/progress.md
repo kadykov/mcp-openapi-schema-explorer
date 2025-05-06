@@ -142,6 +142,7 @@
    - E2E tests updated for new structure and complex fixture. Added tests for resource completion.
    - Unit tests for `SpecLoaderService` updated for `swagger2openapi`.
    - CI workflow updated to use `just` and includes automated release job for npm and Docker.
+   - Handler unit tests updated to accommodate `@modelcontextprotocol/sdk` v1.11.0 changes (`RequestHandlerExtra` now requires `requestId`, and `RequestId` import path corrected to `@modelcontextprotocol/sdk/types.js`).
 
 3. API Design
    - New URI structure implemented, aligned with OpenAPI spec.

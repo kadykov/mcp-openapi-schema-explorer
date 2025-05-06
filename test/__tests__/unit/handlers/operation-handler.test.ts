@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
+import { RequestId } from '@modelcontextprotocol/sdk/types.js';
 import { OperationHandler } from '../../../../src/handlers/operation-handler';
 import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
@@ -62,6 +63,7 @@ describe('OperationHandler', () => {
       signal: new AbortController().signal,
       sendNotification: jest.fn(),
       sendRequest: jest.fn(),
+      requestId: 'test-request-id' as RequestId,
     };
 
     it('should return detail for a single valid method', async () => {

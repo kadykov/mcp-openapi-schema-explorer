@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
+import { RequestId } from '@modelcontextprotocol/sdk/types.js';
 import { PathItemHandler } from '../../../../src/handlers/path-item-handler';
 import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
@@ -54,6 +55,7 @@ describe('PathItemHandler', () => {
       signal: new AbortController().signal,
       sendNotification: jest.fn(),
       sendRequest: jest.fn(),
+      requestId: 'test-request-id' as RequestId,
     };
 
     it('should list methods for a valid path', async () => {

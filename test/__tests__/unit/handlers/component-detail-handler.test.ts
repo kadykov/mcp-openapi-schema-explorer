@@ -1,4 +1,5 @@
 import { OpenAPIV3 } from 'openapi-types';
+import { RequestId } from '@modelcontextprotocol/sdk/types.js';
 import { ComponentDetailHandler } from '../../../../src/handlers/component-detail-handler';
 import { SpecLoaderService } from '../../../../src/types';
 import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
@@ -66,6 +67,7 @@ describe('ComponentDetailHandler', () => {
       signal: new AbortController().signal,
       sendNotification: jest.fn(),
       sendRequest: jest.fn(),
+      requestId: 'test-request-id' as RequestId,
     };
 
     it('should return detail for a single valid component (schema)', async () => {
