@@ -54,7 +54,7 @@
     "@semantic-release/release-notes-generator": "^14.0.3",
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.14.1",
+    "@types/node": "^24.0.1",
     "@types/node-fetch": "^2.6.12",
     "@types/swagger2openapi": "^7.0.4",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
