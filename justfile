@@ -30,7 +30,7 @@ type-check:
 
 # Security scan dependencies for vulnerabilities
 audit:
-    npm audit || true
+    npm audit --audit-level=high
 
 # Check license compliance
 check-licenses:
