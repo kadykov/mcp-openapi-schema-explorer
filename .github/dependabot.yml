@@ -5,9 +5,21 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 10
+    groups:
+      # Group all development dependencies together
+      dev-dependencies:
+        dependency-type: 'development'
+
+      # Group production dependencies together
+      production-dependencies:
+        dependency-type: 'production'
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - '*'
