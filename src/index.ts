@@ -50,11 +50,24 @@ async function main(): Promise<void> {
       ? `Schema Explorer for ${spec.info.title}`
       : defaultServerName;
 
+    // Brief help content for LLMs
+    const helpContent = `This MCP server provides direct access to OpenAPI specifications through structured resource URIs.
+
+**DO:** Use readMcpResource directly with specific URIs
+**DON'T:** Call listMcpResources first - it's unnecessary overhead
+
+Start with readMcpResource('openapi://paths') to get all endpoints`;
+
     // Create MCP server with dynamic name
-    const server = new McpServer({
-      name: serverName,
-      version: VERSION, // Use the imported version
-    });
+    const server = new McpServer(
+      {
+        name: serverName,
+        version: VERSION, // Use the imported version
+      },
+      {
+        instructions: helpContent,
+      }
+    );
 
     // Set up formatter and new handlers
     const formatter = createFormatter(config.outputFormat);
