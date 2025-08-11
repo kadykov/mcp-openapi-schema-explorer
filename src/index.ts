@@ -51,12 +51,7 @@ async function main(): Promise<void> {
       : defaultServerName;
 
     // Brief help content for LLMs
-    const helpContent = `This MCP server provides direct access to OpenAPI specifications through structured resource URIs.
-
-**DO:** Use readMcpResource directly with specific URIs
-**DON'T:** Call listMcpResources first - it's unnecessary overhead
-
-Start with readMcpResource('openapi://paths') to get all endpoints`;
+    const helpContent = `Use resorces/templates/list to get a list of available resources. Use openapi://paths to get a list of all endpoints.`;
 
     // Create MCP server with dynamic name
     const server = new McpServer(
