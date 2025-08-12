@@ -1,3 +1,13 @@
+# [1.3.0](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.2.1...v1.3.0) (2025-08-12)
+
+### Bug Fixes
+
+- Use more generic instructions ([1372aae](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/1372aaea824f2b9eb5d4c3569acc4f38c82550fd))
+
+### Features
+
+- add brief instructions so LLMs can better understand how to use the server ([c55c4ec](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/c55c4ec029a7603746bf506340d8e3ffd54a6532))
+
 ## [1.2.1](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.2.0...v1.2.1) (2025-04-13)
 
 ### Bug Fixes
