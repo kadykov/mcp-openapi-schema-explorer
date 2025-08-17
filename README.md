@@ -10,8 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![codecov](https://codecov.io/gh/kadykov/mcp-openapi-schema-explorer/graph/badge.svg?token=LFDOMJ6W4W)](https://codecov.io/gh/kadykov/mcp-openapi-schema-explorer)
 [![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/819a3ba3-ad54-4657-9241-648497e57d7b)
-[![](https://tokei.rs/b1/github/kadykov/mcp-openapi-schema-explorer?category=code)](https://github.com/kadykov/mcp-openapi-schema-explorer)
-
+[![Lines of code](https://tokei.rs/b1/github/kadykov/mcp-openapi-schema-explorer?category=code)](https://github.com/kadykov/mcp-openapi-schema-explorer)
 [![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/kadykov/mcp-openapi-schema-explorer)](https://archestra.ai/mcp-catalog/kadykov__mcp-openapi-schema-explorer)
 
 An MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resources**.
@@ -232,14 +231,12 @@ Some resource templates include parameters ending with an asterisk (`*`), like `
 **Resource Templates:**
 
 - **`openapi://{field}`**
-
   - **Description:** Accesses top-level fields of the OpenAPI document (e.g., `info`, `servers`, `tags`) or lists the contents of `paths` or `components`. The specific available fields depend on the loaded specification.
   - **Example:** `openapi://info`
   - **Output:** `text/plain` list for `paths` and `components`; configured format (JSON/YAML/minified JSON) for other fields.
   - **Completions:** Provides dynamic suggestions for `{field}` based on the actual top-level keys found in the loaded spec.
 
 - **`openapi://paths/{path}`**
-
   - **Description:** Lists the available HTTP methods (operations) for a specific API path.
   - **Parameter:** `{path}` - The API path string. **Must be URL-encoded** (e.g., `/users/{id}` becomes `users%2F%7Bid%7D`).
   - **Example:** `openapi://paths/users%2F%7Bid%7D`
@@ -247,7 +244,6 @@ Some resource templates include parameters ending with an asterisk (`*`), like `
   - **Completions:** Provides dynamic suggestions for `{path}` based on the paths found in the loaded spec (URL-encoded).
 
 - **`openapi://paths/{path}/{method*}`**
-
   - **Description:** Gets the detailed specification for one or more operations (HTTP methods) on a specific API path.
   - **Parameters:**
     - `{path}` - The API path string. **Must be URL-encoded**.
@@ -258,7 +254,6 @@ Some resource templates include parameters ending with an asterisk (`*`), like `
   - **Completions:** Provides dynamic suggestions for `{path}`. Provides static suggestions for `{method*}` (common HTTP verbs like GET, POST, PUT, DELETE, etc.).
 
 - **`openapi://components/{type}`**
-
   - **Description:** Lists the names of all defined components of a specific type (e.g., `schemas`, `responses`, `parameters`). The specific available types depend on the loaded specification. Also provides a short description for each listed type.
   - **Example:** `openapi://components/schemas`
   - **Output:** `text/plain` list of component names with descriptions.
