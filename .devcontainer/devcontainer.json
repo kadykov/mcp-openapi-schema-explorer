@@ -14,7 +14,6 @@
       "extensions": [
         "ms-azuretools.vscode-docker",
         "GitHub.vscode-github-actions",
-        "saoudrizwan.claude-dev",
         "dbaeumer.vscode-eslint",
         "rvest.vs-code-prettier-eslint",
         "ms-vscode.vscode-typescript-next"
