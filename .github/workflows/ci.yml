@@ -73,12 +73,12 @@ jobs:
 
       # Static code analysis with CodeQL (Keep separate as it's not in justfile)
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         # Auto-detect languages: javascript, typescript
         # queries: +security-extended # Optional: run more queries
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
   release:
     name: Release
