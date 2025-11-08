@@ -14,6 +14,10 @@
 
 An MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resources**.
 
+<a href="https://glama.ai/mcp/servers/@kadykov/mcp-openapi-schema-explorer">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@kadykov/mcp-openapi-schema-explorer/badge" alt="OpenAPI Schema Explorer MCP server" />
+</a>
+
 ## Project Goal
 
 The primary goal of this project is to allow MCP clients (like Cline or Claude Desktop) to explore the structure and details of large OpenAPI specifications without needing to load the entire file into an LLM's context window. It achieves this by exposing parts of the specification through MCP Resources, which are well-suited for read-only data exploration.
