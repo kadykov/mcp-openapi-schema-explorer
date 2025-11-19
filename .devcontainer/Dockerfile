@@ -1,3 +1,3 @@
-FROM node:22-alpine3.21
+FROM node:lts-alpine
 
 WORKDIR /workspaces/mcp-openapi-schema-explorer
