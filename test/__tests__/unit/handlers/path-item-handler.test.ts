@@ -6,6 +6,7 @@ import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
+import { FormattedResultItem } from '../../../../src/handlers/handler-utils';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -69,17 +70,18 @@ describe('PathItemHandler', () => {
         format: 'openapi',
       });
       expect(result.contents).toHaveLength(1);
-      expect(result.contents[0]).toMatchObject({
+      const content = result.contents[0] as FormattedResultItem;
+      expect(content).toMatchObject({
         uri: `openapi://paths/${encodedPathItems}`,
         mimeType: 'text/plain',
         isError: false,
       });
       // Check for hint first, then methods
-      expect(result.contents[0].text).toContain("Hint: Use 'openapi://paths/items/{method}'");
-      expect(result.contents[0].text).toContain('GET: Get Item');
-      expect(result.contents[0].text).toContain('POST: Create Item');
+      expect(content.text).toContain("Hint: Use 'openapi://paths/items/{method}'");
+      expect(content.text).toContain('GET: Get Item');
+      expect(content.text).toContain('POST: Create Item');
       // Ensure the old "Methods for..." header is not present if hint is first
-      expect(result.contents[0].text).not.toContain('Methods for items:');
+      expect(content.text).not.toContain('Methods for items:');
     });
 
     it('should handle path with no methods', async () => {

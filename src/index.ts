@@ -97,7 +97,7 @@ async function main(): Promise<void> {
       {
         // MimeType varies (text/plain for lists, JSON/YAML for details)
         description: `Access top-level fields like ${getFieldList()}. (e.g., openapi://info)`,
-        name: 'OpenAPI Field/List', // Generic name
+        title: 'OpenAPI Field/List', // Generic name
       },
       topLevelFieldHandler.handleRequest
     );
@@ -116,7 +116,7 @@ async function main(): Promise<void> {
         mimeType: 'text/plain', // This always returns a list
         description:
           'List methods for a specific path (URL encode paths with slashes). (e.g., openapi://paths/users%2F%7Bid%7D)',
-        name: 'Path Methods List',
+        title: 'Path Methods List',
       },
       pathItemHandler.handleRequest
     );
@@ -146,7 +146,7 @@ async function main(): Promise<void> {
         mimeType: formatter.getMimeType(), // Detail view uses formatter
         description:
           'Get details for one or more operations (comma-separated). (e.g., openapi://paths/users%2F%7Bid%7D/get,post)',
-        name: 'Operation Detail',
+        title: 'Operation Detail',
       },
       operationHandler.handleRequest
     );
@@ -170,7 +170,7 @@ async function main(): Promise<void> {
       {
         mimeType: 'text/plain', // This always returns a list
         description: `List components of a specific type like ${getComponentTypeList()}. (e.g., openapi://components/schemas)`,
-        name: 'Component List',
+        title: 'Component List',
       },
       componentMapHandler.handleRequest
     );
@@ -217,7 +217,7 @@ async function main(): Promise<void> {
         mimeType: formatter.getMimeType(), // Detail view uses formatter
         description:
           'Get details for one or more components (comma-separated). (e.g., openapi://components/schemas/User,Task)',
-        name: 'Component Detail',
+        title: 'Component Detail',
       },
       componentDetailHandler.handleRequest
     );
