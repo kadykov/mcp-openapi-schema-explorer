@@ -6,6 +6,7 @@ import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
+import { FormattedResultItem } from '../../../../src/handlers/handler-utils';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -67,15 +68,16 @@ describe('ComponentMapHandler', () => {
         format: 'openapi',
       });
       expect(result.contents).toHaveLength(1);
-      expect(result.contents[0]).toMatchObject({
+      const content = result.contents[0] as FormattedResultItem;
+      expect(content).toMatchObject({
         uri: 'openapi://components/schemas',
         mimeType: 'text/plain',
         isError: false,
       });
-      expect(result.contents[0].text).toContain('Available schemas:');
-      expect(result.contents[0].text).toMatch(/-\sError\n/); // Sorted
-      expect(result.contents[0].text).toMatch(/-\sUser\n/);
-      expect(result.contents[0].text).toContain("Hint: Use 'openapi://components/schemas/{name}'");
+      expect(content.text).toContain('Available schemas:');
+      expect(content.text).toMatch(/-\sError\n/); // Sorted
+      expect(content.text).toMatch(/-\sUser\n/);
+      expect(content.text).toContain("Hint: Use 'openapi://components/schemas/{name}'");
     });
 
     it('should list names for another valid type (parameters)', async () => {
@@ -85,16 +87,15 @@ describe('ComponentMapHandler', () => {
       const result = await handler.handleRequest(uri, variables, mockExtra);
 
       expect(result.contents).toHaveLength(1);
-      expect(result.contents[0]).toMatchObject({
+      const content = result.contents[0] as FormattedResultItem;
+      expect(content).toMatchObject({
         uri: 'openapi://components/parameters',
         mimeType: 'text/plain',
         isError: false,
       });
-      expect(result.contents[0].text).toContain('Available parameters:');
-      expect(result.contents[0].text).toMatch(/-\slimitParam\n/);
-      expect(result.contents[0].text).toContain(
-        "Hint: Use 'openapi://components/parameters/{name}'"
-      );
+      expect(content.text).toContain('Available parameters:');
+      expect(content.text).toMatch(/-\slimitParam\n/);
+      expect(content.text).toContain("Hint: Use 'openapi://components/parameters/{name}'");
     });
 
     it('should handle component type with no components defined (examples)', async () => {

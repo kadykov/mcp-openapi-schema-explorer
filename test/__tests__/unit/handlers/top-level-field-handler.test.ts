@@ -6,6 +6,7 @@ import { IFormatter, JsonFormatter } from '../../../../src/services/formatters';
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate.js';
 import { suppressExpectedConsoleError } from '../../../utils/console-helpers';
+import { FormattedResultItem } from '../../../../src/handlers/handler-utils';
 
 // Mocks
 const mockGetTransformedSpec = jest.fn();
@@ -93,14 +94,15 @@ describe('TopLevelFieldHandler', () => {
       const result = await handler.handleRequest(uri, variables, mockExtra);
 
       expect(result.contents).toHaveLength(1);
-      expect(result.contents[0].uri).toBe('openapi://paths');
-      expect(result.contents[0].mimeType).toBe('text/plain');
-      expect(result.contents[0].isError).toBe(false);
-      expect(result.contents[0].text).toContain('GET /test'); // Check content format
+      const content = result.contents[0] as FormattedResultItem;
+      expect(content.uri).toBe('openapi://paths');
+      expect(content.mimeType).toBe('text/plain');
+      expect(content.isError).toBe(false);
+      expect(content.text).toContain('GET /test'); // Check content format
       // Check that the hint contains the essential URI patterns
-      expect(result.contents[0].text).toContain('Hint:');
-      expect(result.contents[0].text).toContain('openapi://paths/{encoded_path}');
-      expect(result.contents[0].text).toContain('openapi://paths/{encoded_path}/{method}');
+      expect(content.text).toContain('Hint:');
+      expect(content.text).toContain('openapi://paths/{encoded_path}');
+      expect(content.text).toContain('openapi://paths/{encoded_path}/{method}');
     });
 
     it('should handle request for "components" field (list view)', async () => {
@@ -111,11 +113,12 @@ describe('TopLevelFieldHandler', () => {
       const result = await handler.handleRequest(uri, variables, mockExtra);
 
       expect(result.contents).toHaveLength(1);
-      expect(result.contents[0].uri).toBe('openapi://components');
-      expect(result.contents[0].mimeType).toBe('text/plain');
-      expect(result.contents[0].isError).toBe(false);
-      expect(result.contents[0].text).toContain('- schemas'); // Check content format
-      expect(result.contents[0].text).toContain("Hint: Use 'openapi://components/{type}'");
+      const content = result.contents[0] as FormattedResultItem;
+      expect(content.uri).toBe('openapi://components');
+      expect(content.mimeType).toBe('text/plain');
+      expect(content.isError).toBe(false);
+      expect(content.text).toContain('- schemas'); // Check content format
+      expect(content.text).toContain("Hint: Use 'openapi://components/{type}'");
     });
 
     it('should return error for non-existent field', async () => {
