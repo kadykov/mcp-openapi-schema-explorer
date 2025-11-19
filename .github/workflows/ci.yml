@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22 # Match Dockerfile
+          node-version: lts/* # Match Dockerfile
           cache: 'npm'
 
       - name: Setup Just
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22 # Match Dockerfile and test job
+          node-version: lts/* # Match Dockerfile and test job
           cache: 'npm'
 
       - name: Setup Just
@@ -100,7 +100,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22 # Match Dockerfile and other jobs
+          node-version: lts/* # Match Dockerfile and other jobs
           cache: 'npm'
 
       - name: Install all dependencies
