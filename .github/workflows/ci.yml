@@ -128,5 +128,4 @@ jobs:
             @codedependant/semantic-release-docker
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }} # Use dedicated release token if needed
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Docker login is handled by the login-action step above
