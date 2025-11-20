@@ -8,6 +8,10 @@
   "bin": {
     "mcp-openapi-schema-explorer": "dist/src/index.js"
   },
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "rm -rf dist && mkdir -p dist && npx tsc && chmod +x dist/src/index.js",
     "test": "jest",
