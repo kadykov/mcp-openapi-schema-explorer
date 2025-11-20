@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.0...v1.3.1) (2025-11-20)
+
+### Bug Fixes
+
+- **package:** exclude unnecessary files from npm artifact ([b1fc7f6](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/b1fc7f677ad7e008f078956cbc8e1e3f16b2679f))
+
 # [1.3.0](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.2.1...v1.3.0) (2025-08-12)
 
 ### Bug Fixes
