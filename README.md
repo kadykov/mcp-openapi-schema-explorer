@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo-400.png" alt="MCP OpenAPI Schema Explorer Logo" width="200">
+  <img src="https://github.com/kadykov/mcp-openapi-schema-explorer/raw/main/assets/logo.min.svg" alt="MCP OpenAPI Schema Explorer Logo" width="200">
 </p>
 
 # MCP OpenAPI Schema Explorer

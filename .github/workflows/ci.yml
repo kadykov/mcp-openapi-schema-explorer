@@ -19,9 +19,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: 22 # Match Dockerfile
+          node-version: lts/* # Match Dockerfile
           cache: 'npm'
 
       - name: Setup Just
@@ -34,7 +34,7 @@ jobs:
         run: just all # Uses justfile for consistency
 
       - name: Upload coverage reports artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: coverage-report-${{ github.run_id }} # Unique name per run
           path: coverage/
@@ -56,9 +56,9 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: 22 # Match Dockerfile and test job
+          node-version: lts/* # Match Dockerfile and test job
           cache: 'npm'
 
       - name: Setup Just
@@ -73,12 +73,12 @@ jobs:
 
       # Static code analysis with CodeQL (Keep separate as it's not in justfile)
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         # Auto-detect languages: javascript, typescript
         # queries: +security-extended # Optional: run more queries
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
 
   release:
     name: Release
@@ -98,9 +98,9 @@ jobs:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: 22 # Match Dockerfile and other jobs
+          node-version: lts/* # Match Dockerfile and other jobs
           cache: 'npm'
 
       - name: Install all dependencies
@@ -118,7 +118,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v5
+        uses: cycjimmy/semantic-release-action@v6
         with:
           # Add the docker plugin to extra_plugins
           extra_plugins: |
@@ -128,5 +128,4 @@ jobs:
             @codedependant/semantic-release-docker
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }} # Use dedicated release token if needed
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           # Docker login is handled by the login-action step above

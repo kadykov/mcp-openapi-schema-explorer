@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM node:22-alpine AS builder
+FROM node:lts-alpine AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ RUN npm ci
 RUN npm run build
 
 # Stage 2: Release
-FROM node:22-alpine AS release
+FROM node:lts-alpine AS release
 
 WORKDIR /app
 
