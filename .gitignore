@@ -135,8 +135,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Personal files
-kadykov-*
-
-# Local documentation and examples
-local-docs/
+# Foreign documentation and examples
+foreign-docs/
