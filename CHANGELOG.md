@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.1...v1.3.2) (2025-11-26)
+
+### Bug Fixes
+
+- **deps:** resolve build and test errors from @modelcontextprotocol/sdk update ([ebae43a](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/ebae43a65a89772a799d651c30597abd52be360b))
+
 ## [1.3.1](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.0...v1.3.1) (2025-11-20)
 
 ### Bug Fixes
