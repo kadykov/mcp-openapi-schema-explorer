@@ -173,9 +173,9 @@ export function getValidatedComponentMap(
   // Validate the requested type against the actual keys in spec.components
   const componentsMap = new Map(Object.entries(spec.components));
   // Add type assertion for clarity, although the check below handles undefined
-  const componentMapObj = componentsMap.get(type) as
-    | OpenAPIV3.ComponentsObject[keyof OpenAPIV3.ComponentsObject]
-    | undefined;
+  const componentMapObj = componentsMap.get(
+    type
+  ) as OpenAPIV3.ComponentsObject[keyof OpenAPIV3.ComponentsObject];
 
   if (!componentMapObj) {
     const availableTypes = Array.from(componentsMap.keys()).join(', ');
@@ -204,7 +204,7 @@ export function getValidatedComponentMap(
  * @throws {McpError} If none of the requested names are valid.
  */
 // Modify to accept a Map directly
-export function getValidatedComponentDetails<V extends OpenAPIV3.ReferenceObject | object>(
+export function getValidatedComponentDetails<V extends object>(
   detailsMap: Map<string, V>, // Accept Map<string, V>
   requestedNames: string[],
   componentTypeForError: string
