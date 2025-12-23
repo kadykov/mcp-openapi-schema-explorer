@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/kadykov-mcp-openapi-schema-explorer-badge.png)](https://mseep.ai/app/kadykov-mcp-openapi-schema-explorer)
+
 <p align="center">
   <img src="https://github.com/kadykov/mcp-openapi-schema-explorer/raw/main/assets/logo.min.svg" alt="MCP OpenAPI Schema Explorer Logo" width="200">
 </p>
