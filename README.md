@@ -12,22 +12,29 @@
 [![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/819a3ba3-ad54-4657-9241-648497e57d7b)
 [![Trust Score](https://archestra.ai/mcp-catalog/api/badge/quality/kadykov/mcp-openapi-schema-explorer)](https://archestra.ai/mcp-catalog/kadykov__mcp-openapi-schema-explorer)
 
-An MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resources**.
+An MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resource Templates**.
 
 ## Project Goal
 
-The primary goal of this project is to allow MCP clients (like Cline or Claude Desktop) to explore the structure and details of large OpenAPI specifications without needing to load the entire file into an LLM's context window. It achieves this by exposing parts of the specification through MCP Resources, which are well-suited for read-only data exploration.
+The primary goal of this project is to allow MCP clients (like Cline or Claude Desktop) to explore the structure and details of large OpenAPI specifications without needing to load the entire file into an LLM's context window. It achieves this by exposing parts of the specification through **MCP Resource Templates**, which provide parameterized access patterns for read-only data exploration.
 
 This server supports loading specifications from both local file paths and remote HTTP/HTTPS URLs. Swagger v2.0 specifications are automatically converted to OpenAPI v3.0 upon loading.
 
-## Why MCP Resources?
+> **Note:** This server provides **resource templates** (not pre-enumerated resources). MCP clients access these templates through the `resources/templates/list` protocol method. For more information about resource templates, see the [MCP Resource Templates documentation](https://modelcontextprotocol.io/specification/2025-11-25/server/resources#resource-templates).
+
+## Why MCP Resource Templates?
 
 The Model Context Protocol defines both **Resources** and **Tools**.
 
-- **Resources:** Represent data sources (like files, API responses). They are ideal for read-only access and exploration by MCP clients (e.g., browsing API paths in Claude Desktop).
+- **Resources:** Represent data sources (like files, API responses). They are ideal for read-only access and exploration by MCP clients.
+  - **Resource Templates:** A special type of resource that uses parameterized URIs (e.g., `openapi://paths/{path}/{method}`), allowing dynamic access without pre-enumerating all possible values.
 - **Tools:** Represent executable actions or functions, often used by LLMs to perform tasks or interact with external systems.
 
-While other MCP servers exist that provide access to OpenAPI specs via _Tools_, this project specifically focuses on providing access via _Resources_. This makes it particularly useful for direct exploration within MCP client applications.
+While other MCP servers exist that provide access to OpenAPI specs via _Tools_, this project specifically focuses on providing access via _Resource Templates_. This approach is particularly efficient for large APIs because:
+
+- It doesn't require pre-enumerating thousands of potential paths and components
+- Clients can discover available resources dynamically using the template patterns
+- It provides structured, on-demand access to specific parts of the specification
 
 For more details on MCP clients and their capabilities, see the [MCP Client Documentation](https://modelcontextprotocol.io/clients).
 
@@ -211,7 +218,7 @@ Add the following entry to your MCP client's configuration file. This instructs 
 
 ## Features
 
-- **MCP Resource Access:** Explore OpenAPI specs via intuitive URIs (`openapi://info`, `openapi://paths/...`, `openapi://components/...`).
+- **MCP Resource Template Access:** Explore OpenAPI specs via parameterized URI templates (`openapi://info`, `openapi://paths/{path}/{method}`, `openapi://components/{type}/{name}`).
 - **OpenAPI v3.0 & Swagger v2.0 Support:** Loads both formats, automatically converting v2.0 to v3.0.
 - **Local & Remote Files:** Load specs from local file paths or HTTP/HTTPS URLs.
 - **Token-Efficient:** Designed to minimize token usage for LLMs by providing structured access.
@@ -222,6 +229,14 @@ Add the following entry to your MCP client's configuration file. This instructs 
 ## Available MCP Resources
 
 This server exposes the following MCP resource templates for exploring the OpenAPI specification.
+
+> **Important:** This server provides **resource templates**, not pre-enumerated resources. When you use an MCP client:
+>
+> - The client calls `resources/templates/list` to discover the available template patterns
+> - You then construct specific URIs by filling in the template parameters (e.g., replacing `{path}` with `users%2F%7Bid%7D`)
+> - The client uses `resources/read` with your constructed URI to fetch the actual content
+>
+> If you call `resources/list` (without "templates"), you will get an empty list—this is expected behavior.
 
 **Understanding Multi-Value Parameters (`*`)**
 

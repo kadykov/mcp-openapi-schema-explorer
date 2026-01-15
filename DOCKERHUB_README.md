@@ -4,15 +4,17 @@
 [![GitHub Repo](https://img.shields.io/badge/GitHub-kadykov/mcp--openapi--schema--explorer-blue?logo=github)](https://github.com/kadykov/mcp-openapi-schema-explorer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-This Docker image runs the **MCP OpenAPI Schema Explorer**, an MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resources**.
+This Docker image runs the **MCP OpenAPI Schema Explorer**, an MCP (Model Context Protocol) server that provides token-efficient access to OpenAPI (v3.0) and Swagger (v2.0) specifications via **MCP Resource Templates**.
 
 It allows MCP clients (like Cline or Claude Desktop) to explore the structure and details of large OpenAPI specifications without needing to load the entire file into an LLM's context window.
+
+> **Note:** This server provides **resource templates** (parameterized URI patterns), not pre-enumerated resources. MCP clients discover templates via `resources/templates/list` and construct specific URIs to access content.
 
 **Source Code & Full Documentation:** [https://github.com/kadykov/mcp-openapi-schema-explorer](https://github.com/kadykov/mcp-openapi-schema-explorer)
 
 ## Features
 
-- **MCP Resource Access:** Explore OpenAPI specs via intuitive URIs (`openapi://info`, `openapi://paths/...`, `openapi://components/...`).
+- **MCP Resource Template Access:** Explore OpenAPI specs via parameterized URI templates (`openapi://info`, `openapi://paths/{path}/{method}`, `openapi://components/{type}/{name}`).
 - **OpenAPI v3.0 & Swagger v2.0 Support:** Loads both formats, automatically converting v2.0 to v3.0.
 - **Local & Remote Files:** Load specs from local file paths (via volume mount) or HTTP/HTTPS URLs.
 - **Token-Efficient:** Designed to minimize token usage for LLMs.
