@@ -1,3 +1,9 @@
+## [1.3.3](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.2...v1.3.3) (2026-01-15)
+
+### Bug Fixes
+
+- **deps:** migrate from deprecated API to registerResource ([b8c0e33](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/b8c0e3390a9d47b2fdff0ee7663069f477d4cec7))
+
 ## [1.3.2](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.1...v1.3.2) (2025-11-26)
 
 ### Bug Fixes

@@ -1,6 +1,6 @@
 {
   "name": "mcp-openapi-schema-explorer",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "MCP OpenAPI schema explorer",
   "type": "module",
   "main": "dist/src/index.js",
