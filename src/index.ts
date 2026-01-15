@@ -91,7 +91,7 @@ async function main(): Promise<void> {
         field: (): string[] => Object.keys(transformedSpec), // Use transformedSpec
       },
     });
-    server.resource(
+    server.registerResource(
       'openapi-field', // Unique ID for the resource registration
       fieldTemplate,
       {
@@ -109,7 +109,7 @@ async function main(): Promise<void> {
         path: (): string[] => Object.keys(transformedSpec.paths ?? {}).map(encodeUriPathComponent), // Use imported function directly
       },
     });
-    server.resource(
+    server.registerResource(
       'openapi-path-methods',
       pathTemplate,
       {
@@ -139,7 +139,7 @@ async function main(): Promise<void> {
         ],
       },
     });
-    server.resource(
+    server.registerResource(
       'openapi-operation-detail',
       operationTemplate,
       {
@@ -164,7 +164,7 @@ async function main(): Promise<void> {
         },
       },
     });
-    server.resource(
+    server.registerResource(
       'openapi-component-list',
       componentMapTemplate,
       {
@@ -210,7 +210,7 @@ async function main(): Promise<void> {
         },
       },
     });
-    server.resource(
+    server.registerResource(
       'openapi-component-detail',
       componentDetailTemplate,
       {
