@@ -2,6 +2,8 @@
 
 This guide explains how to add the MCP OpenAPI Schema Explorer server to your MCP client (e.g., Claude Desktop, Windsurf, Cline). This involves adding a configuration entry to your client's settings file that tells the client how to run the server process. The server itself doesn't require separate configuration beyond the command-line arguments specified in the client settings.
 
+> **Note:** For Claude Code users, see the dedicated [Claude Code guide](CLAUDE_CODE.md) which includes CLI-specific instructions.
+
 > **Important Note:** This server provides **resource templates**, not pre-enumerated resources. Your MCP client will discover available URI templates through `resources/templates/list` and then construct specific URIs to access content. If you check `resources/list` (without "templates"), it will return an empty list—this is expected behavior. See the [MCP Resource Templates documentation](https://modelcontextprotocol.io/specification/2025-11-25/server/resources#resource-templates) for more details.
 
 ## Prerequisites
