@@ -49,12 +49,12 @@ build:
     npm run build
 
 # Launch MCP inspector server
-inspect:
+inspect FILE='test/fixtures/complex-endpoint.json':
     #!/usr/bin/env sh
     just build
     npx @modelcontextprotocol/inspector \
         node dist/src/index.js \
-        test/fixtures/complex-endpoint.json \
+        {{FILE}} \
         --output-format yaml
 
 # Run all checks including security
