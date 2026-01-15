@@ -1,0 +1,57 @@
+name: 'Close stale issues and PRs'
+
+on:
+  schedule:
+    # Run weekly on Mondays at 2:46 AM UTC
+    - cron: '46 2 * * 1'
+  workflow_dispatch: # Allows manual triggering
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v10
+        with:
+          # General settings
+          days-before-stale: 56 # Mark as stale after 56 days (8 weeks) of inactivity
+          days-before-close: 14 # Close 14 days after being marked stale
+
+          # Stale issue settings
+          stale-issue-message: >
+            This issue has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 14 days if no further activity occurs.
+            If this issue is still relevant, please leave a comment to keep it open.
+            Thank you for your contributions!
+          stale-issue-label: 'stale'
+          close-issue-message: >
+            This issue was automatically closed due to inactivity. If you believe this
+            is still relevant, feel free to reopen it or create a new issue.
+
+          # Stale PR settings
+          stale-pr-message: >
+            This pull request has been automatically marked as stale because it has not had
+            recent activity. It will be closed in 14 days if no further activity occurs.
+            If you're still working on this, please leave a comment to keep it open.
+            Thank you for your contributions!
+          stale-pr-label: 'stale'
+          close-pr-message: >
+            This pull request was automatically closed due to inactivity. If you'd like
+            to continue this work, please reopen the PR or create a new one.
+
+          # Labels to exempt from being marked stale
+          exempt-issue-labels: 'pinned,security,bug,enhancement,good first issue'
+          exempt-pr-labels: 'pinned,security,work-in-progress'
+
+          # Don't mark issues/PRs with these milestones as stale
+          exempt-all-milestones: true
+
+          # Additional settings
+          operations-per-run: 100 # Limit operations to avoid rate limiting
+          remove-stale-when-updated: true # Remove stale label if there's new activity
+
+          # Enable debug output (set to false in production if desired)
+          debug-only: false
