@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@codedependant/semantic-release-docker": "^5.1.0",
-    "@eslint/js": "^9.24.0",
+    "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/exec": "^7.0.3",
@@ -64,7 +64,7 @@
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
     "axios": "^1.8.4",
-    "eslint": "^9.24.0",
+    "eslint": "^10.0.0",
     "eslint-plugin-security": "^3.0.1",
     "globals": "^17.0.0",
     "husky": "^9.1.7",
