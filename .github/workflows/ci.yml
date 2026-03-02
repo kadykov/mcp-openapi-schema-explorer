@@ -34,7 +34,7 @@ jobs:
         run: just all # Uses justfile for consistency
 
       - name: Upload coverage reports artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-report-${{ github.run_id }} # Unique name per run
           path: coverage/
