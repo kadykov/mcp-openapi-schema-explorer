@@ -25,7 +25,7 @@ jobs:
           cache: 'npm'
 
       - name: Setup Just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@v4
 
       - name: Install dependencies
         run: npm ci
@@ -62,7 +62,7 @@ jobs:
           cache: 'npm'
 
       - name: Setup Just
-        uses: extractions/setup-just@v3
+        uses: extractions/setup-just@v4
 
       - name: Install dependencies
         run: npm ci
