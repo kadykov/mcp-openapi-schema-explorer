@@ -39,6 +39,10 @@ While other MCP servers exist that provide access to OpenAPI specs via _Tools_, 
 
 For more details on MCP clients and their capabilities, see the [MCP Client Documentation](https://modelcontextprotocol.io/clients).
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/kadykov-mcp-openapi-schema-explorer).
+
 ## Quick Start Guides by Client
 
 - **[Claude Code](CLAUDE_CODE.md)** - Anthropic's CLI tool for coding with Claude
