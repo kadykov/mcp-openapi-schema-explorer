@@ -41,7 +41,7 @@ jobs:
         if: always() # Upload even if previous steps fail
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         # fail_ci_if_error: true # Optional: fail CI if upload fails
