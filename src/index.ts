@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'; // Import ResourceTemplate
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { OpenAPI } from 'openapi-types'; // Import OpenAPIV3 as well
 import { loadConfig } from './config.js';
 
@@ -221,6 +222,11 @@ async function main(): Promise<void> {
       },
       componentDetailHandler.handleRequest
     );
+
+    // Workaround for Codex: it calls tools/list on startup and treats -32601 as a fatal error.
+    // Register tools capability + empty handler so resource-only servers stay compatible.
+    server.server.registerCapabilities({ tools: {} });
+    server.server.setRequestHandler(ListToolsRequestSchema, () => ({ tools: [] }));
 
     // Start server
     const transport = new StdioServerTransport();
