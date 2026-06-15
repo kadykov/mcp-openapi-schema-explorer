@@ -72,7 +72,6 @@
     "jest-silent-reporter": "^0.6.0",
     "license-checker": "^25.0.1",
     "msw": "^2.7.4",
-    "openapi-typescript": "^7.6.1",
     "prettier": "^3.5.3",
     "semantic-release": "^25.0.1",
     "ts-jest": "^29.3.1",

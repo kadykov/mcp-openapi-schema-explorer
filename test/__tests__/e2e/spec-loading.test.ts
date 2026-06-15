@@ -13,7 +13,9 @@ function parseJsonSafely(text: string | undefined): unknown {
     return JSON.parse(text);
   } catch (e) {
     console.error('Failed to parse JSON:', text);
-    throw new Error(`Invalid JSON received: ${e instanceof Error ? e.message : String(e)}`);
+    const err = new Error(`Invalid JSON received: ${e instanceof Error ? e.message : String(e)}`);
+    Object.defineProperty(err, 'cause', { value: e, enumerable: true });
+    throw err;
   }
 }
 

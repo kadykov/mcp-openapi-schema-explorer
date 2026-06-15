@@ -73,7 +73,7 @@ export function isOpenAPIV3(spec: unknown): spec is OpenAPIV3.Document {
     typeof spec === 'object' &&
     spec !== null &&
     'openapi' in spec &&
-    typeof (spec as { openapi: unknown }).openapi === 'string' &&
+    typeof spec.openapi === 'string' &&
     (spec as { openapi: string }).openapi.startsWith('3.')
   );
 }
@@ -104,7 +104,7 @@ export function getValidatedPathItem(
     throw new Error(errorMessage);
   }
   // We assume the spec structure is valid if the key exists
-  return pathItem as OpenAPIV3.PathItemObject;
+  return pathItem;
 }
 
 /**
@@ -184,9 +184,7 @@ export function getValidatedComponentMap(
     throw new Error(errorMessage);
   }
   // We assume the spec structure is valid if the key exists
-  return componentMapObj as NonNullable<
-    OpenAPIV3.ComponentsObject[keyof OpenAPIV3.ComponentsObject]
-  >;
+  return componentMapObj;
 }
 
 /**

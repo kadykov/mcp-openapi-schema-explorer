@@ -161,7 +161,7 @@ describe('TopLevelFieldHandler', () => {
 
     it('should handle non-OpenAPI v3 spec', async () => {
       const invalidSpec = { swagger: '2.0', info: {} }; // Not OpenAPI v3
-      mockGetTransformedSpec.mockResolvedValue(invalidSpec as unknown as OpenAPIV3.Document);
+      mockGetTransformedSpec.mockResolvedValue(invalidSpec);
       const variables: Variables = { field: 'info' };
       const uri = new URL('openapi://info');
       // Match the core error message using RegExp

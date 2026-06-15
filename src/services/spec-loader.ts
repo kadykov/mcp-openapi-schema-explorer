@@ -40,7 +40,7 @@ export class SpecLoaderService {
 
       // TODO: Check result.options?.warnings for potential issues?
 
-      this.specData = result.openapi as OpenAPI.Document; // Assuming result.openapi is compatible
+      this.specData = result.openapi; // Assuming result.openapi is compatible
       return this.specData;
     } catch (error) {
       // Improve error message clarity
@@ -52,7 +52,9 @@ export class SpecLoaderService {
       } else {
         message += String(error);
       }
-      throw new Error(message);
+      const err = new Error(message);
+      Object.defineProperty(err, 'cause', { value: error, enumerable: true });
+      throw err;
     }
   }
 
