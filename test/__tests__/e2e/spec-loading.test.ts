@@ -170,4 +170,67 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
       });
     });
   });
+
+  describe('Local OpenAPI v3.1 Spec (Xquik)', () => {
+    const xquikSpecPath = path.resolve(__dirname, '../../fixtures/xquik-openapi.json');
+    const tweetSearchPath = '/api/v1/x/tweets/search';
+    const encodedTweetSearchPath = encodeURIComponent(tweetSearchPath);
+
+    beforeAll(async () => await setup(xquikSpecPath));
+
+    it('should retrieve the "info" field from Xquik', async () => {
+      if (!client) return;
+      await checkJsonDetailResponse('openapi://info', {
+        title: 'Xquik API',
+        version: '1.0',
+      });
+    });
+
+    it('should retrieve the Xquik tweet search path', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://paths', [
+        'GET /api/v1/x/tweets/search',
+        'openapi://paths/{encoded_path}/{method}',
+      ]);
+    });
+
+    it('should expose query parameters for the Xquik tweet search operation', async () => {
+      if (!client) return;
+      await checkJsonDetailResponse(`openapi://paths/${encodedTweetSearchPath}/get`, {
+        operationId: 'searchTweets',
+        parameters: [
+          { name: 'q', in: 'query', required: true },
+          { name: 'queryType', schema: { enum: ['Latest', 'Top'] } },
+          { name: 'limit', schema: { maximum: 200 } },
+          { name: 'fromUser', in: 'query' },
+          { name: 'verifiedOnly', in: 'query' },
+        ],
+        security: [{ apiKey: [] }, { oauthBearer: [] }, {}],
+      });
+    });
+
+    it('should list and retrieve Xquik schema components', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components/schemas', [
+        '- Error',
+        '- PaginatedTweets',
+        '- SearchTweet',
+        '- TweetAuthor',
+      ]);
+      await checkJsonDetailResponse('openapi://components/schemas/PaginatedTweets', {
+        required: ['tweets', 'has_next_page', 'next_cursor'],
+        properties: {
+          tweets: { type: 'array', items: { $ref: '#/components/schemas/SearchTweet' } },
+        },
+      });
+    });
+
+    it('should list Xquik security schemes', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components/securitySchemes', [
+        '- apiKey',
+        '- oauthBearer',
+      ]);
+    });
+  });
 });
