@@ -1,0 +1,203 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Xquik API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://xquik.com"
+    }
+  ],
+  "paths": {
+    "/api/v1/x/tweets/search": {
+      "get": {
+        "summary": "Search tweets by query, Tweet ID, X status URL, or account date window",
+        "operationId": "searchTweets",
+        "tags": ["Tweets"],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queryType",
+            "in": "query",
+            "required": false,
+            "description": "Sort order",
+            "schema": {
+              "type": "string",
+              "enum": ["Latest", "Top"],
+              "default": "Latest"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max tweets to return",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 200
+            }
+          },
+          {
+            "$ref": "#/components/parameters/TweetFilterFromUser"
+          },
+          {
+            "$ref": "#/components/parameters/TweetFilterVerifiedOnly"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "oauthBearer": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedTweets"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "TweetFilterFromUser": {
+        "name": "fromUser",
+        "in": "query",
+        "description": "Filter by author username.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "TweetFilterVerifiedOnly": {
+        "name": "verifiedOnly",
+        "in": "query",
+        "description": "Only return tweets from verified authors.",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    "schemas": {
+      "SearchTweet": {
+        "type": "object",
+        "required": ["id", "text", "createdAt", "author"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "text": {
+            "type": "string",
+            "example": "Just launched our new feature!"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-01-15T12:00:00Z"
+          },
+          "likeCount": {
+            "type": "integer",
+            "example": 42
+          },
+          "author": {
+            "$ref": "#/components/schemas/TweetAuthor"
+          }
+        }
+      },
+      "TweetAuthor": {
+        "type": "object",
+        "required": ["id", "username", "followers", "verified"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "username": {
+            "type": "string",
+            "example": "elonmusk"
+          },
+          "followers": {
+            "type": "integer",
+            "example": 150000000
+          },
+          "verified": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "PaginatedTweets": {
+        "type": "object",
+        "required": ["tweets", "has_next_page", "next_cursor"],
+        "properties": {
+          "tweets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchTweet"
+            }
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "example": true
+          },
+          "next_cursor": {
+            "type": "string",
+            "example": "DAACCgACGRElMJcAAA"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["missing_query", "rate_limit_exceeded", "unauthenticated"],
+            "example": "missing_query"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "oauthBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
