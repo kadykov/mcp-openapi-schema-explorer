@@ -1,0 +1,141 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Xquik API",
+    "version": "1.0",
+    "description": "Public social data API fixture for exercising OpenAPI 3.1, API key security, query parameters, and paginated response schemas."
+  },
+  "servers": [
+    {
+      "url": "https://xquik.com"
+    }
+  ],
+  "paths": {
+    "/api/v1/x/tweets/search": {
+      "get": {
+        "operationId": "searchTweets",
+        "summary": "Search tweets by query, Tweet ID, X status URL, or account date window",
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "oauthBearer": []
+          },
+          {}
+        ],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queryType",
+            "in": "query",
+            "required": false,
+            "description": "Sort order.",
+            "schema": {
+              "type": "string",
+              "enum": ["Latest", "Top"],
+              "default": "Latest"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max tweets to return.",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TweetSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing query"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      },
+      "oauthBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "TweetSearchResponse": {
+        "type": "object",
+        "required": ["tweets", "has_next_page"],
+        "properties": {
+          "tweets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tweet"
+            }
+          },
+          "has_next_page": {
+            "type": "boolean"
+          },
+          "next_cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "Tweet": {
+        "type": "object",
+        "required": ["id", "text", "author"],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "author": {
+            "type": "object",
+            "required": ["id", "username"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "username": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
