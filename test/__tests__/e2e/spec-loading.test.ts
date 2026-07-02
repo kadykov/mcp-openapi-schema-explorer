@@ -170,4 +170,40 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
       });
     });
   });
+
+  describe('Local OpenAPI v3.1 Spec with API key security (Xquik)', () => {
+    const xquikSpecPath = path.resolve(__dirname, '../../fixtures/xquik-social-api.json');
+
+    beforeAll(async () => await setup(xquikSpecPath));
+
+    it('should retrieve the "info" field from the Xquik fixture', async () => {
+      if (!client) return;
+      await checkJsonDetailResponse('openapi://info', {
+        title: 'Xquik API',
+        version: '1.0',
+      });
+    });
+
+    it('should retrieve the search path from the Xquik fixture', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://paths', [
+        'GET /api/v1/x/tweets/search',
+        'Search tweets by query',
+      ]);
+    });
+
+    it('should expose security schemes from the Xquik fixture', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components', ['- schemas', '- securitySchemes']);
+    });
+
+    it('should get details for the Xquik search operation', async () => {
+      if (!client) return;
+      const encodedPath = encodeURIComponent('api/v1/x/tweets/search');
+      await checkJsonDetailResponse(`openapi://paths/${encodedPath}/get`, {
+        operationId: 'searchTweets',
+        security: [{ apiKey: [] }, { oauthBearer: [] }, {}],
+      });
+    });
+  });
 });
