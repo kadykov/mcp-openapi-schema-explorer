@@ -196,15 +196,45 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
 
     it('should expose operation details including parameters and security', async () => {
       if (!client) return;
-      await checkJsonDetailResponse(`openapi://paths/${encodedPostSearchPath}/get`, {
+      const data = (await checkJsonDetailResponse(`openapi://paths/${encodedPostSearchPath}/get`, {
         operationId: 'searchPosts',
-        parameters: [
-          { name: 'q', in: 'query', required: true },
-          { name: 'sort', schema: { enum: ['latest', 'top'] } },
-          { name: 'fromUser', in: 'query' },
-        ],
         security: [{ apiKey: [] }, { oauthBearer: [] }, {}],
-      });
+      })) as Record<string, unknown>;
+
+      const parameters = data.parameters;
+      expect(Array.isArray(parameters)).toBe(true);
+      if (!Array.isArray(parameters)) {
+        throw new Error('Expected parameters to be an array');
+      }
+
+      const parameterRecords = parameters as Array<Record<string, unknown>>;
+      expect(parameterRecords).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ name: 'q', in: 'query', required: true }),
+          expect.objectContaining({ name: 'sort' }),
+          expect.objectContaining({ name: 'limit', in: 'query' }),
+          expect.objectContaining({
+            $ref: 'openapi://components/parameters/PostFilterFromUser',
+          }),
+          expect.objectContaining({
+            $ref: 'openapi://components/parameters/PostFilterVerifiedOnly',
+          }),
+        ])
+      );
+
+      const qParameter = parameterRecords.find(parameter => parameter.name === 'q');
+      expect(qParameter).toBeDefined();
+      if (qParameter) {
+        const qSchema = qParameter.schema as Record<string, unknown>;
+        expect(qSchema.type).toBe('string');
+      }
+
+      const sortParameter = parameterRecords.find(parameter => parameter.name === 'sort');
+      expect(sortParameter).toBeDefined();
+      if (sortParameter) {
+        const sortSchema = sortParameter.schema as Record<string, unknown>;
+        expect(sortSchema.enum).toEqual(['latest', 'top']);
+      }
     });
 
     it('should list and retrieve schema components from Social Feed API', async () => {
