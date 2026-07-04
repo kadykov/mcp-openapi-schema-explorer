@@ -176,7 +176,7 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
     const socialSpecPath = path.resolve(__dirname, '../../fixtures/social-feed-api.json');
     const encodedPostSearchPath = encodeURIComponent('api/v1/posts/search');
 
-    beforeAll(async () => await setup(socialSpecPath));
+    beforeEach(async () => await setup(socialSpecPath));
 
     it('should retrieve the "info" field from Social Feed API', async () => {
       if (!client) return;
