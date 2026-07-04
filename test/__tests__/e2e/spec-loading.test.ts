@@ -170,4 +170,65 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
       });
     });
   });
+
+  // --- Tests for Local OpenAPI v3.1 Spec (Social Feed API) ---
+  describe('Local OpenAPI v3.1 Spec (social-feed-api.json)', () => {
+    const socialSpecPath = path.resolve(__dirname, '../../fixtures/social-feed-api.json');
+    const encodedPostSearchPath = encodeURIComponent('api/v1/posts/search');
+
+    beforeAll(async () => await setup(socialSpecPath));
+
+    it('should retrieve the "info" field from Social Feed API', async () => {
+      if (!client) return;
+      await checkJsonDetailResponse('openapi://info', {
+        title: 'Social Feed API',
+        version: '1.0',
+      });
+    });
+
+    it('should retrieve the search path from Social Feed API', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://paths', [
+        'GET /api/v1/posts/search',
+        'openapi://paths/{encoded_path}/{method}',
+      ]);
+    });
+
+    it('should expose operation details including parameters and security', async () => {
+      if (!client) return;
+      await checkJsonDetailResponse(`openapi://paths/${encodedPostSearchPath}/get`, {
+        operationId: 'searchPosts',
+        parameters: [
+          { name: 'q', in: 'query', required: true },
+          { name: 'sort', schema: { enum: ['latest', 'top'] } },
+          { name: 'fromUser', in: 'query' },
+        ],
+        security: [{ apiKey: [] }, { oauthBearer: [] }, {}],
+      });
+    });
+
+    it('should list and retrieve schema components from Social Feed API', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components/schemas', [
+        '- Error',
+        '- PaginatedPosts',
+        '- Post',
+        '- PostAuthor',
+      ]);
+      await checkJsonDetailResponse('openapi://components/schemas/PaginatedPosts', {
+        required: ['posts', 'has_next_page', 'next_cursor'],
+        properties: {
+          posts: { type: 'array', items: { $ref: 'openapi://components/schemas/Post' } },
+        },
+      });
+    });
+
+    it('should list security schemes from Social Feed API', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components/securitySchemes', [
+        '- apiKey',
+        '- oauthBearer',
+      ]);
+    });
+  });
 });
