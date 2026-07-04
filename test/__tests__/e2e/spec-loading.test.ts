@@ -198,7 +198,6 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
       if (!client) return;
       const data = (await checkJsonDetailResponse(`openapi://paths/${encodedPostSearchPath}/get`, {
         operationId: 'searchPosts',
-        security: [{ apiKey: [] }, { oauthBearer: [] }, {}],
       })) as Record<string, unknown>;
 
       const parameters = data.parameters;
@@ -235,6 +234,21 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
         const sortSchema = sortParameter.schema as Record<string, unknown>;
         expect(sortSchema.enum).toEqual(['latest', 'top']);
       }
+
+      const security = data.security;
+      expect(Array.isArray(security)).toBe(true);
+      if (!Array.isArray(security)) {
+        throw new Error('Expected security to be an array');
+      }
+
+      const securityEntries = security as Array<Record<string, unknown>>;
+      expect(securityEntries).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ apiKey: [] }),
+          expect.objectContaining({ oauthBearer: [] }),
+          {},
+        ])
+      );
     });
 
     it('should list and retrieve schema components from Social Feed API', async () => {
