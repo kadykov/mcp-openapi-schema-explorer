@@ -87,6 +87,63 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
     return data;
   }
 
+  function expectParameterPresence(parameters: unknown): void {
+    expect(Array.isArray(parameters)).toBe(true);
+    if (!Array.isArray(parameters)) {
+      throw new Error('Expected parameters to be an array');
+    }
+
+    const parameterRecords = parameters as Array<Record<string, unknown>>;
+    expect(parameterRecords).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'q', in: 'query', required: true }),
+        expect.objectContaining({ name: 'sort' }),
+        expect.objectContaining({ name: 'limit', in: 'query' }),
+        expect.objectContaining({
+          $ref: 'openapi://components/parameters/PostFilterFromUser',
+        }),
+        expect.objectContaining({
+          $ref: 'openapi://components/parameters/PostFilterVerifiedOnly',
+        }),
+      ])
+    );
+  }
+
+  function expectOperationParameterDetails(parameters: unknown): void {
+    expectParameterPresence(parameters);
+
+    const parameterRecords = parameters as Array<Record<string, unknown>>;
+    const qParameter = parameterRecords.find(parameter => parameter.name === 'q');
+    expect(qParameter).toBeDefined();
+    if (qParameter) {
+      const qSchema = qParameter.schema as Record<string, unknown>;
+      expect(qSchema.type).toBe('string');
+    }
+
+    const sortParameter = parameterRecords.find(parameter => parameter.name === 'sort');
+    expect(sortParameter).toBeDefined();
+    if (sortParameter) {
+      const sortSchema = sortParameter.schema as Record<string, unknown>;
+      expect(sortSchema.enum).toEqual(['latest', 'top']);
+    }
+  }
+
+  function expectSecurityPresence(security: unknown): void {
+    expect(Array.isArray(security)).toBe(true);
+    if (!Array.isArray(security)) {
+      throw new Error('Expected security to be an array');
+    }
+
+    const securityEntries = security as Array<Record<string, unknown>>;
+    expect(securityEntries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ apiKey: [] }),
+        expect.objectContaining({ oauthBearer: [] }),
+        {},
+      ])
+    );
+  }
+
   // --- Tests for Local Swagger v2.0 Spec ---
   describe('Local Swagger v2.0 Spec (sample-v2-api.json)', () => {
     const v2SpecPath = path.resolve(__dirname, '../../fixtures/sample-v2-api.json');
@@ -200,55 +257,8 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
         operationId: 'searchPosts',
       })) as Record<string, unknown>;
 
-      const parameters = data.parameters;
-      expect(Array.isArray(parameters)).toBe(true);
-      if (!Array.isArray(parameters)) {
-        throw new Error('Expected parameters to be an array');
-      }
-
-      const parameterRecords = parameters as Array<Record<string, unknown>>;
-      expect(parameterRecords).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ name: 'q', in: 'query', required: true }),
-          expect.objectContaining({ name: 'sort' }),
-          expect.objectContaining({ name: 'limit', in: 'query' }),
-          expect.objectContaining({
-            $ref: 'openapi://components/parameters/PostFilterFromUser',
-          }),
-          expect.objectContaining({
-            $ref: 'openapi://components/parameters/PostFilterVerifiedOnly',
-          }),
-        ])
-      );
-
-      const qParameter = parameterRecords.find(parameter => parameter.name === 'q');
-      expect(qParameter).toBeDefined();
-      if (qParameter) {
-        const qSchema = qParameter.schema as Record<string, unknown>;
-        expect(qSchema.type).toBe('string');
-      }
-
-      const sortParameter = parameterRecords.find(parameter => parameter.name === 'sort');
-      expect(sortParameter).toBeDefined();
-      if (sortParameter) {
-        const sortSchema = sortParameter.schema as Record<string, unknown>;
-        expect(sortSchema.enum).toEqual(['latest', 'top']);
-      }
-
-      const security = data.security;
-      expect(Array.isArray(security)).toBe(true);
-      if (!Array.isArray(security)) {
-        throw new Error('Expected security to be an array');
-      }
-
-      const securityEntries = security as Array<Record<string, unknown>>;
-      expect(securityEntries).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({ apiKey: [] }),
-          expect.objectContaining({ oauthBearer: [] }),
-          {},
-        ])
-      );
+      expectOperationParameterDetails(data.parameters);
+      expectSecurityPresence(data.security);
     });
 
     it('should list and retrieve schema components from Social Feed API', async () => {
