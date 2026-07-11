@@ -1,0 +1,204 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Social Feed API",
+    "version": "1.0",
+    "description": "A generic social media API fixture for testing OpenAPI 3.1 features, including security schemes and complex references."
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com"
+    }
+  ],
+  "paths": {
+    "/api/v1/posts/search": {
+      "get": {
+        "summary": "Search posts by query",
+        "operationId": "searchPosts",
+        "tags": ["Posts"],
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "description": "Search query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Sort order",
+            "schema": {
+              "type": "string",
+              "enum": ["latest", "top"],
+              "default": "latest"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Max posts to return",
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 200
+            }
+          },
+          {
+            "$ref": "#/components/parameters/PostFilterFromUser"
+          },
+          {
+            "$ref": "#/components/parameters/PostFilterVerifiedOnly"
+          }
+        ],
+        "security": [
+          {
+            "apiKey": []
+          },
+          {
+            "oauthBearer": []
+          },
+          {}
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedPosts"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing query",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "PostFilterFromUser": {
+        "name": "fromUser",
+        "in": "query",
+        "description": "Filter by author username.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "PostFilterVerifiedOnly": {
+        "name": "verifiedOnly",
+        "in": "query",
+        "description": "Only return posts from verified authors.",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    "schemas": {
+      "Post": {
+        "type": "object",
+        "required": ["id", "text", "createdAt", "author"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1234567890"
+          },
+          "text": {
+            "type": "string",
+            "example": "Hello world!"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-01-15T12:00:00Z"
+          },
+          "likeCount": {
+            "type": "integer",
+            "example": 42
+          },
+          "author": {
+            "$ref": "#/components/schemas/PostAuthor"
+          }
+        }
+      },
+      "PostAuthor": {
+        "type": "object",
+        "required": ["id", "username", "followers", "verified"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "9876543210"
+          },
+          "username": {
+            "type": "string",
+            "example": "user_name"
+          },
+          "followers": {
+            "type": "integer",
+            "example": 1337
+          },
+          "verified": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "PaginatedPosts": {
+        "type": "object",
+        "required": ["posts", "has_next_page", "next_cursor"],
+        "properties": {
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Post"
+            }
+          },
+          "has_next_page": {
+            "type": "boolean",
+            "example": true
+          },
+          "next_cursor": {
+            "type": "string",
+            "example": "base64_encoded_cursor"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "enum": ["missing_query", "rate_limit_exceeded", "unauthenticated"],
+            "example": "missing_query"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "oauthBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
