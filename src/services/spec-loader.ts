@@ -53,7 +53,12 @@ export class SpecLoaderService {
         message += String(error);
       }
       const err = new Error(message);
-      Object.defineProperty(err, 'cause', { value: error, enumerable: true });
+      Object.defineProperty(err, 'cause', {
+        value: error,
+        enumerable: false,
+        writable: true,
+        configurable: true,
+      });
       throw err;
     }
   }
