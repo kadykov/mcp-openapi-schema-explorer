@@ -24,7 +24,7 @@ export class ReferenceTransformService {
   private transformers = new Map<string, ReferenceTransform<unknown>>();
 
   registerTransformer<T>(format: string, transformer: ReferenceTransform<T>): void {
-    this.transformers.set(format, transformer as ReferenceTransform<unknown>);
+    this.transformers.set(format, transformer);
   }
 
   transformDocument<T>(document: T, context: TransformContext): T {

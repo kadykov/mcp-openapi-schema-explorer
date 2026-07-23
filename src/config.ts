@@ -28,6 +28,6 @@ export function loadConfig(specPath?: string, options?: { outputFormat?: string 
   return {
     specPath,
     // Cast is safe here due to the validation above
-    outputFormat: format as OutputFormat,
+    outputFormat: format,
   };
 }

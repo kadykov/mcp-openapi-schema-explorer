@@ -140,7 +140,7 @@ describe('PathItemHandler', () => {
 
     it('should handle non-OpenAPI v3 spec', async () => {
       const invalidSpec = { swagger: '2.0', info: {} };
-      mockGetTransformedSpec.mockResolvedValue(invalidSpec as unknown as OpenAPIV3.Document);
+      mockGetTransformedSpec.mockResolvedValue(invalidSpec);
       const variables: Variables = { path: encodedPathItems };
       const uri = new URL(`openapi://paths/${encodedPathItems}`);
       const expectedLogMessage = /Only OpenAPI v3 specifications are supported/;

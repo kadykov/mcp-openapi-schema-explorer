@@ -38,9 +38,11 @@ function safeParse(text: string | undefined, format: 'json' | 'yaml'): unknown {
   try {
     return format === 'json' ? parseJson(text) : parseYaml(text);
   } catch (error) {
-    throw new Error(
+    const err = new Error(
       `Failed to parse ${format} content: ${error instanceof Error ? error.message : String(error)}`
     );
+    Object.defineProperty(err, 'cause', { value: error, enumerable: true });
+    throw err;
   }
 }
 
