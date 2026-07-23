@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: lts/* # Match Dockerfile
           cache: 'npm'
@@ -41,7 +41,7 @@ jobs:
         if: always() # Upload even if previous steps fail
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         # fail_ci_if_error: true # Optional: fail CI if upload fails
@@ -53,10 +53,10 @@ jobs:
       security-events: write # Needed for CodeQL alert uploads
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: lts/* # Match Dockerfile and test job
           cache: 'npm'
@@ -93,12 +93,12 @@ jobs:
       id-token: write # Needed for provenance publishing to npm (alternative to NPM_TOKEN)
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: lts/* # Match Dockerfile and other jobs
           cache: 'npm'

@@ -1,3 +1,9 @@
+## [1.3.4](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.3...v1.3.4) (2026-06-15)
+
+### Bug Fixes
+
+- handle tools/list for Codex compatibility ([7844f08](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/7844f08a00cee0c2873509e29ebecf8d6f64744e))
+
 ## [1.3.3](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.2...v1.3.3) (2026-01-15)
 
 ### Bug Fixes

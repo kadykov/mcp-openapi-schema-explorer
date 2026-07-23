@@ -89,6 +89,63 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
     return data;
   }
 
+  function expectParameterPresence(parameters: unknown): void {
+    expect(Array.isArray(parameters)).toBe(true);
+    if (!Array.isArray(parameters)) {
+      throw new Error('Expected parameters to be an array');
+    }
+
+    const parameterRecords = parameters as Array<Record<string, unknown>>;
+    expect(parameterRecords).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'q', in: 'query', required: true }),
+        expect.objectContaining({ name: 'sort' }),
+        expect.objectContaining({ name: 'limit', in: 'query' }),
+        expect.objectContaining({
+          $ref: 'openapi://components/parameters/PostFilterFromUser',
+        }),
+        expect.objectContaining({
+          $ref: 'openapi://components/parameters/PostFilterVerifiedOnly',
+        }),
+      ])
+    );
+  }
+
+  function expectOperationParameterDetails(parameters: unknown): void {
+    expectParameterPresence(parameters);
+
+    const parameterRecords = parameters as Array<Record<string, unknown>>;
+    const qParameter = parameterRecords.find(parameter => parameter.name === 'q');
+    expect(qParameter).toBeDefined();
+    if (qParameter) {
+      const qSchema = qParameter.schema as Record<string, unknown>;
+      expect(qSchema.type).toBe('string');
+    }
+
+    const sortParameter = parameterRecords.find(parameter => parameter.name === 'sort');
+    expect(sortParameter).toBeDefined();
+    if (sortParameter) {
+      const sortSchema = sortParameter.schema as Record<string, unknown>;
+      expect(sortSchema.enum).toEqual(['latest', 'top']);
+    }
+  }
+
+  function expectSecurityPresence(security: unknown): void {
+    expect(Array.isArray(security)).toBe(true);
+    if (!Array.isArray(security)) {
+      throw new Error('Expected security to be an array');
+    }
+
+    const securityEntries = security as Array<Record<string, unknown>>;
+    expect(securityEntries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ apiKey: [] }),
+        expect.objectContaining({ oauthBearer: [] }),
+        {},
+      ])
+    );
+  }
+
   // --- Tests for Local Swagger v2.0 Spec ---
   describe('Local Swagger v2.0 Spec (sample-v2-api.json)', () => {
     const v2SpecPath = path.resolve(__dirname, '../../fixtures/sample-v2-api.json');
@@ -170,6 +227,64 @@ describe('E2E Tests for Spec Loading Scenarios', () => {
         // Check a known property
         properties: { id: { type: 'integer', format: 'int64' } },
       });
+    });
+  });
+
+  // --- Tests for Local OpenAPI v3.1 Spec (Social Feed API) ---
+  describe('Local OpenAPI v3.1 Spec (social-feed-api.json)', () => {
+    const socialSpecPath = path.resolve(__dirname, '../../fixtures/social-feed-api.json');
+    const encodedPostSearchPath = encodeURIComponent('api/v1/posts/search');
+
+    beforeEach(async () => await setup(socialSpecPath));
+
+    it('should retrieve the "info" field from Social Feed API', async () => {
+      if (!client) return;
+      await checkJsonDetailResponse('openapi://info', {
+        title: 'Social Feed API',
+        version: '1.0',
+      });
+    });
+
+    it('should retrieve the search path from Social Feed API', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://paths', [
+        'GET /api/v1/posts/search',
+        'openapi://paths/{encoded_path}/{method}',
+      ]);
+    });
+
+    it('should expose operation details including parameters and security', async () => {
+      if (!client) return;
+      const data = (await checkJsonDetailResponse(`openapi://paths/${encodedPostSearchPath}/get`, {
+        operationId: 'searchPosts',
+      })) as Record<string, unknown>;
+
+      expectOperationParameterDetails(data.parameters);
+      expectSecurityPresence(data.security);
+    });
+
+    it('should list and retrieve schema components from Social Feed API', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components/schemas', [
+        '- Error',
+        '- PaginatedPosts',
+        '- Post',
+        '- PostAuthor',
+      ]);
+      await checkJsonDetailResponse('openapi://components/schemas/PaginatedPosts', {
+        required: ['posts', 'has_next_page', 'next_cursor'],
+        properties: {
+          posts: { type: 'array', items: { $ref: 'openapi://components/schemas/Post' } },
+        },
+      });
+    });
+
+    it('should list security schemes from Social Feed API', async () => {
+      if (!client) return;
+      await checkTextListResponse('openapi://components/securitySchemes', [
+        '- apiKey',
+        '- oauthBearer',
+      ]);
     });
   });
 });
