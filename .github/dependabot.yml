@@ -6,11 +6,25 @@ updates:
       interval: 'weekly'
     open-pull-requests-limit: 10
     groups:
-      # Group all development dependencies together
+      # Keep the TypeScript toolchain in a dedicated batch so it can be updated
+      # together without conflicting with the rest of the dev dependencies.
+      typescript-dependencies:
+        patterns:
+          - 'typescript'
+          - '@typescript-eslint/*'
+          - '@types/*'
+          - 'ts-jest'
+
+      # Keep everything else in the development toolchain separate.
       dev-dependencies:
         dependency-type: 'development'
+        exclude-patterns:
+          - 'typescript'
+          - '@typescript-eslint/*'
+          - '@types/*'
+          - 'ts-jest'
 
-      # Group production dependencies together
+      # Group production dependencies together.
       production-dependencies:
         dependency-type: 'production'
 
