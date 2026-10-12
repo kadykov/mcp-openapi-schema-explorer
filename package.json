@@ -18,6 +18,7 @@
   "scripts": {
     "build": "rm -rf dist && mkdir -p dist && npx tsc && chmod +x dist/src/index.js",
     "test": "jest",
+    "docker:smoke": "bash ./scripts/docker-smoke-test.sh",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",
@@ -50,7 +51,6 @@
     "zod": "^4.0.5"
   },
   "devDependencies": {
-    "@codedependant/semantic-release-docker": "^8.0.0",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/commit-analyzer": "^13.0.1",

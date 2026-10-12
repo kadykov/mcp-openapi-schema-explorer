@@ -18,14 +18,6 @@
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
-    [
-      "@codedependant/semantic-release-docker",
-      {
-        "dockerProject": "kadykov",
-        "dockerImage": "mcp-openapi-schema-explorer",
-        "dockerLogin": false
-      }
-    ],
     "@semantic-release/github"
   ]
 }
