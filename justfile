@@ -57,6 +57,10 @@ inspect FILE='test/fixtures/complex-endpoint.json':
         {{FILE}} \
         --output-format yaml
 
+# Smoke test the production Docker image
+docker-smoke:
+    npm run docker:smoke
+
 # Run all checks including security
 all:
     @just format
