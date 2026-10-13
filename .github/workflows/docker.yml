@@ -73,7 +73,7 @@ jobs:
 
       - name: Generate Docker metadata
         id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
         with:
           images: kadykov/mcp-openapi-schema-explorer
           tags: |
@@ -83,7 +83,7 @@ jobs:
             type=sha
 
       - name: Build and push image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
         with:
           context: .
           push: true
