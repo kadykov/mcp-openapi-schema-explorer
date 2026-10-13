@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -20,7 +20,7 @@ if (args.includes('--help') || args.includes('-h')) {
 
 const imageTag = args[0] ?? 'mcp-openapi-schema-explorer:smoke';
 const fixturePath = process.env.FIXTURE_PATH
-  ? realpathSync(process.env.FIXTURE_PATH)
+  ? path.resolve(repoRoot, process.env.FIXTURE_PATH)
   : path.join(repoRoot, 'test', 'fixtures', 'sample-api.json');
 
 if (!existsSync(fixturePath)) {
