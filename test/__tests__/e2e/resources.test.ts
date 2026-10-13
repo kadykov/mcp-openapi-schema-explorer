@@ -168,8 +168,7 @@ describe('E2E Tests for Refactored Resources', () => {
       expect(result.contents).toHaveLength(2);
 
       const getContent = result.contents.find(c => c.uri.endsWith('/get')) as
-        | FormattedResultItem
-        | undefined;
+        FormattedResultItem | undefined;
       expect(getContent).toBeDefined();
       // expect(getContent?.isError).toBeFalsy(); // Removed as SDK might strip this property
       if (!getContent || !hasTextContent(getContent))
@@ -179,8 +178,7 @@ describe('E2E Tests for Refactored Resources', () => {
       expect(getData).toMatchObject({ operationId: 'getProjectTasks' });
 
       const postContent = result.contents.find(c => c.uri.endsWith('/post')) as
-        | FormattedResultItem
-        | undefined;
+        FormattedResultItem | undefined;
       expect(postContent).toBeDefined();
       // expect(postContent?.isError).toBeFalsy(); // Removed as SDK might strip this property
       if (!postContent || !hasTextContent(postContent))
@@ -241,8 +239,7 @@ describe('E2E Tests for Refactored Resources', () => {
       expect(result.contents).toHaveLength(2);
 
       const taskContent = result.contents.find(c => c.uri.endsWith('/Task')) as
-        | FormattedResultItem
-        | undefined;
+        FormattedResultItem | undefined;
       expect(taskContent).toBeDefined();
       // expect(taskContent?.isError).toBeFalsy(); // Removed as SDK might strip this property
       if (!taskContent || !hasTextContent(taskContent))
@@ -251,8 +248,7 @@ describe('E2E Tests for Refactored Resources', () => {
       expect(taskData).toMatchObject({ properties: { id: { type: 'string' } } });
 
       const taskListContent = result.contents.find(c => c.uri.endsWith('/TaskList')) as
-        | FormattedResultItem
-        | undefined;
+        FormattedResultItem | undefined;
       expect(taskListContent).toBeDefined();
       // expect(taskListContent?.isError).toBeFalsy(); // Removed as SDK might strip this property
       if (!taskListContent || !hasTextContent(taskListContent))
