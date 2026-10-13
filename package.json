@@ -18,7 +18,7 @@
   "scripts": {
     "build": "rm -rf dist && mkdir -p dist && npx tsc && chmod +x dist/src/index.js",
     "test": "jest",
-    "docker:smoke": "bash ./scripts/docker-smoke-test.sh",
+    "docker:smoke": "node ./scripts/docker-smoke-test.js",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "lint": "eslint . --ext .ts",

@@ -44,7 +44,7 @@ jobs:
       - name: Smoke test the candidate image
         env:
           FIXTURE_PATH: ${{ github.workspace }}/test/fixtures/sample-api.json
-        run: bash ./scripts/docker-smoke-test.sh mcp-openapi-schema-explorer:ci
+        run: node ./scripts/docker-smoke-test.js mcp-openapi-schema-explorer:ci
 
   publish:
     name: Publish container image
