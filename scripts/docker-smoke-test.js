@@ -1,15 +1,36 @@
 #!/usr/bin/env node
 
 import { spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
+const fixturesDir = path.resolve(repoRoot, 'test', 'fixtures');
+const defaultFixturePath = path.resolve(fixturesDir, 'sample-api.json');
 
 function printUsage() {
   console.log('Usage: node scripts/docker-smoke-test.js [IMAGE_TAG]');
+}
+
+function resolveFixturePath() {
+  const requestedPath = process.env.FIXTURE_PATH;
+  const candidatePath = requestedPath ? path.resolve(repoRoot, requestedPath) : defaultFixturePath;
+
+  if (candidatePath === defaultFixturePath) {
+    return candidatePath;
+  }
+
+  const relativePath = path.relative(fixturesDir, candidatePath);
+  const isInsideFixturesDir =
+    relativePath !== '' && !relativePath.startsWith('..') && !path.isAbsolute(relativePath);
+
+  if (!isInsideFixturesDir) {
+    console.error(`FIXTURE_PATH must resolve to a file inside ${fixturesDir}`);
+    process.exit(1);
+  }
+
+  return candidatePath;
 }
 
 const args = process.argv.slice(2);
@@ -19,14 +40,7 @@ if (args.includes('--help') || args.includes('-h')) {
 }
 
 const imageTag = args[0] ?? 'mcp-openapi-schema-explorer:smoke';
-const fixturePath = process.env.FIXTURE_PATH
-  ? path.resolve(repoRoot, process.env.FIXTURE_PATH)
-  : path.join(repoRoot, 'test', 'fixtures', 'sample-api.json');
-
-if (!existsSync(fixturePath)) {
-  console.error(`Fixture file not found: ${fixturePath}`);
-  process.exit(1);
-}
+const fixturePath = resolveFixturePath();
 
 function runCommand(command, args, options = {}) {
   const result = spawnSync(command, args, {
