@@ -1,3 +1,10 @@
+## [1.3.5](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.4...v1.3.5) (2026-10-13)
+
+### Bug Fixes
+
+- improve fixture path resolution and validation in docker smoke test ([ad8d1ae](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/ad8d1ae63afa3d77b9db9980f22c56f737a538f3))
+- replace realpathSync with path.resolve for fixture path resolution ([fb84ba3](https://github.com/kadykov/mcp-openapi-schema-explorer/commit/fb84ba397e1526c4443e3fd713459b375c126bcf))
+
 ## [1.3.4](https://github.com/kadykov/mcp-openapi-schema-explorer/compare/v1.3.3...v1.3.4) (2026-06-15)
 
 ### Bug Fixes
