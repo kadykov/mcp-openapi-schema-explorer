@@ -41,7 +41,7 @@ jobs:
         if: always() # Upload even if previous steps fail
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@f9fe539f5290016afa014f8ef31597d3a61c2dea
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
         # fail_ci_if_error: true # Optional: fail CI if upload fails
@@ -107,7 +107,7 @@ jobs:
         run: npm ci --include=dev
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@b12c8f6015dc215fe37bc154d4ad456dd3833c90
+        uses: cycjimmy/semantic-release-action@9e1f8a3ef91f1097285028e799a5fb8bb90e8899
         with:
           extra_plugins: |
             @semantic-release/changelog
